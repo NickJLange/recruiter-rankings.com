@@ -1,0 +1,76 @@
+<h1><%= t('admin.reviews.index.title') %></h1>
+
+<p>Statuses: <%= @statuses.join(", ") %>. Showing up to <%= params[:limit] || 100 %> latest.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Created</th>
+      <th>Status</th>
+      <th>Recruiter</th>
+      <th>Company</th>
+      <th>Text</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @reviews.each do |rev| %>
+      <tr>
+        <td><%= rev.id %></td>
+        <td><%= rev.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+        <td><%= rev.status %></td>
+        <td><%= rev.recruiter&.name || "—" %></td>
+        <td><%= rev.company&.name || "—" %></td>
+        <td style="max-width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <%= rev.text %>
+        </td>
+        <td>
+          <%= form_with url: approve_admin_review_path(rev), method: :patch, style: "display:inline-block;" do %>
+            <button type="submit"><%= t('admin.reviews.index.approve') %></button>
+          <% end %>
+          <%= form_with url: flag_admin_review_path(rev), method: :patch, style: "display:inline-block; margin-left:6px;" do %>
+            <button type="submit"><%= t('admin.reviews.index.flag') %></button>
+          <% end %>
+          <%= form_with url: remove_admin_review_path(rev), method: :patch, style: "display:inline-block; margin-left:6px;" do %>
+            <button type="submit"><%= t('admin.reviews.index.remove') %></button>
+          <% end %>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="7">
+          <%= form_with url: admin_review_responses_path(rev), method: :post, style: "margin:8px 0;" do |f| %>
+            <%= f.text_area :body, rows: 2, placeholder: "Post a right‑of‑reply…", required: true, style: "width:100%;" %>
+            <div style="margin-top:6px;">
+            <button type="submit"><%= t('admin.reviews.index.post_response') %></button>
+            </div>
+          <% end %>
+        </td>
+      </tr>
+      <%# Existing responses for this review %>
+      <% rev.review_responses.each do |resp| %>
+        <tr>
+          <td></td>
+          <td colspan="4" style="color: var(--muted);">Response #<%= resp.id %> (<%= resp.visible ? 'visible' : 'hidden' %>)</td>
+          <td colspan="2">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <div style="flex:1; border:1px solid var(--border); padding:6px; border-radius:6px;">
+                <%= simple_format resp.body %>
+              </div>
+              <% if resp.visible %>
+                <%= form_with url: hide_admin_review_response_path(rev, resp), method: :patch do %>
+                  <button type="submit">Hide</button>
+                <% end %>
+              <% else %>
+                <%= form_with url: show_admin_review_response_path(rev, resp), method: :patch do %>
+                  <button type="submit">Show</button>
+                <% end %>
+              <% end %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+</table>
+

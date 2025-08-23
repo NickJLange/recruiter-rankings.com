@@ -1,0 +1,62 @@
+<h1><%= t('recruiters.index.title') %></h1>
+<p><%= t('recruiters.index.subtitle', count: public_min_reviews) %></p>
+
+<%= form_with url: recruiters_path, method: :get, local: true do |f| %>
+  <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin: 8px 0 16px;">
+    <div>
+      <label for="q"><%= t('recruiters.index.search') %></label><br>
+      <input type="text" name="q" id="q" value="<%= h @q %>" placeholder="Recruiter name">
+    </div>
+    <div>
+      <label for="company"><%= t('recruiters.index.company') %></label><br>
+      <input type="text" name="company" id="company" value="<%= h @company %>">
+    </div>
+    <div>
+      <label for="region"><%= t('recruiters.index.region') %></label><br>
+      <input type="text" name="region" id="region" value="<%= h @region %>">
+    </div>
+    <div>
+      <label for="per_page"><%= t('recruiters.index.per_page') %></label><br>
+      <input type="number" min="1" max="<%= public_max_per_page %>" name="per_page" id="per_page" value="<%= @per_page %>">
+    </div>
+    <div>
+      <button type="submit"><%= t('recruiters.index.filter') %></button>
+      <%= link_to t('recruiters.index.clear'), recruiters_path, style: "margin-left:6px;" %>
+    </div>
+  </div>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th><%= t('recruiters.index.th.recruiter') %></th>
+      <th><%= t('recruiters.index.th.company') %></th>
+      <th><%= t('recruiters.index.th.avg_overall') %></th>
+      <th><%= t('recruiters.index.th.reviews') %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @recruiters.each do |r| %>
+      <tr>
+        <td><%= link_to r.name, recruiter_path(r.public_slug) %></td>
+        <td><%= r.company&.name || "—" %></td>
+        <td><%= r.attributes["avg_overall"].to_f.round(2) %></td>
+        <td><%= r.attributes["reviews_count"] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div style="margin-top: 16px; display:flex; justify-content: space-between;">
+  <div>
+    <% if @page > 1 %>
+      <%= link_to "← Previous", recruiters_path(request.query_parameters.merge(page: @page - 1)), class: "cta" %>
+    <% end %>
+  </div>
+  <div>
+    <% if @has_next %>
+      <%= link_to "Next →", recruiters_path(request.query_parameters.merge(page: @page + 1)), class: "cta" %>
+    <% end %>
+  </div>
+</div>
+

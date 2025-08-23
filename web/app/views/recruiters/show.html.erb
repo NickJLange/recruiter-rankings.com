@@ -1,0 +1,44 @@
+<% content_for :title, "#{@recruiter.name} — Recruiter Profile" %>
+<% content_for :meta_description, "Aggregated reviews and metrics for #{@recruiter.name}." %>
+<h1><%= @recruiter.name %></h1>
+<p><strong>Company:</strong> <% if @recruiter.company %><%= link_to @recruiter.company.name, company_path(@recruiter.company) %><% else %>—<% end %></p>
+<p><strong>Region:</strong> <%= @recruiter.region || "—" %></p>
+<p><strong>Verified:</strong> <%= @recruiter.verified_at ? @recruiter.verified_at.strftime("%Y-%m-%d") : "No" %></p>
+
+<section>
+  <h2><%= t('recruiters.show.aggregates') %></h2>
+  <p><strong><%= t('recruiters.show.average_overall') %>:</strong> <%= @avg_overall&.round(2) || "—" %> (<%= @reviews_count %> <%= t('recruiters.index.th.reviews') %>)</p>
+  <ul>
+    <% ReviewMetric::DIMENSIONS.each do |k, v| %>
+      <li><%= v.humanize %>: <%= (@dimension_averages[k.to_s]&.to_f&.round(2) || "—") %></li>
+    <% end %>
+  </ul>
+</section>
+
+<p>
+  <%= link_to t('recruiters.show.write_review'), new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug) %>
+  &nbsp;|&nbsp;
+  <%= link_to t('recruiters.show.claim_profile'), new_claim_identity_path(subject_type: 'recruiter', recruiter_slug: @recruiter.public_slug), class: "" %>
+</p>
+
+<section>
+  <h2><%= t('recruiters.show.recent_reviews') %></h2>
+  <% @reviews.each do |rev| %>
+    <article style="border:1px solid var(--border); padding:10px; margin-bottom:10px; background: var(--surface);">
+      <p><strong>Overall:</strong> <%= rev.overall_score %> — <em><%= rev.created_at.strftime("%Y-%m-%d") %></em></p>
+      <p><%= simple_format rev.text %></p>
+      <% if rev.review_responses.visible.exists? %>
+        <div style="margin-top:8px; padding:8px; border-left:3px solid var(--accent); background: transparent;">
+          <p style="margin:0 0 4px 0; color: var(--muted);"><strong>Right-of-reply</strong></p>
+          <% rev.review_responses.visible.each do |resp| %>
+            <p style="margin:0 0 8px 0;">
+              <%= simple_format resp.body %>
+              <small style="color: var(--muted);">— posted <%= time_ago_in_words(resp.created_at) %> ago</small>
+            </p>
+          <% end %>
+        </div>
+      <% end %>
+    </article>
+  <% end %>
+</section>
+

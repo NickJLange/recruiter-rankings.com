@@ -1,0 +1,20 @@
+nav:
+  home: ホーム
+  about: 概要
+  policies: ポリシー
+  recruiters: リクルーター
+  companies: 会社
+  approve: 承認
+  locale_en: EN
+  locale_ja: 日本語
+  top_companies: 上位の会社
+pages:
+  home:
+    title: Recruiter Rankings — 匿名化されたリクルーター品質指標
+    description: 応募者とリクルーターの体験を改善するため、標準化された品質指標を公開し、安全な回答の場を提供します。
+  about:
+    title: 概要 — Recruiter Rankings
+    description: Recruiter Rankings の仕組み：ユーザー、本人確認、ポリシー、ロードマップ。
+  policies:
+    title: ポリシー — Recruiter Rankings
+    description: 回答権、削除ポリシー、POCのコンプライアンス詳細。

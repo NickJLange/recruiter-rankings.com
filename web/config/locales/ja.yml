@@ -1,0 +1,77 @@
+ja:
+  nav:
+    home: "ホーム"
+    about: "概要"
+    policies: "ポリシー"
+    recruiters: "リクルーター"
+    companies: "会社"
+    approve: "承認"
+    top_companies: "上位の会社"
+    locale_en: "EN"
+    locale_ja: "日本語"
+  recruiters:
+    index:
+      title: "上位のリクルーター"
+      subtitle: "%{count} 件以上の承認済みレビューがあるリクルーターを表示しています。"
+      search: "検索"
+      company: "会社"
+      region: "地域"
+      per_page: "件数"
+      filter: "絞り込み"
+      clear: "クリア"
+      th:
+        recruiter: "リクルーター"
+        company: "会社"
+        avg_overall: "平均スコア"
+        reviews: "レビュー数"
+    show:
+      aggregates: "集計"
+      average_overall: "平均スコア"
+      recent_reviews: "最近のレビュー"
+      write_review: "レビューを書く"
+      claim_profile: "プロフィールを申請"
+      right_of_reply: "回答"
+  reviews:
+    new:
+      title_for: "%{name} へのレビューを書く"
+      overall_score: "総合スコア (1–5)"
+      your_experience: "体験の内容"
+      email_optional: "メール（任意・重複防止、非公開）"
+      submit: "送信"
+  admin:
+    reviews:
+      index:
+        title: "モデレーションキュー"
+        approve: "承認"
+        flag: "フラグ"
+        remove: "削除"
+        post_response: "回答を投稿"
+        response_visible: "表示"
+        response_hidden: "非表示"
+  claim_identity:
+    new:
+      title: "本人確認の申請"
+      subject: "対象"
+      recruiter: "リクルーター"
+      user: "ユーザー"
+      recruiter_slug: "リクルーターのスラッグ（リクルーターの場合）"
+      linkedin_url: "LinkedIn のURL"
+      email_user: "メール（ユーザーの場合）"
+      get_token: "検証トークンを取得"
+    instructions:
+      title: "検証手順"
+      paste_instructions: "次のトークンを LinkedIn のプロフィール（概要・特集・ウェブサイト）に貼り付けて公開してください："
+      after_save: "保存後に［検証］をクリックしてください："
+      verify: "検証"
+  activerecord:
+    models:
+      user: "ユーザー"
+      recruiter: "リクルーター"
+      company: "会社"
+      review: "レビュー"
+      review_metric: "レビュー指標"
+      identity_challenge: "本人確認チャレンジ"
+      takedown_request: "削除依頼"
+      moderation_action: "モデレーションアクション"
+      profile_claim: "プロフィール申請"
+

@@ -1,0 +1,19 @@
+<h1>Verification instructions</h1>
+
+<p>Paste this token into your LinkedIn profile (About, Featured, or Website). Make sure it is public/visible:</p>
+
+<pre style="background: var(--surface); border:1px solid var(--border); padding:12px; border-radius:8px; overflow:auto;">{{ <%= @paste_token %> }}</pre>
+
+<p>After saving your profile, click Verify:</p>
+
+<%= form_with url: verify_claim_identity_path do |f| %>
+  <%= hidden_field_tag :challenge_id, @challenge_id %>
+  <div>
+    <label for="verify_linkedin_url">LinkedIn URL</label><br>
+    <input type="url" id="verify_linkedin_url" name="linkedin_url" value="<%= h @linkedin_url %>" required>
+  </div>
+  <div style="margin-top: 10px;">
+    <button type="submit">Verify</button>
+  </div>
+<% end %>
+
