@@ -17,5 +17,3 @@ class Rack::Attack
     req.get? && req.path == "/up"
   end
 end
-
-Rails.application.config.middleware.use Rack::Attack
