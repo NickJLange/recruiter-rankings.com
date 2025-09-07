@@ -1,0 +1,43 @@
+<h1>Moderation Queue</h1>
+
+<p>Statuses: <%= @statuses.join(", ") %>. Showing up to <%= params[:limit] || 100 %> latest.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Created</th>
+      <th>Status</th>
+      <th>Recruiter</th>
+      <th>Company</th>
+      <th>Text</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @reviews.each do |rev| %>
+      <tr>
+        <td><%= rev.id %></td>
+        <td><%= rev.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+        <td><%= rev.status %></td>
+        <td><%= rev.recruiter&.name || "—" %></td>
+        <td><%= rev.company&.name || "—" %></td>
+        <td style="max-width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          <%= rev.text %>
+        </td>
+        <td>
+          <%= form_with url: approve_admin_review_path(rev), method: :patch, style: "display:inline-block;" do %>
+            <button type="submit">Approve</button>
+          <% end %>
+          <%= form_with url: flag_admin_review_path(rev), method: :patch, style: "display:inline-block; margin-left:6px;" do %>
+            <button type="submit">Flag</button>
+          <% end %>
+          <%= form_with url: remove_admin_review_path(rev), method: :patch, style: "display:inline-block; margin-left:6px;" do %>
+            <button type="submit">Remove</button>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
