@@ -14,8 +14,14 @@ window.addEventListener('DOMContentLoaded', function(){
   var btns = document.querySelectorAll('.theme-toggle');
   function updateLabel(){
     var theme = document.documentElement.getAttribute('data-theme');
-    var label = theme === 'dark' ? 'Bright' : 'Dark';
-    btns.forEach(function(btn){ btn.textContent = label; });
+    // Show the icon for the NEXT theme (toggle hint): 🌞 switches to light, 🌙 switches to dark
+    var nextIcon = theme === 'dark' ? '🌞' : '🌙';
+    var nextTitle = theme === 'dark' ? 'Switch to bright theme' : 'Switch to dark theme';
+    btns.forEach(function(btn){
+      btn.textContent = nextIcon;
+      btn.setAttribute('aria-label', nextTitle);
+      btn.setAttribute('title', nextTitle);
+    });
   }
   updateLabel();
 
