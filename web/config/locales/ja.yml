@@ -1,0 +1,14 @@
+ja:
+  hello: "こんにちは"
+  activerecord:
+    models:
+      user: "ユーザー"
+      recruiter: "リクルーター"
+      company: "会社"
+      review: "レビュー"
+      review_metric: "レビュー指標"
+      identity_challenge: "本人確認チャレンジ"
+      takedown_request: "削除依頼"
+      moderation_action: "モデレーションアクション"
+      profile_claim: "プロフィール申請"
+
