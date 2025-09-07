@@ -1,7 +1,7 @@
 <% content_for :title, "#{@recruiter.name} — Recruiter Profile" %>
 <% content_for :meta_description, "Aggregated reviews and metrics for #{@recruiter.name}." %>
 <h1><%= @recruiter.name %></h1>
-<p><strong>Company:</strong> <%= @recruiter.company&.name || "—" %></p>
+<p><strong>Company:</strong> <% if @recruiter.company %><%= link_to @recruiter.company.name, company_path(@recruiter.company) %><% else %>—<% end %></p>
 <p><strong>Region:</strong> <%= @recruiter.region || "—" %></p>
 <p><strong>Verified:</strong> <%= @recruiter.verified_at ? @recruiter.verified_at.strftime("%Y-%m-%d") : "No" %></p>
 

@@ -5,6 +5,7 @@ Rails.application.routes.draw do
     resources :reviews, only: [:new]
   end
   resources :reviews, only: [:create]
+  resources :companies, only: [:index, :show]
 
   # Unified claim identity (users or recruiters)
   get  "/claim_identity/new",    to: "claim_identity#new",    as: :new_claim_identity

@@ -1,0 +1,20 @@
+<h1>Companies</h1>
+<p><%= t('recruiters.index.subtitle', count: public_min_reviews) %></p>
+<table>
+  <thead>
+    <tr>
+      <th><%= t('recruiters.index.th.company') %></th>
+      <th><%= t('recruiters.index.th.avg_overall') %></th>
+      <th><%= t('recruiters.index.th.reviews') %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @companies.each do |c| %>
+      <tr>
+        <td><%= link_to c.name, company_path(c) %></td>
+        <td><%= c.attributes['avg_overall']&.to_f&.round(2) || '—' %></td>
+        <td><%= c.attributes['reviews_count'] || 0 %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
