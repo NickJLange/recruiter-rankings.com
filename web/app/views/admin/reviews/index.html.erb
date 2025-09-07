@@ -48,6 +48,29 @@
         </td>
       </tr>
     <% end %>
+    <%# Existing responses under review %>
+    <% rev.review_responses.each do |resp| %>
+      <tr>
+        <td></td>
+        <td colspan="4" style="color: var(--muted);">Response #<%= resp.id %> (<%= resp.visible ? 'visible' : 'hidden' %>)</td>
+        <td colspan="2">
+          <div style="display:flex; gap:8px; align-items:center;">
+            <div style="flex:1; border:1px solid var(--border); padding:6px; border-radius:6px;">
+              <%= simple_format resp.body %>
+            </div>
+            <% if resp.visible %>
+              <%= form_with url: hide_admin_review_response_path(rev, resp), method: :patch do %>
+                <button type="submit">Hide</button>
+              <% end %>
+            <% else %>
+              <%= form_with url: show_admin_review_response_path(rev, resp), method: :patch do %>
+                <button type="submit">Show</button>
+              <% end %>
+            <% end %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
   </tbody>
 </table>
 

@@ -20,7 +20,12 @@ Rails.application.routes.draw do
         patch :flag
         patch :remove
       end
-      resources :responses, only: [:create]
+      resources :responses, only: [:create] do
+        member do
+          patch :hide
+          patch :show
+        end
+      end
     end
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_07_020000) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_07_043000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -93,6 +93,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_020000) do
     t.check_constraint "score >= 1 AND score <= 5", name: "check_review_metrics_score_range"
   end
 
+  create_table "review_responses", force: :cascade do |t|
+    t.bigint "review_id", null: false
+    t.bigint "user_id"
+    t.text "body", null: false
+    t.boolean "visible", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["review_id"], name: "index_review_responses_on_review_id"
+    t.index ["user_id"], name: "index_review_responses_on_user_id"
+    t.index ["visible"], name: "index_review_responses_on_visible"
+  end
+
   create_table "reviews", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "recruiter_id"
@@ -144,6 +156,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_020000) do
   add_foreign_key "profile_claims", "users"
   add_foreign_key "recruiters", "companies"
   add_foreign_key "review_metrics", "reviews"
+  add_foreign_key "review_responses", "reviews"
+  add_foreign_key "review_responses", "users"
   add_foreign_key "reviews", "companies"
   add_foreign_key "reviews", "recruiters"
   add_foreign_key "reviews", "users"
