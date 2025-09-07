@@ -1,0 +1,18 @@
+title: recruiter-rankings.com
+description: Static marketing pages for Recruiter Rankings
+# Build into Rails public directory so Rails serves the static site
+# NOTE: keep_files prevents Jekyll from deleting Rails' generated static files
+# during clean builds.
+destination: ../web/public
+baseurl: ""
+url: https://recruiter-rankings.com
+plugins: []
+keep_files:
+  - 400.html
+  - 404.html
+  - 406-unsupported-browser.html
+  - 422.html
+  - 500.html
+  - icon.png
+  - icon.svg
+

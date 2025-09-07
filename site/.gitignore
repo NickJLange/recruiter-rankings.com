@@ -1,0 +1,6 @@
+# Jekyll cache and local bundles
+.jekyll-cache/
+.sass-cache/
+.bundle/
+vendor/
+
