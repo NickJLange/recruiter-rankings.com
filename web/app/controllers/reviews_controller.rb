@@ -43,7 +43,8 @@ class ReviewsController < ApplicationController
   end
 
   def hmac_email(email)
-    pepper = Rails.configuration.x.submission_email_hmac_pepper || "demo-only-pepper-not-secret"
+    pepper = Rails.configuration.x.submission_email_hmac_pepper
+    pepper = pepper.is_a?(String) && pepper.present? ? pepper : "demo-only-pepper-not-secret"
     OpenSSL::HMAC.hexdigest("SHA256", pepper, email)
   end
 

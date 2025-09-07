@@ -1,5 +1,5 @@
 <h1>Top Recruiters</h1>
-<p>Showing recruiters with at least <%= Rails.configuration.x.public_min_reviews %> approved reviews.</p>
+<p>Showing recruiters with at least <%= (Rails.configuration.x.public_min_reviews.presence || 5).to_i %> approved reviews.</p>
 
 <table>
   <thead>

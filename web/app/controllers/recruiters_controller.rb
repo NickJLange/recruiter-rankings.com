@@ -1,6 +1,6 @@
 class RecruitersController < ApplicationController
   def index
-    threshold = Rails.configuration.x.public_min_reviews || 5
+    threshold = (Rails.configuration.x.public_min_reviews.presence || 5).to_i
 
     aggregates = Review.where(status: "approved")
       .group(:recruiter_id)
