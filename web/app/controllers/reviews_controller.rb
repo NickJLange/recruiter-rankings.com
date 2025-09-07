@@ -1,6 +1,15 @@
 class ReviewsController < ApplicationController
   protect_from_forgery with: :exception
 
+  def index
+    recruiter = Recruiter.find_by!(public_slug: params[:recruiter_slug] || params[:recruiter_id])
+    per = (params[:per].presence || 10).to_i
+    reviews = recruiter.reviews.where(status: "approved").order(created_at: :desc).limit(per)
+    render json: reviews.map { |r|
+      { id: r.id, overall_score: r.overall_score, text: r.text, created_at: r.created_at.iso8601 }
+    }
+  end
+
   def new
     @recruiter = Recruiter.find_by!(public_slug: params[:recruiter_slug] || params[:recruiter_id])
     @review = Review.new(recruiter: @recruiter, company: @recruiter.company)

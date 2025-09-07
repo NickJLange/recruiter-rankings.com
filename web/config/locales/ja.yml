@@ -4,7 +4,9 @@ ja:
     about: "概要"
     policies: "ポリシー"
     recruiters: "リクルーター"
+    companies: "会社"
     approve: "承認"
+    top_companies: "上位の会社"
     locale_en: "EN"
     locale_ja: "日本語"
   recruiters:

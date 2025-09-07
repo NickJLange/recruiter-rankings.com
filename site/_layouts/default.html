@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ page.title | default: site.title }}</title>
-    <meta name="description" content="{{ page.description | default: site.description }}" />
+    <meta name="description" content="{{ page.description | default: site.description }}" data-i18n-meta="description" />
     <link rel="canonical" href="{{ site.url }}{{ page.url }}" />
     <meta property="og:site_name" content="Recruiter Rankings" />
     <meta property="og:title" content="{{ page.title | default: site.title }}" />
@@ -51,6 +51,7 @@
     </footer>
     <script>
       window.I18N = {{ site.data.i18n | jsonify }};
+      window.PAGE_KEY = "{{ page.i18n_key | default: '' }}";
     </script>
     <script src="/assets/theme.js"></script>
     <script src="/assets/nav.js"></script>

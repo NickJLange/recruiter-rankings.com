@@ -1,5 +1,6 @@
 ---
 layout: default
+i18n_key: about
 title: About — Recruiter Rankings
 description: "Learn how Recruiter Rankings works: users, identity verification, policies, and roadmap."
 ---

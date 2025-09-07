@@ -1,5 +1,6 @@
 ---
 layout: default
+i18n_key: home
 title: Recruiter Rankings — De‑identified recruiter quality signals
 description: Improve the recruiter–candidate experience by publishing standardized quality signals with a safe right‑of‑reply.
 ---

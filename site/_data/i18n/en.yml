@@ -8,3 +8,13 @@ nav:
   locale_en: EN
   locale_ja: 日本語
   top_companies: Top companies
+pages:
+  home:
+    title: Recruiter Rankings — De‑identified recruiter quality signals
+    description: "Improve the recruiter–candidate experience by publishing standardized quality signals with a safe right‑of‑reply."
+  about:
+    title: About — Recruiter Rankings
+    description: "Learn how Recruiter Rankings works: users, identity verification, policies, and roadmap."
+  policies:
+    title: Policies — Recruiter Rankings
+    description: "Right-of-reply, takedown policy, and compliance details for the POC."

@@ -33,7 +33,9 @@ en:
     about: "About"
     policies: "Policies"
     recruiters: "Recruiters"
+    companies: "Companies"
     approve: "Approve"
+    top_companies: "Top companies"
     locale_en: "EN"
     locale_ja: "日本語"
   recruiters:

@@ -7,15 +7,33 @@ class CompaniesController < ApplicationController
       .joins("INNER JOIN (#{aggregates.to_sql}) agg ON agg.company_id = companies.id")
       .where("agg.reviews_count >= ?", threshold)
       .select("companies.*, agg.reviews_count, agg.avg_overall")
-      .order("agg.avg_overall DESC NULLS LAST, companies.name ASC")
 
-    @companies = scope
+    # Filters
+    @q = params[:q].to_s.strip
+    @region = params[:region].to_s.strip
+    if @q.present?
+      scope = scope.where("companies.name ILIKE ?", "%#{@q}%")
+    end
+    if @region.present?
+      scope = scope.where("companies.region ILIKE ?", "%#{@region}%")
+    end
+
+    scope = scope.order("agg.avg_overall DESC NULLS LAST, companies.name ASC")
+
+    # Pagination
+    @page = params[:page].to_i; @page = 1 if @page < 1
+    requested_per = params[:per_page].presence&.to_i
+    @per_page = [[requested_per || public_per_page, 1].max, public_max_per_page].min
+    offset = (@page - 1) * @per_page
+    records = scope.offset(offset).limit(@per_page + 1).to_a
+    @has_next = records.length > @per_page
+    @companies = records.first(@per_page)
 
     respond_to do |format|
       format.html
       format.json do
         per = (params[:per].presence || 5).to_i
-        render json: @companies.limit(per).map { |c|
+        render json: scope.limit(per).map { |c|
           { id: c.id, name: c.name, reviews_count: c.attributes['reviews_count'].to_i, avg_overall: c.attributes['avg_overall']&.to_f }
         }
       end

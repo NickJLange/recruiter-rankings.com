@@ -1,5 +1,6 @@
 ---
 layout: default
+i18n_key: policies
 title: Policies — Recruiter Rankings
 description: "Right-of-reply, takedown policy, and compliance details for the POC."
 ---
