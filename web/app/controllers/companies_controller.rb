@@ -3,11 +3,23 @@ class CompaniesController < ApplicationController
     threshold = public_min_reviews
     aggregates = Review.where(status: "approved").group(:company_id).select(:company_id, "COUNT(*) AS reviews_count", "AVG(overall_score) AS avg_overall")
 
-    @companies = Company
+    scope = Company
       .joins("INNER JOIN (#{aggregates.to_sql}) agg ON agg.company_id = companies.id")
       .where("agg.reviews_count >= ?", threshold)
       .select("companies.*, agg.reviews_count, agg.avg_overall")
       .order("agg.avg_overall DESC NULLS LAST, companies.name ASC")
+
+    @companies = scope
+
+    respond_to do |format|
+      format.html
+      format.json do
+        per = (params[:per].presence || 5).to_i
+        render json: @companies.limit(per).map { |c|
+          { id: c.id, name: c.name, reviews_count: c.attributes['reviews_count'].to_i, avg_overall: c.attributes['avg_overall']&.to_f }
+        }
+      end
+    end
   end
 
   def show
