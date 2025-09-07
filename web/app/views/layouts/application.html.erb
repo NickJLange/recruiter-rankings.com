@@ -21,6 +21,16 @@
     <%= stylesheet_link_tag :app %>
     <%# Include the Jekyll site stylesheet to unify theme %>
     <link rel="stylesheet" href="/assets/style.css" />
+    <script>
+      (function(){
+        try{
+          var stored = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored || (prefersDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        }catch(e){ document.documentElement.setAttribute('data-theme','dark'); }
+      })();
+    </script>
   </head>
 
   <body>
@@ -33,6 +43,7 @@
           <a href="/policies">Policies</a>
           <a href="/recruiters">Recruiters</a>
           <a href="/admin/reviews">Approve</a>
+          <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme"></button>
         </div>
       </nav>
     </header>
@@ -44,5 +55,6 @@
     <footer class="site-footer container">
       <p>© <%= Time.current.year %> Recruiter Rankings. All rights reserved.</p>
     </footer>
+    <script src="/assets/theme.js"></script>
   </body>
 </html>
