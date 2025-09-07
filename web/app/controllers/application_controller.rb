@@ -8,8 +8,8 @@ class ApplicationController < ActionController::Base
   private
 
   def set_locale
-    # priority: params[:locale] -> Accept-Language -> default
-    requested = params[:locale].to_s.presence
+    # priority: params[:locale] or params[:local] -> cookie -> Accept-Language -> default
+    requested = params[:locale].to_s.presence || params[:local].to_s.presence || cookies[:locale].to_s.presence
     allowed = %w[en ja]
     if requested && allowed.include?(requested)
       I18n.locale = requested
@@ -17,6 +17,8 @@ class ApplicationController < ActionController::Base
       header = request.env["HTTP_ACCEPT_LANGUAGE"].to_s
       I18n.locale = header&.downcase&.include?("ja") ? :ja : I18n.default_locale
     end
+    # Persist selection in a long-lived cookie so subsequent pages honor it
+    cookies.permanent[:locale] = I18n.locale
   end
 
   def switch_locale_to(to)
