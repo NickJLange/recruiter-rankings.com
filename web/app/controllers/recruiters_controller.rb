@@ -1,4 +1,6 @@
 class RecruitersController < ApplicationController
+  include RecruitersHelper
+
   def index
     threshold = public_min_reviews
 
@@ -45,7 +47,7 @@ class RecruitersController < ApplicationController
       format.json do
         render json: @recruiters.map { |r|
           {
-            name: r.name,
+            name: display_name_for(r, reviews_count: r.attributes['reviews_count'], avg_overall: r.attributes['avg_overall']),
             slug: r.public_slug,
             company: r.company&.name,
             region: r.region,
@@ -68,6 +70,7 @@ class RecruitersController < ApplicationController
       .first || [0, nil]
     @reviews_count = overall[0]
     @avg_overall = overall[1]&.to_f
+    @display_name = view_context.display_name_for(@recruiter, reviews_count: @reviews_count, avg_overall: @avg_overall)
 
     # Dimension aggregates
     dims = ReviewMetric.where(review_id: @recruiter.reviews.where(status: "approved"))
@@ -79,7 +82,7 @@ class RecruitersController < ApplicationController
       format.html
       format.json do
         render json: {
-          name: @recruiter.name,
+          name: @display_name,
           slug: @recruiter.public_slug,
           company: @recruiter.company&.name,
           region: @recruiter.region,

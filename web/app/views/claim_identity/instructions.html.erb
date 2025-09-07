@@ -13,6 +13,9 @@
     <input type="url" id="verify_linkedin_url" name="linkedin_url" value="<%= h @linkedin_url %>" required>
   </div>
   <div style="margin-top: 10px;">
+    <label><input type="checkbox" name="consent" value="1"> I consent to displaying my real name publicly on this site.</label>
+  </div>
+  <div style="margin-top: 10px;">
     <button type="submit">Verify</button>
   </div>
 <% end %>

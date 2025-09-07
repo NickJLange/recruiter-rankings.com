@@ -16,4 +16,9 @@ class Rack::Attack
   safelist("healthcheck") do |req|
     req.get? && req.path == "/up"
   end
+
+  # Limit recruiter reveal attempts by IP
+  throttle("reveal/ip", limit: (ENV["RATE_LIMIT_REVEALS_PER_DAY"] || 3).to_i, period: 1.day) do |req|
+    req.ip if req.post? && req.path == "/reveal"
+  end
 end

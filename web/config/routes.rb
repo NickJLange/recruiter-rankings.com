@@ -7,6 +7,10 @@ Rails.application.routes.draw do
   resources :reviews, only: [:create]
   resources :companies, only: [:index, :show]
 
+  # Reveal known recruiters (email or LinkedIn URL + optional company confirm)
+  get  "/reveal", to: "reveals#new",    as: :new_reveal
+  post "/reveal", to: "reveals#create", as: :reveal
+
   # Unified claim identity (users or recruiters)
   get  "/claim_identity/new",    to: "claim_identity#new",    as: :new_claim_identity
   post "/claim_identity",        to: "claim_identity#create", as: :claim_identity

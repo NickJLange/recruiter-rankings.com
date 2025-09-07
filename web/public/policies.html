@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Policies — Recruiter Rankings</title>
-    <meta name="description" content="Right-of-reply, takedown policy, and compliance details for the POC." />
+    <meta name="description" content="Right-of-reply, takedown policy, and compliance details for the POC." data-i18n-meta="description" />
     <link rel="canonical" href="https://recruiter-rankings.com/policies.html" />
     <meta property="og:site_name" content="Recruiter Rankings" />
     <meta property="og:title" content="Policies — Recruiter Rankings" />
@@ -29,14 +29,19 @@
       <nav class="container nav">
         <a class="brand" href="/">Recruiter Rankings</a>
         <div class="nav-links">
-          <a href="/">Home</a>
-          <a href="/about">About</a>
-          <a href="/policies">Policies</a>
-          <a href="/recruiters">Recruiters</a>
-          <a href="/admin/reviews">Approve</a>
+          <a href="/"><span class="i18n" data-key="nav.home">Home</span></a>
+          <a href="/about"><span class="i18n" data-key="nav.about">About</span></a>
+          <a href="/policies"><span class="i18n" data-key="nav.policies">Policies</span></a>
+          <a href="/recruiters"><span class="i18n" data-key="nav.recruiters">Recruiters</span></a>
+          <a href="/companies"><span class="i18n" data-key="nav.companies">Companies</span></a>
+          <a href="/admin/reviews"><span class="i18n" data-key="nav.approve">Approve</span></a>
           <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme"></button>
         </div>
       </nav>
+      <div class="container" style="padding-bottom:8px;">
+        <small class="muted"><span class="i18n" data-key="nav.top_companies">Top companies</span>:</small>
+        <ul id="top-companies-nav" style="display:inline-flex; gap:10px; list-style:none; margin:0 0 0 8px; padding:0;"></ul>
+      </div>
     </header>
     <main class="container">
       <h2 id="right-of-reply">Right-of-reply</h2>
@@ -67,7 +72,12 @@
     <footer class="site-footer container">
       <p>© 2025 Recruiter Rankings. All rights reserved.</p>
     </footer>
+    <script>
+      window.I18N = {"en":{"nav":{"home":"Home","about":"About","policies":"Policies","recruiters":"Recruiters","companies":"Companies","approve":"Approve","locale_en":"EN","locale_ja":"日本語","top_companies":"Top companies"},"pages":{"home":{"title":"Recruiter Rankings — De‑identified recruiter quality signals","description":"Improve the recruiter–candidate experience by publishing standardized quality signals with a safe right‑of‑reply."},"about":{"title":"About — Recruiter Rankings","description":"Learn how Recruiter Rankings works: users, identity verification, policies, and roadmap."},"policies":{"title":"Policies — Recruiter Rankings","description":"Right-of-reply, takedown policy, and compliance details for the POC."}}},"ja":{"nav":{"home":"ホーム","about":"概要","policies":"ポリシー","recruiters":"リクルーター","companies":"会社","approve":"承認","locale_en":"EN","locale_ja":"日本語","top_companies":"上位の会社"},"pages":{"home":{"title":"Recruiter Rankings — 匿名化されたリクルーター品質指標","description":"応募者とリクルーターの体験を改善するため、標準化された品質指標を公開し、安全な回答の場を提供します。"},"about":{"title":"概要 — Recruiter Rankings","description":"Recruiter Rankings の仕組み：ユーザー、本人確認、ポリシー、ロードマップ。"},"policies":{"title":"ポリシー — Recruiter Rankings","description":"回答権、削除ポリシー、POCのコンプライアンス詳細。"}}}};
+      window.PAGE_KEY = "policies";
+    </script>
     <script src="/assets/theme.js"></script>
+    <script src="/assets/nav.js"></script>
   </body>
 </html>
 

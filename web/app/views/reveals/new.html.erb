@@ -1,0 +1,22 @@
+<h1>Reveal a recruiter you know</h1>
+<p>Enter the recruiter's email or LinkedIn profile URL and optionally their company to confirm. Revealed recruiters will show their real names for you going forward. Limit: 3 reveals per day.</p>
+
+<%= form_with url: reveal_path, method: :post do |f| %>
+  <div style="display:flex; flex-direction:column; gap:12px; max-width:640px;">
+    <div>
+      <label for="email">Recruiter email</label><br>
+      <input type="email" id="email" name="email" placeholder="firstname.lastname@company.com">
+    </div>
+    <div>
+      <label for="linkedin_url">LinkedIn profile URL</label><br>
+      <input type="url" id="linkedin_url" name="linkedin_url" placeholder="https://www.linkedin.com/in/…">
+    </div>
+    <div>
+      <label for="company">Company (optional, used to confirm)</label><br>
+      <input type="text" id="company" name="company" placeholder="Company name">
+    </div>
+    <div>
+      <button type="submit">Reveal</button>
+    </div>
+  </div>
+<% end %>

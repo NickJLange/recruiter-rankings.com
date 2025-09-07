@@ -1,20 +1,8 @@
 (function(){
-  function getCookie(name){
-    var m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/([.$?*|{}()\[\]\\\/\+^])/g, '\\$1') + '=([^;]*)'));
-    return m ? decodeURIComponent(m[1]) : null;
-  }
-  function setCookie(name, value){
-    try { document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; max-age=' + (60*60*24*365); } catch(e){}
-  }
   function getLocale(){
     var urlParams = new URLSearchParams(window.location.search);
-    var p = urlParams.get('locale') || urlParams.get('local');
-    if (p) {
-      try { localStorage.setItem('locale', p); } catch(e){}
-      setCookie('locale', p);
-      return p;
-    }
-    var c = getCookie('locale'); if (c) return c;
+    var p = urlParams.get('locale');
+    if (p) { try { localStorage.setItem('locale', p); } catch(e){} return p; }
     try { var s = localStorage.getItem('locale'); if (s) return s; } catch(e){}
     return (navigator.language || '').toLowerCase().indexOf('ja')>=0 ? 'ja' : 'en';
   }
@@ -45,15 +33,6 @@
       items.slice(0,5).forEach(function(c){
         var li=document.createElement('li');
         var a=document.createElement('a'); a.href='/companies/'+c.id; a.textContent=c.name; li.appendChild(a);
-        ul.appendChild(li);
-      });
-    }).catch(function(){});
-  }
-  document.addEventListener('DOMContentLoaded', function(){
-    applyI18n();
-    loadTopCompanies();
-  });
-})();
         ul.appendChild(li);
       });
     }).catch(function(){});

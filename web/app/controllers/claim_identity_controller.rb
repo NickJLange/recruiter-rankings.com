@@ -70,7 +70,12 @@ class ClaimIdentityController < ApplicationController
     case challenge.subject_type
     when 'Recruiter'
       recruiter = Recruiter.find(challenge.subject_id)
-      recruiter.update!(verified_at: Time.current)
+      attrs = { verified_at: Time.current }
+      attrs[:linkedin_url] = linkedin_url
+      if ActiveModel::Type::Boolean.new.cast(params[:consent])
+        attrs[:consented_at] = Time.current
+      end
+      recruiter.update!(attrs)
       flash[:notice] = 'Recruiter verified.'
       redirect_to recruiter_path(recruiter.public_slug)
     when 'User'
