@@ -1,3 +1,5 @@
+<% content_for :title, "#{@recruiter.name} — Recruiter Profile" %>
+<% content_for :meta_description, "Aggregated reviews and metrics for #{@recruiter.name}." %>
 <h1><%= @recruiter.name %></h1>
 <p><strong>Company:</strong> <%= @recruiter.company&.name || "—" %></p>
 <p><strong>Region:</strong> <%= @recruiter.region || "—" %></p>
@@ -18,9 +20,20 @@
 <section>
   <h2>Recent reviews</h2>
   <% @reviews.each do |rev| %>
-    <article style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">
+    <article style="border:1px solid var(--border); padding:10px; margin-bottom:10px; background: var(--surface);">
       <p><strong>Overall:</strong> <%= rev.overall_score %> — <em><%= rev.created_at.strftime("%Y-%m-%d") %></em></p>
       <p><%= simple_format rev.text %></p>
+      <% if rev.review_responses.visible.exists? %>
+        <div style="margin-top:8px; padding:8px; border-left:3px solid var(--accent); background: transparent;">
+          <p style="margin:0 0 4px 0; color: var(--muted);"><strong>Right-of-reply</strong></p>
+          <% rev.review_responses.visible.each do |resp| %>
+            <p style="margin:0 0 8px 0;">
+              <%= simple_format resp.body %>
+              <small style="color: var(--muted);">— posted <%= time_ago_in_words(resp.created_at) %> ago</small>
+            </p>
+          <% end %>
+        </div>
+      <% end %>
     </article>
   <% end %>
 </section>

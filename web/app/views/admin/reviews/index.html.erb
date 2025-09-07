@@ -37,6 +37,16 @@
           <% end %>
         </td>
       </tr>
+      <tr>
+        <td colspan="7">
+          <%= form_with url: admin_review_responses_path(rev), method: :post, style: "margin:8px 0;" do |f| %>
+            <%= f.text_area :body, rows: 2, placeholder: "Post a right‑of‑reply…", required: true, style: "width:100%;" %>
+            <div style="margin-top:6px;">
+              <button type="submit">Post response</button>
+            </div>
+          <% end %>
+        </td>
+      </tr>
     <% end %>
   </tbody>
 </table>

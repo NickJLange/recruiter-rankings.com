@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   end
   resources :reviews, only: [:create]
 
+  get "/sitemap.xml", to: "sitemaps#show", defaults: { format: :xml }
+
   namespace :admin do
     resources :reviews, only: [:index] do
       member do
@@ -13,6 +15,7 @@ Rails.application.routes.draw do
         patch :flag
         patch :remove
       end
+      resources :responses, only: [:create]
     end
   end
 end

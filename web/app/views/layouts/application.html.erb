@@ -8,6 +8,16 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# Canonical and meta (fallbacks) %>
+    <link rel="canonical" href="<%= canonical_url %>">
+    <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'De‑identified recruiter quality signals with right‑of‑reply.' %>">
+    <meta property="og:site_name" content="Recruiter Rankings">
+    <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : 'Recruiter Rankings' %>">
+    <meta property="og:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'De‑identified recruiter quality signals with right‑of‑reply.' %>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= canonical_url %>">
+    <meta name="twitter:card" content="summary">
+
     <%= yield :head %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
