@@ -19,9 +19,30 @@
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app %>
+    <%# Include the Jekyll site stylesheet to unify theme %>
+    <link rel="stylesheet" href="/assets/style.css" />
   </head>
 
   <body>
-    <%= yield %>
+    <header class="site-header">
+      <nav class="container nav">
+        <a class="brand" href="/">Recruiter Rankings</a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/about">About</a>
+          <a href="/policies">Policies</a>
+          <a href="/recruiters">Recruiters</a>
+          <a href="/admin/reviews">Approve</a>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <%= yield %>
+    </main>
+
+    <footer class="site-footer container">
+      <p>© <%= Time.current.year %> Recruiter Rankings. All rights reserved.</p>
+    </footer>
   </body>
 </html>
