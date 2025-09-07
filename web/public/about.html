@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>About — Recruiter Rankings</title>
+    <meta name="description" content="Learn how Recruiter Rankings works: users, identity verification, policies, and roadmap." />
+    <link rel="stylesheet" href="/assets/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="container nav">
+        <a class="brand" href="/">Recruiter Rankings</a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/about">About</a>
+          <a href="/policies">Policies</a>
+          <a href="/recruiters">Recruiters</a>
+          <a href="/admin/reviews">Approve</a>
+        </div>
+      </nav>
+    </header>
+    <main class="container">
+      <h2 id="mission">Mission</h2>
+<p>Improve the recruiter–candidate experience by publishing de‑identified, standardized quality signals with a safe right‑of‑reply.</p>
+
+<h2 id="primary-users">Primary users</h2>
+<ul>
+  <li>Candidates: browse aggregates; submit reviews</li>
+  <li>Recruiters: claim profile; right‑of‑reply</li>
+  <li>Moderators/Admin: moderation and takedowns</li>
+</ul>
+
+<h2 id="identity--verification-poc">Identity &amp; verification (POC)</h2>
+<ul>
+  <li>LinkedIn profile challenge with a one‑time token (128‑bit), TTL 7 days</li>
+  <li>No plaintext tokens stored; hashed only; rate‑limited fetching</li>
+</ul>
+
+<h2 id="data--privacy">Data &amp; privacy</h2>
+<ul>
+  <li>Public uses only aggregates; no PII</li>
+  <li>Email handling with HMAC reference publicly; raw email encrypted at rest via envelope encryption</li>
+  <li>PII retention (POC): 180 days; abuse metadata 30 days; logs redact PII</li>
+</ul>
+
+<h2 id="roadmap">Roadmap</h2>
+<ul>
+  <li>POC: core models, reviews, verification, moderation, public directory</li>
+  <li>Beta: claims, right‑of‑reply UI, suppression thresholds, B2B skeleton</li>
+  <li>GA: expanded compliance, regional isolation, pricing/payments, hardened anti‑abuse</li>
+</ul>
+
+
+    </main>
+    <footer class="site-footer container">
+      <p>© 2025 Recruiter Rankings. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
+

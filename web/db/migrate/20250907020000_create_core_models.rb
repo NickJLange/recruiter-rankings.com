@@ -45,8 +45,6 @@ class CreateCoreModels < ActiveRecord::Migration[8.0]
       t.timestamps
     end
     add_index :reviews, :status
-    add_index :reviews, :recruiter_id
-    add_index :reviews, :company_id
 
     create_table :review_metrics do |t|
       t.references :review, null: false, foreign_key: true
@@ -93,7 +91,6 @@ class CreateCoreModels < ActiveRecord::Migration[8.0]
       t.timestamps
     end
     add_index :moderation_actions, [:subject_type, :subject_id]
-    add_index :moderation_actions, :actor_id
 
     create_table :profile_claims do |t|
       t.references :recruiter, null: false, foreign_key: true

@@ -5,4 +5,14 @@ Rails.application.routes.draw do
     resources :reviews, only: [:new]
   end
   resources :reviews, only: [:create]
+
+  namespace :admin do
+    resources :reviews, only: [:index] do
+      member do
+        patch :approve
+        patch :flag
+        patch :remove
+      end
+    end
+  end
 end
