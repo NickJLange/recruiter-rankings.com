@@ -49,7 +49,7 @@ class ApplicationController < ActionController::Base
   def public_max_per_page
     (ENV["PUBLIC_MAX_PER_PAGE"].presence || 50).to_i
   end
-end
+
   def demo_auto_approve?
     ActiveModel::Type::Boolean.new.cast(ENV.fetch("DEMO_AUTO_APPROVE", Rails.env.development?.to_s))
   end
