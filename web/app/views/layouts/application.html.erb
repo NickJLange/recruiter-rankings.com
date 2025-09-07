@@ -48,11 +48,12 @@
       <nav class="container nav">
         <a class="brand" href="/">Recruiter Rankings</a>
         <div class="nav-links">
-          <a href="/">Home</a>
-          <a href="/about">About</a>
-          <a href="/policies">Policies</a>
-          <a href="/recruiters">Recruiters</a>
-          <a href="/admin/reviews">Approve</a>
+          <a href="/"><%= t('nav.home') %></a>
+          <a href="/about"><%= t('nav.about') %></a>
+          <a href="/policies"><%= t('nav.policies') %></a>
+          <a href="/recruiters"><%= t('nav.recruiters') %></a>
+          <a href="/admin/reviews"><%= t('nav.approve') %></a>
+          <a href="<%= switch_locale_to(I18n.locale == :ja ? 'en' : 'ja') %>"><%= I18n.locale == :ja ? t('nav.locale_en') : t('nav.locale_ja') %></a>
           <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme"></button>
         </div>
       </nav>

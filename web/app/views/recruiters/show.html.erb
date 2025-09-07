@@ -6,8 +6,8 @@
 <p><strong>Verified:</strong> <%= @recruiter.verified_at ? @recruiter.verified_at.strftime("%Y-%m-%d") : "No" %></p>
 
 <section>
-  <h2>Aggregates</h2>
-  <p><strong>Average overall:</strong> <%= @avg_overall&.round(2) || "—" %> (<%= @reviews_count %> reviews)</p>
+  <h2><%= t('recruiters.show.aggregates') %></h2>
+  <p><strong><%= t('recruiters.show.average_overall') %>:</strong> <%= @avg_overall&.round(2) || "—" %> (<%= @reviews_count %> <%= t('recruiters.index.th.reviews') %>)</p>
   <ul>
     <% ReviewMetric::DIMENSIONS.each do |k, v| %>
       <li><%= v.humanize %>: <%= (@dimension_averages[k.to_s]&.to_f&.round(2) || "—") %></li>
@@ -16,13 +16,13 @@
 </section>
 
 <p>
-  <%= link_to "Write a review", new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug) %>
+  <%= link_to t('recruiters.show.write_review'), new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug) %>
   &nbsp;|&nbsp;
-  <%= link_to "Claim this profile", new_claim_identity_path(subject_type: 'recruiter', recruiter_slug: @recruiter.public_slug), class: "" %>
+  <%= link_to t('recruiters.show.claim_profile'), new_claim_identity_path(subject_type: 'recruiter', recruiter_slug: @recruiter.public_slug), class: "" %>
 </p>
 
 <section>
-  <h2>Recent reviews</h2>
+  <h2><%= t('recruiters.show.recent_reviews') %></h2>
   <% @reviews.each do |rev| %>
     <article style="border:1px solid var(--border); padding:10px; margin-bottom:10px; background: var(--surface);">
       <p><strong>Overall:</strong> <%= rev.overall_score %> — <em><%= rev.created_at.strftime("%Y-%m-%d") %></em></p>
