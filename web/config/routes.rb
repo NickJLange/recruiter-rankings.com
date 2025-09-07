@@ -6,6 +6,11 @@ Rails.application.routes.draw do
   end
   resources :reviews, only: [:create]
 
+  # Unified claim identity (users or recruiters)
+  get  "/claim_identity/new",    to: "claim_identity#new",    as: :new_claim_identity
+  post "/claim_identity",        to: "claim_identity#create", as: :claim_identity
+  post "/claim_identity/verify", to: "claim_identity#verify", as: :verify_claim_identity
+
   get "/sitemap.xml", to: "sitemaps#show", defaults: { format: :xml }
 
   namespace :admin do

@@ -15,7 +15,11 @@
   </ul>
 </section>
 
-<p><%= link_to "Write a review", new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug) %></p>
+<p>
+  <%= link_to "Write a review", new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug) %>
+  &nbsp;|&nbsp;
+  <%= link_to "Claim this profile", new_claim_identity_path(subject_type: 'recruiter', recruiter_slug: @recruiter.public_slug, linkedin_url: @recruiter.linked_in_url), class: "" %>
+</p>
 
 <section>
   <h2>Recent reviews</h2>
