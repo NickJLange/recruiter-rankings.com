@@ -43,8 +43,7 @@ class ReviewsController < ApplicationController
   end
 
   def hmac_email(email)
-    pepper = Rails.configuration.x.submission_email_hmac_pepper
-    pepper = pepper.is_a?(String) && pepper.present? ? pepper : "demo-only-pepper-not-secret"
+    pepper = submission_email_hmac_pepper
     OpenSSL::HMAC.hexdigest("SHA256", pepper, email)
   end
 
@@ -60,11 +59,11 @@ class ReviewsController < ApplicationController
   end
 
   def demo_auto_approve?
-    ActiveModel::Type::Boolean.new.cast(Rails.configuration.x.demo_auto_approve)
+    super
   end
 
   def copy_overall_to_dimensions?
-    ActiveModel::Type::Boolean.new.cast(Rails.configuration.x.copy_overall_to_dimensions)
+    super
   end
 end
 
