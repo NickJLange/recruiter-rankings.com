@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   get "/sitemap.xml", to: "sitemaps#show", defaults: { format: :xml }
 
   namespace :admin do
+    get "/" => "dashboard#index", as: :dashboard
     resources :reviews, only: [:index] do
       member do
         patch :approve
