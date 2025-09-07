@@ -1,0 +1,27 @@
+<h1><%= @recruiter.name %></h1>
+<p><strong>Company:</strong> <%= @recruiter.company&.name || "—" %></p>
+<p><strong>Region:</strong> <%= @recruiter.region || "—" %></p>
+<p><strong>Verified:</strong> <%= @recruiter.verified_at ? @recruiter.verified_at.strftime("%Y-%m-%d") : "No" %></p>
+
+<section>
+  <h2>Aggregates</h2>
+  <p><strong>Average overall:</strong> <%= @avg_overall&.round(2) || "—" %> (<%= @reviews_count %> reviews)</p>
+  <ul>
+    <% ReviewMetric::DIMENSIONS.each do |k, v| %>
+      <li><%= v.humanize %>: <%= (@dimension_averages[k.to_s]&.to_f&.round(2) || "—") %></li>
+    <% end %>
+  </ul>
+</section>
+
+<p><%= link_to "Write a review", new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug) %></p>
+
+<section>
+  <h2>Recent reviews</h2>
+  <% @reviews.each do |rev| %>
+    <article style="border:1px solid #ddd; padding:10px; margin-bottom:10px;">
+      <p><strong>Overall:</strong> <%= rev.overall_score %> — <em><%= rev.created_at.strftime("%Y-%m-%d") %></em></p>
+      <p><%= simple_format rev.text %></p>
+    </article>
+  <% end %>
+</section>
+

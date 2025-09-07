@@ -1,0 +1,24 @@
+<h1>Top Recruiters</h1>
+<p>Showing recruiters with at least <%= Rails.configuration.x.public_min_reviews %> approved reviews.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Recruiter</th>
+      <th>Company</th>
+      <th>Avg Overall</th>
+      <th>Reviews</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @recruiters.each do |r| %>
+      <tr>
+        <td><%= link_to r.name, recruiter_path(r.public_slug) %></td>
+        <td><%= r.company&.name || "—" %></td>
+        <td><%= r.attributes["avg_overall"].to_f.round(2) %></td>
+        <td><%= r.attributes["reviews_count"] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+

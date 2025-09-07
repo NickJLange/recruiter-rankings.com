@@ -1,0 +1,25 @@
+<h1>Write a review for <%= @recruiter.name %></h1>
+
+<%= form_with url: reviews_path, scope: :review do |f| %>
+  <%= f.hidden_field :recruiter_slug, value: @recruiter.public_slug %>
+
+  <div>
+    <%= f.label :overall_score, "Overall score (1–5)" %><br>
+    <%= f.number_field :overall_score, in: 1..5, step: 1, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :text, "Your experience" %><br>
+    <%= f.text_area :text, rows: 6, required: true %>
+  </div>
+
+  <div>
+    <%= f.label :email, "Email (optional; used for dedupe, not shown)" %><br>
+    <%= f.email_field :email %>
+  </div>
+
+  <div style="margin-top:10px;">
+    <%= f.submit "Submit review" %>
+  </div>
+<% end %>
+
