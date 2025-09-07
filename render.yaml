@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: recruiter-rankings
+    env: ruby
+    rootDir: web
+    autoDeploy: true
+    healthCheckPath: /up
+    buildCommand: |
+      bundle install
+      cd ../site && bundle install && bundle exec jekyll build
+    startCommand: bundle exec puma -C config/puma.rb
+    postDeployCommand: bundle exec rails db:migrate
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rr-postgres
+          property: connectionString
+      - key: CANONICAL_URL
+        value: https://recruiter-rankings.com
+      - key: PUBLIC_MIN_REVIEWS
+        value: "5"
+      - key: DEMO_AUTO_APPROVE
+        value: "false"
+      - key: LINKEDIN_FETCH_TIMEOUT
+        value: "5"
+      - key: LINKEDIN_FETCH_UA
+        value: RecruiterRankingsBot/0.1
+      - key: SUBMISSION_EMAIL_HMAC_PEPPER
+        generateValue: true
+      - key: SUBMISSION_COPY_OVERALL_TO_DIMENSIONS
+        value: "true"
+      - key: PUBLIC_PER_PAGE
+        value: "10"
+      - key: PUBLIC_MAX_PER_PAGE
+        value: "50"
+
+databases:
+  - name: rr-postgres
+    plan: free
+
