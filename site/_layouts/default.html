@@ -4,11 +4,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{{ page.title | default: site.title }}</title>
+    <meta name="description" content="{{ page.description | default: site.description }}" />
+    <link rel="stylesheet" href="/assets/style.css" />
   </head>
   <body>
-    <main>
+    <header class="site-header">
+      <nav class="container nav">
+        <a class="brand" href="/">Recruiter Rankings</a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="/about">About</a>
+          <a href="/policies">Policies</a>
+          <span class="muted">Directory (POC)</span>
+        </div>
+      </nav>
+    </header>
+    <main class="container">
       {{ content }}
     </main>
+    <footer class="site-footer container">
+      <p>© {{ "now" | date: "%Y" }} Recruiter Rankings. All rights reserved.</p>
+    </footer>
   </body>
 </html>
 
