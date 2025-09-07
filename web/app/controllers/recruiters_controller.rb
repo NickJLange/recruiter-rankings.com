@@ -39,6 +39,22 @@ class RecruitersController < ApplicationController
     records = scope.offset(offset).limit(@per_page + 1).to_a
     @has_next = records.length > @per_page
     @recruiters = records.first(@per_page)
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: @recruiters.map { |r|
+          {
+            name: r.name,
+            slug: r.public_slug,
+            company: r.company&.name,
+            region: r.region,
+            reviews_count: r.attributes['reviews_count'].to_i,
+            avg_overall: r.attributes['avg_overall']&.to_f
+          }
+        }
+      end
+    end
   end
 
   def show
@@ -58,6 +74,21 @@ class RecruitersController < ApplicationController
       .group(:dimension)
       .pluck(:dimension, Arel.sql("AVG(score)"))
     @dimension_averages = dims.to_h
+
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          name: @recruiter.name,
+          slug: @recruiter.public_slug,
+          company: @recruiter.company&.name,
+          region: @recruiter.region,
+          reviews_count: @reviews_count,
+          avg_overall: @avg_overall,
+          dimensions: @dimension_averages
+        }
+      end
+    end
   end
 end
 
