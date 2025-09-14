@@ -61,7 +61,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_043000) do
     t.index ["recruiter_id", "user_id"], name: "index_profile_claims_on_recruiter_id_and_user_id", unique: true
     t.index ["recruiter_id"], name: "index_profile_claims_on_recruiter_id"
     t.index ["user_id"], name: "index_profile_claims_on_user_id"
-    t.check_constraint "verification_method::text = ANY (ARRAY['li'::character varying, 'email'::character varying]::text[])", name: "check_profile_claims_verification_method"
+    t.check_constraint "verification_method::text = ANY (ARRAY['li'::character varying::text, 'email'::character varying::text])", name: "check_profile_claims_verification_method"
   end
 
   create_table "recruiters", force: :cascade do |t|
@@ -119,7 +119,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_043000) do
     t.index ["status"], name: "index_reviews_on_status"
     t.index ["user_id"], name: "index_reviews_on_user_id"
     t.check_constraint "overall_score >= 1 AND overall_score <= 5", name: "check_reviews_overall_score_range"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'approved'::character varying, 'removed'::character varying, 'flagged'::character varying]::text[])", name: "check_reviews_status"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'approved'::character varying::text, 'removed'::character varying::text, 'flagged'::character varying::text])", name: "check_reviews_status"
   end
 
   create_table "takedown_requests", force: :cascade do |t|
@@ -135,7 +135,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_043000) do
     t.index ["sla_due_at"], name: "index_takedown_requests_on_sla_due_at"
     t.index ["status"], name: "index_takedown_requests_on_status"
     t.index ["subject_type", "subject_id"], name: "index_takedown_requests_on_subject_type_and_subject_id"
-    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'in_review'::character varying, 'resolved'::character varying, 'rejected'::character varying]::text[])", name: "check_takedown_requests_status"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying::text, 'in_review'::character varying::text, 'resolved'::character varying::text, 'rejected'::character varying::text])", name: "check_takedown_requests_status"
   end
 
   create_table "users", force: :cascade do |t|
@@ -148,7 +148,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_07_043000) do
     t.datetime "updated_at", null: false
     t.index ["email_hmac"], name: "index_users_on_email_hmac", unique: true
     t.index ["role"], name: "index_users_on_role"
-    t.check_constraint "role::text = ANY (ARRAY['candidate'::character varying, 'recruiter'::character varying, 'moderator'::character varying, 'admin'::character varying]::text[])", name: "check_users_role"
+    t.check_constraint "role::text = ANY (ARRAY['candidate'::character varying::text, 'recruiter'::character varying::text, 'moderator'::character varying::text, 'admin'::character varying::text])", name: "check_users_role"
   end
 
   add_foreign_key "moderation_actions", "users", column: "actor_id"
