@@ -37,7 +37,7 @@
   </thead>
   <tbody>
     <% @recruiters.each do |r| %>
-      <tr>
+      <tr class="recruiter-row">
         <td><%= link_to r.name, recruiter_path(r.public_slug) %></td>
         <td><%= r.company&.name || "—" %></td>
         <td><%= r.attributes["avg_overall"].to_f.round(2) %></td>

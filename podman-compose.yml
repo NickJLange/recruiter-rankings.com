@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    image: postgres:16
+    image: docker.io/library/postgres:16
     container_name: rr-postgres
     restart: unless-stopped
     environment:

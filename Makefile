@@ -1,5 +1,9 @@
 SHELL := /bin/bash
 
+# Use podman-compose if available, otherwise fall back to podman commands
+PODMAN := podman
+COMPOSE_FILE := podman-compose.yml
+
 .PHONY: help db-up db-down db-logs db-psql db-reset db-nuke db-status web-setup web-server web-test
 
 help: ## Show this help message
@@ -8,24 +12,37 @@ help: ## Show this help message
 
 # Database management
 db-up: ## Start PostgreSQL container
-	@echo "Starting PostgreSQL container..."
-	@docker compose up -d db
+	@echo "Starting PostgreSQL container with Podman..."
+	@$(PODMAN) play kube $(COMPOSE_FILE) 2>/dev/null || \
+		$(PODMAN) run -d \
+		--name rr-postgres \
+		-e POSTGRES_USER=postgres \
+		-e POSTGRES_PASSWORD=postgres \
+		-e POSTGRES_DB=postgres \
+		-p 5432:5432 \
+		-v rr-postgres-data:/var/lib/postgresql/data \
+		--health-cmd="pg_isready -U postgres" \
+		--health-interval=5s \
+		--health-timeout=3s \
+		--health-retries=5 \
+		docker.io/library/postgres:16
 	@echo "Waiting for database to be ready..."
 	@sleep 3
-	@docker compose ps
+	@$(PODMAN) ps --filter name=rr-postgres
 
 db-down: ## Stop PostgreSQL container
 	@echo "Stopping PostgreSQL container..."
-	@docker compose down
+	@$(PODMAN) stop rr-postgres 2>/dev/null || true
+	@$(PODMAN) rm rr-postgres 2>/dev/null || true
 
 db-logs: ## Show PostgreSQL container logs
-	@docker compose logs -f db
+	@$(PODMAN) logs -f rr-postgres
 
 db-status: ## Show PostgreSQL container status
-	@docker compose ps
+	@$(PODMAN) ps --filter name=rr-postgres
 
 db-psql: ## Connect to PostgreSQL with psql
-	@docker compose exec -it db psql -U postgres -d postgres
+	@$(PODMAN) exec -it rr-postgres psql -U postgres -d postgres
 
 db-reset: db-up ## Reset database (drop, create, migrate, seed)
 	@echo "Resetting database..."
@@ -35,7 +52,9 @@ db-reset: db-up ## Reset database (drop, create, migrate, seed)
 
 db-nuke: ## Completely remove container and volume
 	@echo "Removing PostgreSQL container and volume..."
-	@docker compose down -v
+	@$(PODMAN) stop rr-postgres 2>/dev/null || true
+	@$(PODMAN) rm rr-postgres 2>/dev/null || true
+	@$(PODMAN) volume rm rr-postgres-data 2>/dev/null || true
 	@echo "Container and volume removed!"
 
 # Rails application

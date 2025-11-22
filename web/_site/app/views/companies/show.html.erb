@@ -1,0 +1,22 @@
+<h1><%= @company.name %></h1>
+<p><strong><%= t('recruiters.index.th.reviews') %>:</strong> <%= @reviews_count %> &nbsp; <strong><%= t('recruiters.index.th.avg_overall') %>:</strong> <%= @avg_overall&.round(2) || '—' %></p>
+
+<h2><%= t('recruiters.index.th.recruiter') %></h2>
+<table>
+  <thead>
+    <tr>
+      <th><%= t('recruiters.index.th.recruiter') %></th>
+      <th><%= t('recruiters.index.th.avg_overall') %></th>
+      <th><%= t('recruiters.index.th.reviews') %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @recruiters.each do |r| %>
+      <tr>
+        <td><%= link_to r.name, recruiter_path(r.public_slug) %></td>
+        <td><%= r.attributes['avg_overall']&.to_f&.round(2) || '—' %></td>
+        <td><%= r.attributes['reviews_count'] || 0 %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -2,11 +2,12 @@
 
 This project supports two database setup options for local development:
 
-## Option 1: Dockerized PostgreSQL (Recommended)
+## Option 1: Containerized PostgreSQL with Podman (Recommended)
 
 ### Prerequisites
-- Docker Desktop for Mac: https://www.docker.com/products/docker-desktop/
-- Make sure Docker is running before proceeding
+- Podman for macOS: https://podman.io/getting-started/installation#macos
+- Install via Homebrew: `brew install podman`
+- Initialize and start Podman machine: `podman machine init && podman machine start`
 
 ### Quick Start
 ```bash
@@ -34,7 +35,7 @@ make web-test     # Run Rails test suite
 ```
 
 ### Configuration
-The Docker setup uses these defaults (configured in `docker-compose.yml` and `web/.env`):
+The Podman setup uses these defaults (configured in `podman-compose.yml` and `web/.env`):
 - PostgreSQL version: 16
 - Database user: postgres
 - Database password: postgres
@@ -101,21 +102,26 @@ environment variable provided by Render. No changes to production settings are n
 
 ### Port Already in Use
 If port 5432 is already in use:
-1. Update `docker-compose.yml` to use a different port mapping (e.g., `"5433:5432"`)
+1. Update the port mapping in `Makefile` db-up target (e.g., change `-p 5432:5432` to `-p 5433:5432`)
 2. Update `DB_PORT=5433` in `web/.env`
 3. Update the `DATABASE_URL` in `web/.env` to use the new port
 
 ### Database Connection Issues
-- Ensure Docker Desktop is running (Option 1) or PostgreSQL service is running (Option 2)
+- Ensure Podman machine is running: `podman machine start`
 - Check that environment variables in `web/.env` match your setup
-- Run `docker compose ps` to verify the container is healthy (Option 1)
+- Run `make db-status` to verify the container is healthy
 - Try connecting directly: `psql postgresql://postgres:postgres@127.0.0.1:5432/postgres`
 
-### Reset Everything (Docker)
+### Reset Everything (Podman)
 ```bash
 make db-nuke  # Remove container and volumes
 make setup    # Fresh setup
 ```
+
+### Podman-specific Tips
+- If you encounter permission issues, ensure your Podman machine has enough resources: `podman machine stop && podman machine set --cpus 2 --memory 4096 && podman machine start`
+- Check Podman machine status: `podman machine list`
+- View Podman system info: `podman info`
 
 ### Reset Everything (Local PostgreSQL)
 ```bash
