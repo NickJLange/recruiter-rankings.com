@@ -2,14 +2,17 @@ require 'net/http'
 require 'uri'
 
 class LinkedInFetcher
+  DEFAULT_TIMEOUT = 5
+
   def fetch(url)
     uri = URI.parse(url)
     return nil unless uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = uri.scheme == 'https'
-    http.read_timeout = (ENV['LINKEDIN_FETCH_TIMEOUT'] || '5').to_i
-    http.open_timeout = (ENV['LINKEDIN_FETCH_TIMEOUT'] || '5').to_i
+    timeout = (ENV['LINKEDIN_FETCH_TIMEOUT'] || DEFAULT_TIMEOUT.to_s).to_i
+    http.read_timeout = timeout
+    http.open_timeout = timeout
 
     req = Net::HTTP::Get.new(uri.request_uri)
     req['User-Agent'] = ENV['LINKEDIN_FETCH_UA'].presence || 'RecruiterRankingsBot/0.1'
