@@ -1,9 +1,13 @@
 class ClaimIdentityController < ApplicationController
-  require 'net/http'
-  require 'uri'
   require 'digest'
 
   protect_from_forgery with: :exception
+
+  attr_writer :linkedin_fetcher
+
+  def linkedin_fetcher
+    @linkedin_fetcher ||= LinkedInFetcher.new
+  end
 
   def new
     @subject_type = params[:subject_type].presence || 'recruiter'
@@ -59,7 +63,7 @@ class ClaimIdentityController < ApplicationController
     linkedin_url = params.require(:linkedin_url)
     token = "RR-VERIFY-#{challenge.token_hash}"
 
-    body = safe_fetch(linkedin_url)
+    body = linkedin_fetcher.fetch(linkedin_url)
     unless body&.include?(token)
       flash[:alert] = 'Token not found on the page. Make sure it is visible and saved.'
       redirect_to new_claim_identity_path(subject_type: map_subject_param(challenge), recruiter_slug: recruiter_slug_for(challenge), linkedin_url: linkedin_url) and return
@@ -100,26 +104,6 @@ class ClaimIdentityController < ApplicationController
   def generate_token_hash
     raw = SecureRandom.hex(16) # 128-bit
     Digest::SHA256.hexdigest(raw)
-  end
-
-  def safe_fetch(url)
-    uri = URI.parse(url)
-    return nil unless uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)
-
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = uri.scheme == 'https'
-    http.read_timeout = (ENV['LINKEDIN_FETCH_TIMEOUT'] || '5').to_i
-    http.open_timeout = (ENV['LINKEDIN_FETCH_TIMEOUT'] || '5').to_i
-
-    req = Net::HTTP::Get.new(uri.request_uri)
-    req['User-Agent'] = ENV['LINKEDIN_FETCH_UA'].presence || 'RecruiterRankingsBot/0.1'
-
-    res = http.request(req)
-    return res.body if res.is_a?(Net::HTTPSuccess)
-
-    nil
-  rescue => _e
-    nil
   end
 
   def hmac_email(email)

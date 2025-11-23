@@ -26,34 +26,29 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
     assert_equal "Recruiter", challenge.subject_type
     assert_equal @recruiter.id, challenge.subject_id
     
-    # 2. Verify claim (Mocking safe_fetch to return the token)
+    # 2. Verify claim (Mocking LinkedInFetcher to return the token)
     token = "RR-VERIFY-#{challenge.token_hash}"
     
-    # We need to mock the controller's safe_fetch method. 
-    # Since integration tests use the app instance, we can't easily mock instance methods of controllers directly 
-    # without some metaprogramming or stubbing at the network level.
-    # Given no WebMock, we'll use a workaround: 
-    # We will stub the method on the controller class for the duration of the request.
+    # Create a mock fetcher that returns the token in the response
+    mock_fetcher = Minitest::Mock.new
+    mock_fetcher.expect(:fetch, "<html><body>Profile content with #{token}</body></html>", [String])
     
-    ClaimIdentityController.define_method(:safe_fetch) do |url|
-      "<html><body>Profile content with #{token}</body></html>"
+    # Inject the mock into the controller
+    ClaimIdentityController.any_instance.stub(:linkedin_fetcher, mock_fetcher) do
+      post "/claim_identity/verify", params: {
+        challenge_id: challenge.id,
+        linkedin_url: "https://linkedin.com/in/miles"
+      }
+
+      assert_redirected_to recruiter_path("miles-dyson")
+      follow_redirect!
+      assert_select ".alert-info", "Recruiter verified."
+      
+      assert @recruiter.reload.verified_at.present?
     end
-
-    post "/claim_identity/verify", params: {
-      challenge_id: challenge.id,
-      linkedin_url: "https://linkedin.com/in/miles"
-    }
-
-    assert_redirected_to recruiter_path("miles-dyson")
-    follow_redirect!
-    assert_select ".alert-info", "Recruiter verified."
     
-    assert @recruiter.reload.verified_at.present?
-  ensure
-    # Restore original method (best effort, though integration tests fork)
-    # In a real app we'd use a proper service object to mock.
-    ClaimIdentityController.send(:remove_method, :safe_fetch)
-    # Restore original definition (simplified for this test context)
+    # Verify the mock was called
+    mock_fetcher.verify
   end
 
   test "user review submission creates user" do
