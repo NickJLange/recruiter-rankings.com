@@ -1,9 +1,13 @@
 class ClaimIdentityController < ApplicationController
-  require 'net/http'
-  require 'uri'
   require 'digest'
 
   protect_from_forgery with: :exception
+
+  attr_writer :linkedin_fetcher
+
+  def linkedin_fetcher
+    @linkedin_fetcher ||= LinkedInFetcher.new
+  end
 
   def new
     @subject_type = params[:subject_type].presence || 'recruiter'
@@ -100,10 +104,6 @@ class ClaimIdentityController < ApplicationController
   def generate_token_hash
     raw = SecureRandom.hex(16) # 128-bit
     Digest::SHA256.hexdigest(raw)
-  end
-
-  def linkedin_fetcher
-    @linkedin_fetcher ||= LinkedinFetcher.new
   end
 
   def hmac_email(email)
