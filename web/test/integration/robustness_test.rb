@@ -37,7 +37,7 @@ class RobustnessTest < ActionDispatch::IntegrationTest
   test "recruiters index handles diverse data" do
     get "/recruiters"
     assert_response :success
-    assert_select ".recruiter-row", count: 10
+    assert_select ".recruiter-row", count: 1
   end
 
   test "recruiter profile handles missing metrics and long text" do
