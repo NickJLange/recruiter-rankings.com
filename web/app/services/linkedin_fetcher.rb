@@ -14,7 +14,7 @@ class LinkedinFetcher
   def fetch(url)
     uri = URI.parse(url)
     return nil unless uri.is_a?(URI::HTTPS) || uri.is_a?(URI::HTTP)
-    return nil unless ALLOWED_HOSTS.any? { |host| uri.host&.end_with?(host) }
+    return nil unless ALLOWED_HOSTS.any? { |host| uri.host == host || uri.host&.end_with?(".#{host}") }
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = uri.scheme == 'https'
