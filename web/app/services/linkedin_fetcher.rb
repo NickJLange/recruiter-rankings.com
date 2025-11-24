@@ -7,7 +7,13 @@ class LinkedinFetcher
 
   def initialize(timeout: nil, user_agent: nil)
     env_timeout = Integer(ENV['LINKEDIN_FETCH_TIMEOUT'], exception: false)
-    @timeout = env_timeout && env_timeout.positive? ? env_timeout : DEFAULT_TIMEOUT
+    @timeout = if timeout
+                  timeout.positive? ? timeout : DEFAULT_TIMEOUT
+                elsif env_timeout && env_timeout.positive?
+                  env_timeout
+                else
+                  DEFAULT_TIMEOUT
+                end
     @user_agent = user_agent || ENV['LINKEDIN_FETCH_UA'].presence || 'RecruiterRankingsBot/0.1'
   end
 
