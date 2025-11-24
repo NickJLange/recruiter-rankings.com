@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Web" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%# Canonical and meta (fallbacks) %>
+    <link rel="canonical" href="<%= canonical_url %>">
+    <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'De‑identified recruiter quality signals with right‑of‑reply.' %>">
+    <meta property="og:site_name" content="Recruiter Rankings">
+    <meta property="og:title" content="<%= content_for?(:title) ? yield(:title) : 'Recruiter Rankings' %>">
+    <meta property="og:description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : 'De‑identified recruiter quality signals with right‑of‑reply.' %>">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= canonical_url %>">
+    <meta name="twitter:card" content="summary">
+
+    <%= yield :head %>
+
+    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%= stylesheet_link_tag :app %>
+    <%# Include the Jekyll site stylesheet to unify theme %>
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script>
+      (function(){
+        try{
+          var stored = localStorage.getItem('theme');
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = stored || (prefersDark ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        }catch(e){ document.documentElement.setAttribute('data-theme','dark'); }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <header class="site-header">
+      <nav class="container nav">
+        <a class="brand" href="/">Recruiter Rankings</a>
+        <div class="nav-links">
+          <a href="/"><%= t('nav.home') %></a>
+          <a href="/about"><%= t('nav.about') %></a>
+          <a href="/policies"><%= t('nav.policies') %></a>
+          <a href="/recruiters"><%= t('nav.recruiters') %></a>
+          <a href="/companies"><%= t('nav.companies', default: 'Companies') %></a>
+          <a href="/admin/reviews"><%= t('nav.approve') %></a>
+          <a href="<%= switch_locale_to(I18n.locale == :ja ? 'en' : 'ja') %>"><%= I18n.locale == :ja ? t('nav.locale_en') : t('nav.locale_ja') %></a>
+          <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme"></button>
+        </div>
+      </nav>
+      <div class="container" style="padding-bottom:8px;">
+        <small class="muted"><%= t('nav.top_companies', default: 'Top companies') %>:</small>
+        <ul id="top-companies-nav" style="display:inline-flex; gap:10px; list-style:none; margin:0 0 0 8px; padding:0;"></ul>
+      </div>
+    </header>
+
+    <main class="container">
+      <%= yield %>
+    </main>
+
+    <footer class="site-footer container">
+      <p>© <%= Time.current.year %> Recruiter Rankings. All rights reserved.</p>
+    </footer>
+    <script src="/assets/theme.js"></script>
+    <script>
+      (function(){
+        fetch('/companies.json?per=5').then(function(r){return r.json()}).then(function(items){
+          var ul = document.getElementById('top-companies-nav'); if(!ul) return;
+          ul.innerHTML='';
+          items.slice(0,5).forEach(function(c){
+            var li=document.createElement('li');
+            var a=document.createElement('a'); a.href='/companies/'+c.id; a.textContent=c.name; li.appendChild(a);
+            ul.appendChild(li);
+          });
+        }).catch(function(){});
+      })();
+    </script>
+  </body>
+</html>

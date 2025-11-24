@@ -1,0 +1,27 @@
+<h1>Claim identity</h1>
+
+<%= form_with url: claim_identity_path, scope: :claim do |f| %>
+  <div style="display:flex; gap:16px; flex-wrap:wrap;">
+    <div>
+      <label>Subject</label><br>
+      <label><input type="radio" name="claim[subject_type]" value="recruiter" <%= @subject_type == 'recruiter' ? 'checked' : '' %>> Recruiter</label>
+      <label style="margin-left:12px;"><input type="radio" name="claim[subject_type]" value="user" <%= @subject_type == 'user' ? 'checked' : '' %>> User</label>
+    </div>
+    <div>
+      <label for="recruiter_slug">Recruiter slug (for recruiter subject)</label><br>
+      <input type="text" id="recruiter_slug" name="claim[recruiter_slug]" value="<%= h @recruiter_slug %>" placeholder="e.g. ava-tanaka">
+    </div>
+    <div>
+      <label for="linkedin_url">LinkedIn URL</label><br>
+      <input type="url" id="linkedin_url" name="claim[linkedin_url]" value="<%= h @linkedin_url %>" placeholder="https://www.linkedin.com/in/..." required>
+    </div>
+    <div>
+      <label for="email">Email (for user subject)</label><br>
+      <input type="email" id="email" name="claim[email]" value="<%= h @email %>" placeholder="optional">
+    </div>
+  </div>
+  <div style="margin-top:12px;">
+    <button type="submit">Get verification token</button>
+  </div>
+<% end %>
+

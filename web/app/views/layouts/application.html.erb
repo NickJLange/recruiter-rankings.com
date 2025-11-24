@@ -65,6 +65,11 @@
     </header>
 
     <main class="container">
+      <% flash.each do |type, msg| %>
+        <div class="alert alert-<%= type == 'notice' ? 'info' : 'danger' %>">
+          <%= msg %>
+        </div>
+      <% end %>
       <%= yield %>
     </main>
 

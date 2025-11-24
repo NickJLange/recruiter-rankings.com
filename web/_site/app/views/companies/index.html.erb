@@ -1,0 +1,55 @@
+<h1><%= t('nav.companies') %></h1>
+<p><%= t('recruiters.index.subtitle', count: public_min_reviews) %></p>
+
+<%= form_with url: companies_path, method: :get, local: true do %>
+  <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin: 8px 0 16px;">
+    <div>
+      <label for="q"><%= t('recruiters.index.search') %></label><br>
+      <input type="text" name="q" id="q" value="<%= h @q %>" placeholder="<%= t('recruiters.index.company') %>">
+    </div>
+    <div>
+      <label for="region"><%= t('recruiters.index.region') %></label><br>
+      <input type="text" name="region" id="region" value="<%= h @region %>">
+    </div>
+    <div>
+      <label for="per_page"><%= t('recruiters.index.per_page') %></label><br>
+      <input type="number" min="1" max="<%= public_max_per_page %>" name="per_page" id="per_page" value="<%= @per_page %>">
+    </div>
+    <div>
+      <button type="submit"><%= t('recruiters.index.filter') %></button>
+      <%= link_to t('recruiters.index.clear'), companies_path, style: "margin-left:6px;" %>
+    </div>
+  </div>
+<% end %>
+
+<table>
+  <thead>
+    <tr>
+      <th><%= t('recruiters.index.th.company') %></th>
+      <th><%= t('recruiters.index.th.avg_overall') %></th>
+      <th><%= t('recruiters.index.th.reviews') %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @companies.each do |c| %>
+      <tr>
+        <td><%= link_to c.name, company_path(c) %></td>
+        <td><%= c.attributes['avg_overall']&.to_f&.round(2) || '—' %></td>
+        <td><%= c.attributes['reviews_count'] || 0 %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div style="margin-top: 16px; display:flex; justify-content: space-between;">
+  <div>
+    <% if @page > 1 %>
+      <%= link_to "← Previous", companies_path(request.query_parameters.merge(page: @page - 1)), class: "cta" %>
+    <% end %>
+  </div>
+  <div>
+    <% if @has_next %>
+      <%= link_to "Next →", companies_path(request.query_parameters.merge(page: @page + 1)), class: "cta" %>
+    <% end %>
+  </div>
+</div>
