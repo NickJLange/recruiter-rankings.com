@@ -29,7 +29,7 @@ class LinkedinFetcher
 
     nil
   rescue => e
-    Rails.logger.warn("LinkedinFetcher failed: #{e.message}")
+    Rails.logger.warn("LinkedinFetcher failed for #{uri.host}: #{e.class}")
     nil
   end
 end
