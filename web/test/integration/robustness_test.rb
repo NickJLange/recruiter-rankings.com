@@ -14,7 +14,7 @@ class RobustnessTest < ActionDispatch::IntegrationTest
     @recruiter = Recruiter.create!(
       name: Faker::Name.unique.name,
       company: @company,
-      public_slug: Faker::Internet.slug,
+      public_slug: Faker::Internet.unique.slug,
       region: "Remote",
       verified_at: nil, # Unverified
       email_hmac: nil   # No email
