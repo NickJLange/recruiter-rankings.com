@@ -74,7 +74,7 @@ bin/rails server
 
 ### Dockerfile
 
-Create a `Dockerfile` in the project root:
+A `Dockerfile` has been provided in this directory:
 
 ```dockerfile
 FROM ruby:3.4.7-alpine
