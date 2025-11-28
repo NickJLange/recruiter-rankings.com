@@ -1,0 +1,60 @@
+#!/usr/bin/env ruby
+
+# Setup verification script
+puts "🔍 Checking development environment setup...\n\n"
+
+# Check Ruby version
+ruby_version = `ruby --version`.strip
+expected_version = File.read('.ruby-version').strip rescue 'unknown'
+puts "✓ Ruby version: #{ruby_version}"
+if ruby_version.include?(expected_version)
+  puts "  ✅ Matches expected version: #{expected_version}"
+else
+  puts "  ⚠️  Expected: #{expected_version}"
+end
+puts
+
+# Check if using rbenv
+ruby_path = `which ruby`.strip
+if ruby_path.include?('rbenv')
+  puts "✓ Using rbenv-managed Ruby: #{ruby_path}"
+else
+  puts "⚠️  Not using rbenv: #{ruby_path}"
+  puts "   Consider running: eval \"$(rbenv init - zsh)\""
+end
+puts
+
+# Check Bundler version
+bundler_version = `bundle --version`.strip rescue "Not installed"
+puts "✓ Bundler: #{bundler_version}"
+puts
+
+# Check if gems are installed
+begin
+  require 'bundler/setup'
+  puts "✓ Gems installed successfully"
+rescue LoadError
+  puts "⚠️  Gems not installed. Run: bundle install"
+end
+puts
+
+# Check PostgreSQL
+pg_running = system('pg_isready > /dev/null 2>&1')
+if pg_running
+  puts "✓ PostgreSQL is running"
+else
+  puts "⚠️  PostgreSQL not running or not installed"
+  puts "   macOS: brew services start postgresql"
+end
+puts
+
+# Check .env file
+if File.exist?('.env')
+  puts "✓ .env file exists"
+else
+  puts "⚠️  .env file missing. Run: cp .env.example .env"
+end
+puts
+
+puts "✅ Setup check complete!"
+puts "\nTo start the server: bin/rails server"
