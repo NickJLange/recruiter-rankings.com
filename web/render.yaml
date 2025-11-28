@@ -24,4 +24,4 @@ services:
 databases:
   - name: recruiter-rankings-db
     databaseName: recruiter_rankings
-    plan: free  # Change to 'starter' for production use
+    plan: free  # For production, override the plan in the Render dashboard instead of modifying this file
