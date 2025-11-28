@@ -196,7 +196,7 @@ docker-compose down
 
 ### Method 2: render.yaml (Infrastructure as Code)
 
-Create a `render.yaml` in your repository root:
+A `render.yaml` has been provided with the following contents:
 
 ```yaml
 services:
