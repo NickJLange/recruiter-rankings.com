@@ -2,18 +2,15 @@ services:
   - type: web
     name: recruiter-rankings
     runtime: ruby
-    plan: starter
+    plan: free
     rootDir: web
     autoDeploy: true
     branch: main
     healthCheckPath: /up
     region: oregon
-    buildCommand: |
-      bundle install
-      bundle exec rails assets:precompile
-      bundle exec rails assets:clean
-      cd ../site && bundle install && bundle exec jekyll build --destination ../web/public
-    startCommand: bundle exec puma -C config/puma.rb
+    buildCommand: './bin/render-build.sh'
+    # preDeployCommand: "bundle exec rails db:migrate" # preDeployCommand only available on paid instance types
+    startCommand: './bin/rails server'
     preDeployCommand: bundle exec rails db:migrate
     postDeployCommand: bundle exec rails db:seed
     envVars:
@@ -30,13 +27,13 @@ services:
         value: "2"
       - key: RAILS_MAX_THREADS
         value: "5"
-      
+
       # Database Configuration
       - key: DATABASE_URL
         fromDatabase:
           name: rr-postgres
           property: connectionString
-      
+
       # Application Configuration
       - key: CANONICAL_URL
         value: https://recruiter-rankings.com
@@ -44,13 +41,13 @@ services:
         value: "5"
       - key: DEMO_AUTO_APPROVE
         value: "false"
-      
+
       # LinkedIn Verification
       - key: LINKEDIN_FETCH_TIMEOUT
         value: "5"
       - key: LINKEDIN_FETCH_UA
         value: RecruiterRankingsBot/0.1
-      
+
       # Security & Privacy
       - key: SUBMISSION_EMAIL_HMAC_PEPPER
         generateValue: true
@@ -58,17 +55,17 @@ services:
         generateValue: true
       - key: KEK_KEY
         generateValue: true
-      
+
       # Feature Flags
       - key: SUBMISSION_COPY_OVERALL_TO_DIMENSIONS
         value: "true"
-      
+
       # Pagination Settings
       - key: PUBLIC_PER_PAGE
         value: "10"
       - key: PUBLIC_MAX_PER_PAGE
         value: "50"
-      
+
       # Admin Authentication (Production values should be set in Render dashboard)
       - key: ADMIN_USERNAME
         sync: false
@@ -77,9 +74,9 @@ services:
 
 databases:
   - name: rr-postgres
-    plan: starter
+    plan: free
     region: oregon
     databaseName: recruiter_rankings_production
     user: recruiter_rankings
-    ipAllowList: []  # Only allow connections from Render services
-
+    ipAllowList: [newyork.nicklange.family]  # Only allow connections from Render services
+    plan: free
