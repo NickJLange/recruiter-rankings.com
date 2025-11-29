@@ -78,4 +78,4 @@ databases:
     region: oregon
     databaseName: recruiter_rankings_production
     user: recruiter_rankings
-    ipAllowList: [newyork.nicklange.family]  # Only allow connections from Render services
+    ipAllowList: []  # Only allow connections from Render services
