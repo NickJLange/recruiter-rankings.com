@@ -12,7 +12,7 @@ services:
     # preDeployCommand: "bundle exec rails db:migrate" # preDeployCommand only available on paid instance types
     startCommand: './bin/rails server'
     preDeployCommand: bundle exec rails db:migrate
-    postDeployCommand: bundle exec rails db:seed
+    #postDeployCommand: bundle exec rails db:seed
     envVars:
       # Rails Configuration
       - key: RAILS_ENV
@@ -79,4 +79,3 @@ databases:
     databaseName: recruiter_rankings_production
     user: recruiter_rankings
     ipAllowList: [newyork.nicklange.family]  # Only allow connections from Render services
-    plan: free
