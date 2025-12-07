@@ -1,0 +1,21 @@
+[Unit]
+Description=Recruiter Rankings Web Application
+After=network-online.target
+
+[Container]
+Image=recruiter-rankings:latest
+ContainerName=recruiter-rankings
+Network=rr-net.network
+# Publish 443 on host to 3000 in container (Puma)
+# Note: Rootless binding of 443 requires host sysctl net.ipv4.ip_unprivileged_port_start=443
+PublishPort=443:3000
+Environment=RAILS_ENV=production
+Environment=RAILS_SERVE_STATIC_FILES=true
+Environment=RAILS_LOG_TO_STDOUT=true
+# Secrets should be handled via EnvironmentFile or .env, assuming .env for simplicity in this user setup
+EnvironmentFile=%h/app/.env
+Volume=%h/app/storage:/rails/storage:Z
+
+[Service]
+Restart=always
+TimeoutStartSec=900

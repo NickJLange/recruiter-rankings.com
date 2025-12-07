@@ -1,0 +1,10 @@
+all:
+  hosts:
+    scalahost:
+      ansible_host: 1.2.3.4
+      ansible_user: myuser
+      ansible_ssh_private_key_file: ~/.ssh/id_rsa
+      # Deploy path on the remote server
+      app_path: ~/app
+      # Helper to allow binding port 443 (needs SUDO, set to false if manual config done)
+      configure_sysctl: false

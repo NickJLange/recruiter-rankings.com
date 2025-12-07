@@ -1,0 +1,97 @@
+---
+- name: Deploy Recruiter Rankings to Scalahost
+  hosts: all
+  gather_facts: true
+  vars:
+    # Default variables
+    app_path: "~/app"
+    repo_url: "https://github.com/NickJLange/recruiter-rankings.com.git"
+    branch: "main" # Can be overridden via -e branch=...
+    
+  tasks:
+    - name: Ensure git and podman are installed
+      # Not using package module as we likely depend on SPanel managed packages
+      # Just asserting they exist
+      command: "{{ item }} --version"
+      loop:
+        - git
+        - podman
+      changed_when: false
+      failed_when: false
+      register: prereq_check
+
+    - name: Check prerequisites
+      fail:
+        msg: "Missing prerequisite: {{ item.item }}. Please install it via SPanel or SSH."
+      loop: "{{ prereq_check.results }}"
+      when: item.rc != 0
+
+    - name: Enable linger for user to allow long-running services
+      # This technically requires sudo managed permission or loginctl access
+      # Try it, ignore failure if permission denied (user might have to ask support)
+      command: "loginctl enable-linger {{ ansible_user }}"
+      changed_when: false
+      ignore_errors: true
+
+    - name: Checkout application code
+      git:
+        repo: "{{ repo_url }}"
+        dest: "{{ app_path }}"
+        version: "{{ branch }}"
+        force: yes
+
+    - name: Ensure deployment directory exists
+      file:
+        path: "{{ app_path }}/deploy"
+        state: directory
+
+    - name: Ensure .env file exists (Upload from local)
+      # In a real setup, use ansible-vault. Here we assume user will populate it or we copy a template.
+      # For now, we'll ensure a dummy one if missing, but WARN the user.
+      stat:
+        path: "{{ app_path }}/.env"
+      register: env_file
+
+    - name: Fail if .env is missing
+      fail:
+        msg: "Please create {{ app_path }}/.env on the server with production secrets before deploying."
+      when: not env_file.stat.exists
+
+    - name: Configure sysctl for port 443 binding (Optional SUDO)
+      # Only runs if configure_sysctl: true in inventory
+      become: true
+      sysctl:
+        name: net.ipv4.ip_unprivileged_port_start
+        value: '443'
+        state: present
+        reload: yes
+      when: configure_sysctl | default(false)
+
+    - name: Build Podman image
+      # Build directly on host to avoid registry complexity
+      command: "podman build -t recruiter-rankings:latest -f deploy/Containerfile ."
+      args:
+        chdir: "{{ app_path }}"
+
+    - name: Ensure systemd user directory exists
+      file:
+        path: "~/.config/containers/systemd"
+        state: directory
+        recurse: yes
+
+    - name: Install Quadlet files
+      copy:
+        src: "{{ app_path }}/deploy/{{ item }}"
+        dest: "~/.config/containers/systemd/{{ item }}"
+        remote_src: yes
+      loop:
+        - recruiter-rankings.container
+        - rr-net.network
+
+    - name: Reload systemd and restart service
+      systemd:
+        scope: user
+        daemon_reload: yes
+        name: recruiter-rankings
+        state: restarted
+        enabled: yes
