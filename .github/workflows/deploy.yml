@@ -10,6 +10,27 @@ jobs:
     name: CI Verification
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: rr_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      RAILS_ENV: test
+      DB_HOST: localhost
+      DB_USER: postgres
+      DB_PASSWORD: password
+
     steps:
       - uses: actions/checkout@v4
       - name: Set up Ruby
@@ -22,13 +43,14 @@ jobs:
         run: |
           cd web
           bundle install
-      # Basic test run to verify the build isn't completely broken
-      # We skip full db tests as we don't have postgres service attached here yet
+      - name: Setup Database
+        run: |
+          cd web
+          bin/rails db:prepare
       - name: Build Verification
         run: |
           cd web
-          # verifiying we can boot the app in test environment
-          RAILS_ENV=test bundle exec rails runner "puts 'App boots successfully'"
+          bin/rails runner "puts 'App boots successfully'"
 
   deploy:
     name: Trigger Render Deploy
