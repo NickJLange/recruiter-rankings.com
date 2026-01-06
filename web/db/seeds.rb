@@ -9,7 +9,13 @@ end
 
 require "securerandom"
 require "openssl"
-require "faker"
+
+begin
+  require "faker"
+rescue LoadError
+  puts "Faker gem not found. Skipping synthetic data generation."
+  exit
+end
 
 PEPPER = ENV.fetch("DEV_EMAIL_HMAC_PEPPER", "dev-only-pepper-not-secret")
 
