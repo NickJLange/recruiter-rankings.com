@@ -19,13 +19,22 @@ fi
 
 # Defaults
 BACKUP_DIR="${BACKUP_DIR:-$HOME/Backups/recruiter-rankings}"
-RETENTION_DAYS=7
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-FILENAME="rr_prod_$TIMESTAMP.dump"
-FILEPATH="$BACKUP_DIR/$FILENAME"
+DAILY_DIR="$BACKUP_DIR/daily"
+MONTHLY_DIR="$BACKUP_DIR/monthly"
+YEARLY_DIR="$BACKUP_DIR/yearly"
 
-# Create backup directory if it doesn't exist
-mkdir -p "$BACKUP_DIR"
+RETENTION_DAILY=7
+RETENTION_MONTHLY=365
+RETENTION_YEARLY=730
+
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+DAY_OF_MONTH=$(date +%d)
+MONTH_OF_YEAR=$(date +%m)
+FILENAME="rr_prod_$TIMESTAMP.dump"
+FILEPATH="$DAILY_DIR/$FILENAME"
+
+# Create backup directories
+mkdir -p "$DAILY_DIR" "$MONTHLY_DIR" "$YEARLY_DIR"
 
 if [ -z "$DATABASE_URL" ]; then
   echo "Error: DATABASE_URL is not set. Please provide it in $ENV_FILE or as an environment variable."
@@ -35,13 +44,26 @@ fi
 echo "Starting backup of Render Postgres to $FILEPATH..."
 
 # Run pg_dump
-# -Fc: Custom format (compressed)
 if pg_dump "$DATABASE_URL" -Fc -f "$FILEPATH"; then
-  echo "Backup successful: $FILENAME"
+  echo "Daily backup successful: $FILENAME"
   
+  # Monthly rotation (1st of the month)
+  if [ "$DAY_OF_MONTH" == "01" ]; then
+    echo "Creating monthly backup..."
+    cp "$FILEPATH" "$MONTHLY_DIR/rr_monthly_$TIMESTAMP.dump"
+  fi
+
+  # Yearly rotation (Jan 1st)
+  if [ "$DAY_OF_MONTH" == "01" ] && [ "$MONTH_OF_YEAR" == "01" ]; then
+    echo "Creating yearly backup..."
+    cp "$FILEPATH" "$YEARLY_DIR/rr_yearly_$TIMESTAMP.dump"
+  fi
+
   # Retention cleanup
-  echo "Cleaning up backups older than $RETENTION_DAYS days..."
-  find "$BACKUP_DIR" -name "rr_prod_*.dump" -mtime +$RETENTION_DAYS -exec rm {} \;
+  echo "Cleaning up old backups..."
+  find "$DAILY_DIR" -name "rr_prod_*.dump" -mtime +$RETENTION_DAILY -delete
+  find "$MONTHLY_DIR" -name "rr_monthly_*.dump" -mtime +$RETENTION_MONTHLY -delete
+  find "$YEARLY_DIR" -name "rr_yearly_*.dump" -mtime +$RETENTION_YEARLY -delete
   echo "Cleanup complete."
 else
   echo "Error: Backup failed!"

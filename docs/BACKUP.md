@@ -1,69 +1,61 @@
 # Local Database Backup Guide
 
-This guide describes how to set up daily backups of your Render Postgres database to your local laptop.
+This guide describes how to set up daily backups of your Render Postgres database to your local laptop using a containerized approach.
+
+## Retention Policy
+
+The system uses a Grandfather-Father-Son (GFS) retention scheme:
+- **Daily**: Keeps the last 7 days of backups.
+- **Monthly**: Keeps the last 12 months (runs on the 1st of each month).
+- **Yearly**: Keeps the last 2 years (runs on Jan 1st).
+
+Backups are organized into `daily/`, `monthly/`, and `yearly/` subdirectories.
 
 ## Prerequisites
 
-1.  **PostgreSQL Client**: Ensure you have `pg_dump` installed locally.
-    - macOS (Homebrew): `brew install postgresql` or `brew install libpq`
-2.  **External Database URL**: Obtain the **External Database URL** from the Render Dashboard (Postgres instance -> Connect -> External Database URL).
+1.  **Docker or Podman**: Ensure you have a container engine installed.
+2.  **External Database URL**: Obtain the **External Database URL** from the Render Dashboard.
 
 ## Setup
 
 1.  **Configure Environment**:
-    Create a file at `scripts/.env.local` (this file is git-ignored) and add your connection string:
+    Create a file at `scripts/.env.local` (git-ignored):
     ```bash
     DATABASE_URL="postgres://user:pass@host.oregon-postgres.render.com/db_name"
     # Optional: override default backup directory
-    # BACKUP_DIR="/path/to/your/backups"
+    # BACKUP_DIR="/app/backups" 
     ```
 
-2.  **Make Script Executable**:
+2.  **Build the Image**:
     ```bash
-    chmod +x scripts/backup.sh
+    cd scripts
+    docker build -t rr-backup .
     ```
 
 ## Usage
 
-Run the backup manually:
+### Run Manually (One-time)
+You can run the backup manually via the container:
 ```bash
-./scripts/backup.sh
+docker run --rm \
+  --env-file scripts/.env.local \
+  -v ~/Backups/recruiter-rankings:/app/backups \
+  -e BACKUP_DIR=/app/backups \
+  rr-backup /app/backup.sh
 ```
 
-The script will:
-- Create the backup directory if it doesn't exist (default: `~/Backups/recruiter-rankings`).
-- Create a compressed `.dump` file with a timestamp.
-- Delete backups older than 7 days.
+### Run as a Background Service
+The container includes `cron` and is configured to run the backup daily at 2:00 AM.
+```bash
+docker run -d \
+  --name rr-backup-service \
+  --restart unless-stopped \
+  --env-file scripts/.env.local \
+  -v ~/Backups/recruiter-rankings:/app/backups \
+  -e BACKUP_DIR=/app/backups \
+  rr-backup
+```
 
-## Automation (Optional)
-
-### macOS (launchd)
-
-To automate this daily on macOS, you can create a `launchd` plist file.
-
-1.  Create `~/Library/LaunchAgents/com.recruiter-rankings.backup.plist`:
-    ```xml
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-    <plist version="1.0">
-    <dict>
-        <key>Label</key>
-        <string>com.recruiter-rankings.backup</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>/Users/your-username/dev/src/recruiter-rankings.com/scripts/backup.sh</string>
-        </array>
-        <key>StartCalendarInterval</key>
-        <dict>
-            <key>Hour</key>
-            <integer>2</integer>
-            <key>Minute</key>
-            <integer>0</integer>
-        </dict>
-    </dict>
-    </plist>
-    ```
-2.  Load the agent:
-    ```bash
-    launchctl load ~/Library/LaunchAgents/com.recruiter-rankings.backup.plist
-    ```
+## Security
+- The `.env.local` file contains sensitive credentials and is git-ignored.
+- Backups are stored on your local machine via volume mounts.
