@@ -1,0 +1,46 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  ci:
+    name: CI Verification
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4
+          bundler-cache: true
+          working-directory: web
+      - name: Install dependencies
+        run: |
+          cd web
+          bundle install
+      # Basic test run to verify the build isn't completely broken
+      # We skip full db tests as we don't have postgres service attached here yet
+      - name: Build Verification
+        run: |
+          cd web
+          # verifiying we can boot the app in test environment
+          RAILS_ENV=test bundle exec rails runner "puts 'App boots successfully'"
+
+  deploy:
+    name: Trigger Render Deploy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Sync Render Blueprint
+        if: ${{ secrets.RENDER_API_KEY && secrets.RENDER_BLUEPRINT_ID }}
+        run: |
+          curl -X POST "https://api.render.com/v1/blueprints/${{ secrets.RENDER_BLUEPRINT_ID }}/syncs" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -H "Content-Type: application/json"
+      - name: Skip Deploy Trigger
+        if: ${{ !secrets.RENDER_API_KEY || !secrets.RENDER_BLUEPRINT_ID }}
+        run: echo "Secrets RENDER_API_KEY and/or RENDER_BLUEPRINT_ID not set. Skipping manual trigger (Auto-Deploy may still work)."
