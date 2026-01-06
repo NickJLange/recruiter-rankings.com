@@ -11,6 +11,9 @@ gem "puma", ">= 5.0"
 # Rate limiting
 gem "rack-attack", "~> 6.7"
 
+# Active Storage variant processing
+gem "image_processing", "~> 1.2"
+
 gem "jekyll", ">1.0"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
