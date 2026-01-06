@@ -1,6 +1,12 @@
 # Development seed data for Recruiter Rankings (synthetic-only)
 # Safe to run multiple times; uses find_or_create_by!/upserts on unique keys.
 
+# Safety guard for production
+if Rails.env.production? && ENV["FORCE_SEED"] != "true"
+  puts "Skipping seeds in production. Set FORCE_SEED=true to override."
+  exit
+end
+
 require "securerandom"
 require "openssl"
 require "faker"

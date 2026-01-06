@@ -1,14 +1,22 @@
 services:
   - type: web
     name: recruiter-rankings
-    runtime: ruby
+    env: ruby
     plan: free
     rootDir: web
     autoDeploy: true
     branch: main
     healthCheckPath: /up
     region: oregon
-    buildCommand: './bin/render-build.sh'
+    buildCommand: |
+      # Build static marketing site
+      cd ../site
+      bundle install
+      bundle exec jekyll build --destination ../web/public
+      
+      # Build Rails application
+      cd ../web
+      ./bin/render-build.sh
     # preDeployCommand: "bundle exec rails db:migrate" # preDeployCommand only available on paid instance types
     startCommand: './bin/rails server'
     #preDeployCommand: bundle exec rails db:migrate
