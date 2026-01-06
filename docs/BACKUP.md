@@ -56,6 +56,22 @@ docker run -d \
   rr-backup
 ```
 
+## Testing & Verification
+
+You can verify the script's logic (directory creation, retention, rotations) without connecting to your real database by using the `MOCK_BACKUP` mode.
+
+1.  **Run a dry-run test**:
+    ```bash
+    mkdir -p ~/Backups/test-run
+    docker run --rm \
+      -e MOCK_BACKUP=true \
+      -e DATABASE_URL=dummy \
+      -v ~/Backups/test-run:/app/backups \
+      -e BACKUP_DIR=/app/backups \
+      rr-backup /app/backup.sh
+    ```
+    This will create a dummy `.dump` file in `~/Backups/test-run/daily` without calling `pg_dump`.
+
 ## Security
 - The `.env.local` file contains sensitive credentials and is git-ignored.
 - Backups are stored on your local machine via volume mounts.

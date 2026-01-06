@@ -44,7 +44,16 @@ fi
 echo "Starting backup of Render Postgres to $FILEPATH..."
 
 # Run pg_dump
-if pg_dump "$DATABASE_URL" -Fc -f "$FILEPATH"; then
+if [ "$MOCK_BACKUP" == "true" ]; then
+  echo "MOCK MODE: Skipping pg_dump, creating dummy file..."
+  touch "$FILEPATH"
+  SUCCESS=0
+else
+  pg_dump "$DATABASE_URL" -Fc -f "$FILEPATH"
+  SUCCESS=$?
+fi
+
+if [ $SUCCESS -eq 0 ]; then
   echo "Daily backup successful: $FILENAME"
   
   # Monthly rotation (1st of the month)
