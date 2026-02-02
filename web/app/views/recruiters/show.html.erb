@@ -1,6 +1,6 @@
-<% content_for :title, "#{@recruiter.name} — Recruiter Profile" %>
-<% content_for :meta_description, "Aggregated reviews and metrics for #{@recruiter.name}." %>
-<h1><%= @recruiter.name %></h1>
+<% content_for :title, "#{@recruiter.display_name(current_user)} — Recruiter Profile" %>
+<% content_for :meta_description, "Aggregated reviews and metrics for #{@recruiter.display_name(current_user)}." %>
+<h1><%= @recruiter.display_name(current_user) %></h1>
 <p><strong>Company:</strong> <% if @recruiter.company %><%= link_to @recruiter.company.name, company_path(@recruiter.company) %><% else %>—<% end %></p>
 <p><strong>Region:</strong> <%= @recruiter.region || "—" %></p>
 <p><strong>Verified:</strong> <%= @recruiter.verified_at ? @recruiter.verified_at.strftime("%Y-%m-%d") : "No" %></p>
@@ -8,9 +8,15 @@
 <section>
   <h2><%= t('recruiters.show.aggregates') %></h2>
   <p><strong><%= t('recruiters.show.average_overall') %>:</strong> <%= @avg_overall&.round(2) || "—" %> (<%= @reviews_count %> <%= t('recruiters.index.th.reviews') %>)</p>
-  <ul>
-    <% ReviewMetric::DIMENSIONS.each do |k, v| %>
-      <li><%= v.humanize %>: <%= (@dimension_averages[k.to_s]&.to_f&.round(2) || "—") %></li>
+  <ul style="list-style:none; padding:0;">
+    <% ReviewMetric::DIMENSIONS.each do |key, dimension_value| %>
+      <% avg = @dimensional_averages[dimension_value] %>
+      <% if avg %>
+        <li style="margin-bottom: 4px;">
+          <strong><%= key.to_s.humanize %>:</strong>
+          <%= avg.round(1) %> / 5.0
+        </li>
+      <% end %>
     <% end %>
   </ul>
 </section>
@@ -22,23 +28,54 @@
 </p>
 
 <section>
-  <h2><%= t('recruiters.show.recent_reviews') %></h2>
-  <% @reviews.each do |rev| %>
-    <article style="border:1px solid var(--border); padding:10px; margin-bottom:10px; background: var(--surface);">
-      <p><strong>Overall:</strong> <%= rev.overall_score %> — <em><%= rev.created_at.strftime("%Y-%m-%d") %></em></p>
-      <p class="review-text"><%= simple_format rev.text %></p>
-      <% if rev.review_responses.visible.exists? %>
-        <div style="margin-top:8px; padding:8px; border-left:3px solid var(--accent); background: transparent;">
-          <p style="margin:0 0 4px 0; color: var(--muted);"><strong>Right-of-reply</strong></p>
-          <% rev.review_responses.visible.each do |resp| %>
-            <p style="margin:0 0 8px 0;">
-              <%= simple_format resp.body %>
-              <small style="color: var(--muted);">— posted <%= time_ago_in_words(resp.created_at) %> ago</small>
-            </p>
+  <% if @can_view_details %>
+    <h2><%= t('recruiters.show.recent_reviews') %></h2>
+    <% @reviews.each do |rev| %>
+      <article style="border:1px solid var(--border); padding:10px; margin-bottom:10px; background: var(--surface);">
+<p><strong>Overall:</strong> <%= rev.rating %> — <em><%= rev.interaction.occurred_at&.strftime("%Y-%m-%d") %></em>
+        <% if rev.interaction.role&.formatted_compensation %>
+          <span style="margin-left: 10px; font-size: 0.9em; color: var(--muted);">
+            <%= rev.interaction.role.title %> (<%= rev.interaction.role.formatted_compensation %>)
+          </span>
+        <% end %>
+        </p>
+        <p class="review-text"><%= simple_format rev.body %></p>
+      </article>
+    <% end %>
+  <% else %>
+    <h2>Quarterly Performance (Median)</h2>
+    <div class="alert alert-info">
+      <p>Detailed reviews are available to the Recruiter Owner or Paid Users.</p>
+      <p>
+        <%= link_to "Claim this Profile", new_claim_identity_path(subject_type: 'recruiter', recruiter_slug: @recruiter.public_slug), class: "cta" %> 
+        or 
+        <%= link_to "Write a Review", new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug), class: "cta" %> 
+        to see more.
+      </p>
+    </div>
+    
+    <% if @quarterly_aggregates.any? %>
+      <table style="width:100%; border-collapse: collapse; margin-top: 16px;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--border);">
+            <th style="text-align:left; padding:8px;">Quarter</th>
+            <th style="text-align:center; padding:8px;">Reviews</th>
+            <th style="text-align:center; padding:8px;">Median Rating</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @quarterly_aggregates.each do |quarter, count, median| %>
+            <tr style="border-bottom: 1px solid var(--border);">
+              <td style="padding:8px;"><%= quarter&.strftime("%Y Q%q") || "Unknown" %></td>
+              <td style="text-align:center; padding:8px;"><%= count %></td>
+              <td style="text-align:center; padding:8px;"><%= median %> / 5</td>
+            </tr>
           <% end %>
-        </div>
-      <% end %>
-    </article>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="muted">No sufficient data for quarterly trends yet.</p>
+    <% end %>
   <% end %>
 </section>
 

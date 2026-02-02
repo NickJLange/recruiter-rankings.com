@@ -4,7 +4,7 @@ require "minitest/mock"
 class RegistrationFlowsTest < ActionDispatch::IntegrationTest
   setup do
     @company = Company.create!(name: "Cyberdyne Systems", region: "US")
-    @recruiter = Recruiter.create!(name: "Miles Dyson", company: @company, public_slug: "miles-dyson")
+    @recruiter = Recruiter.create!(name: "Miles Dyson", company: @company, public_slug: "A1B2C3D4")
   end
 
   test "recruiter claim flow" do
@@ -12,7 +12,7 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
     post "/claim_identity", params: {
       claim: {
         subject_type: "recruiter",
-        recruiter_slug: "miles-dyson",
+        recruiter_slug: "A1B2C3D4",
         linkedin_url: "https://linkedin.com/in/miles",
         email: "miles@example.com"
       }
@@ -40,7 +40,7 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
         linkedin_url: "https://linkedin.com/in/miles"
       }
 
-      assert_redirected_to recruiter_path("miles-dyson")
+      assert_redirected_to recruiter_path("A1B2C3D4")
       follow_redirect!
       assert_select ".alert-info", "Recruiter verified."
       
@@ -58,14 +58,14 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
 
     post "/reviews", params: {
       review: {
-        recruiter_slug: "miles-dyson",
+        recruiter_slug: "A1B2C3D4",
         overall_score: 5,
         text: "Great recruiter!",
         email: email
       }
     }
 
-    assert_redirected_to recruiter_path("miles-dyson")
+    assert_redirected_to recruiter_path("A1B2C3D4")
     
     # Verify user created
     # We need to calculate HMAC to find the user

@@ -2,13 +2,15 @@ class RecruitersController < ApplicationController
   def index
     threshold = public_min_reviews
 
-    aggregates = Review.where(status: "approved")
-      .group(:recruiter_id)
-      .select(:recruiter_id, "COUNT(*) AS reviews_count", "AVG(overall_score) AS avg_overall")
+    aggregates = Experience.where(status: "approved")
+      .joins(:interaction)
+      .group("interactions.recruiter_id")
+      .select("interactions.recruiter_id, COUNT(*) AS reviews_count, AVG(rating) AS avg_overall")
 
     scope = Recruiter
       .joins("INNER JOIN (#{aggregates.to_sql}) agg ON agg.recruiter_id = recruiters.id")
       .left_joins(:company)
+      .preload(:company)
       .where("agg.reviews_count >= ?", threshold)
 
     # Filters
@@ -58,35 +60,75 @@ class RecruitersController < ApplicationController
   end
 
   def show
-    @recruiter = Recruiter.find_by!(public_slug: params[:slug])
+    @recruiter = Recruiter.includes(:company).find_by!(public_slug: params[:slug])
+    
+    # Access Control
+    @can_view_details = current_user && (
+      current_user.admin? || 
+      current_user.paid? || 
+      current_user.owner_of_review?(@recruiter)
+    )
 
-    @reviews = @recruiter.reviews.where(status: "approved").order(created_at: :desc).limit(25)
+    # Base scope for approved experiences
+    base_scope = Experience.where(status: "approved")
+      .joins(:interaction)
+      .where(interactions: { recruiter_id: @recruiter.id })
 
-    # Overall aggregates
-    overall = @recruiter.reviews.where(status: "approved")
-      .pluck(Arel.sql("COUNT(*), AVG(overall_score)"))
-      .first || [0, nil]
+    # Overall aggregates (visible to all)
+    overall = base_scope.pluck(Arel.sql("COUNT(*), AVG(rating)")).first || [0, nil]
     @reviews_count = overall[0]
     @avg_overall = overall[1]&.to_f
 
-    # Dimension aggregates
-    dims = ReviewMetric.where(review_id: @recruiter.reviews.where(status: "approved"))
+    # Dimensional aggregates
+    @dimensional_averages = ReviewMetric
+      .joins(:experience)
+      .merge(base_scope)
       .group(:dimension)
-      .pluck(:dimension, Arel.sql("AVG(score)"))
-    @dimension_averages = dims.to_h
+      .average(:score)
+
+    if @can_view_details
+      # Load full reviews
+      @reviews = base_scope.order("interactions.occurred_at DESC").limit(50)
+    else
+      # Load quarterly aggregates only
+      # Postgres-specific median calculation
+      @quarterly_aggregates = base_scope
+        .group("DATE_TRUNC('quarter', interactions.occurred_at)")
+        .order(Arel.sql("DATE_TRUNC('quarter', interactions.occurred_at) DESC"))
+        .pluck(
+          Arel.sql("DATE_TRUNC('quarter', interactions.occurred_at) AS quarter"),
+          Arel.sql("COUNT(*) as count"),
+          Arel.sql("PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY rating) as median")
+        )
+    end
 
     respond_to do |format|
       format.html
       format.json do
-        render json: {
+        payload = {
           name: @recruiter.name,
           slug: @recruiter.public_slug,
           company: @recruiter.company&.name,
           region: @recruiter.region,
           reviews_count: @reviews_count,
           avg_overall: @avg_overall,
-          dimensions: @dimension_averages
+          dimensional_averages: @dimensional_averages
         }
+        
+        if @can_view_details
+          payload[:reviews] = @reviews.map { |r| 
+            {
+              id: r.id,
+              rating: r.rating,
+              body: r.body,
+              occurred_at: r.interaction.occurred_at
+            }
+          }
+        else
+          payload[:quarterly] = @quarterly_aggregates.map { |q, c, m| { quarter: q, count: c, median: m } }
+        end
+        
+        render json: payload
       end
     end
   end

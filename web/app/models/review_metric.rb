@@ -1,5 +1,5 @@
 class ReviewMetric < ApplicationRecord
-  belongs_to :review
+  belongs_to :experience
 
   DIMENSIONS = {
     responsiveness: "responsiveness",

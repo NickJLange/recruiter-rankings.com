@@ -1,0 +1,6 @@
+one:
+  name: "Alice Recruiter"
+  company: one
+  public_slug: "ABCDEF12"
+  region: "US"
+  email_hmac: "somehash"
