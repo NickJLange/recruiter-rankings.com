@@ -11,6 +11,9 @@ gem "puma", ">= 5.0"
 # Rate limiting
 gem "rack-attack", "~> 6.7"
 
+# Internationalization
+gem "rails-i18n"
+
 # Active Storage variant processing
 gem "image_processing", "~> 1.2"
 

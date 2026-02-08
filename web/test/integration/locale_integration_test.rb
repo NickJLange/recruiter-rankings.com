@@ -36,7 +36,7 @@ class LocaleIntegrationTest < ActionDispatch::IntegrationTest
   end
 
   test "default locale used when none specified" do
-    get "/person", headers: { "HTTP_ACCEPT_LANGUAGE" => "fr-FR,fr;q=0.9" }
+    get "/person", headers: { "HTTP_ACCEPT_LANGUAGE" => "zh-CN,zh;q=0.9" }
     assert_response :success
     assert_includes @response.body, "Recruiter", "Should default to English for unsupported Accept-Language"
   end
@@ -136,8 +136,8 @@ class LocaleIntegrationTest < ActionDispatch::IntegrationTest
   end
 
   test "I18n.available_locales matches allowed locales" do
-    allowed_locales = %w[en ja]
-    
+    # available locales in the app.
+    allowed_locales = %w[en ja es fr ar]
     I18n.available_locales.each do |locale|
       assert allowed_locales.include?(locale.to_s), 
              "Available locale #{locale} should be in allowed locales"

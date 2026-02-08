@@ -1,0 +1,76 @@
+---
+nav:
+  home: "Inicio"
+  about: "Acerca de"
+  policies: "Políticas"
+  recruiters: "Reclutadores"
+  companies: "Empresas"
+  approve: "Aprobar"
+  top_companies: "Mejores empresas"
+  locale_en: "EN"
+  locale_ja: "日本語"
+recruiters:
+  index:
+    title: "Mejores reclutadores"
+    subtitle: "Mostrando reclutadores con al menos %{count} reseñas aprobadas."
+    search: "Buscar"
+    company: "Empresa"
+    region: "Región"
+    per_page: "Por página"
+    filter: "Filtrar"
+    clear: "Limpiar"
+    th:
+      recruiter: "Reclutador"
+      company: "Empresa"
+      avg_overall: "Promedio general"
+      reviews: "Reseñas"
+  show:
+    aggregates: "Resumen"
+    average_overall: "Promedio general"
+    recent_reviews: "Reseñas recientes"
+    write_review: "Escribir una reseña"
+    claim_profile: "Reclamar este perfil"
+    right_of_reply: "Derecho de réplica"
+reviews:
+  new:
+    title_for: "Escribir una reseña para %{name}"
+    overall_score: "Puntuación general (1–5)"
+    your_experience: "Tu experiencia"
+    email_optional: "Correo electrónico (opcional; usado para deduplicación, no se muestra)"
+    submit: "Enviar reseña"
+admin:
+  reviews:
+    index:
+      title: "Cola de moderación"
+      approve: "Aprobar"
+      flag: "Marcar"
+      remove: "Eliminar"
+      post_response: "Publicar respuesta"
+      response_visible: "visible"
+      response_hidden: "oculta"
+claim_identity:
+  new:
+    title: "Reclamar identidad"
+    subject: "Sujeto"
+    recruiter: "Reclutador"
+    user: "Usuario"
+    recruiter_slug: "Slug del reclutador (para sujeto reclutador)"
+    linkedin_url: "URL de LinkedIn"
+    email_user: "Correo electrónico (para sujeto usuario)"
+    get_token: "Obtener token de verificación"
+  instructions:
+    title: "Instrucciones de verificación"
+    paste_instructions: "Pegue este token en su perfil de LinkedIn (Acerca de, Destacados o Sitio web). Asegúrese de que sea público/visible:"
+    after_save: "Después de guardar su perfil, haga clic en Verificar:"
+    verify: "Verificar"
+activerecord:
+  models:
+    user: "Usuario"
+    recruiter: "Reclutador"
+    company: "Empresa"
+    review: "Reseña"
+    review_metric: "Métrica de reseña"
+    identity_challenge: "Desafío de identidad"
+    takedown_request: "Solicitud de eliminación"
+    moderation_action: "Acción de moderación"
+    profile_claim: "Reclamación de perfil"

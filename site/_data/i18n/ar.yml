@@ -1,0 +1,76 @@
+---
+nav:
+  home: "الرئيسية"
+  about: "حول"
+  policies: "السياسات"
+  recruiters: "المجندون"
+  companies: "الشركات"
+  approve: "موافقة"
+  top_companies: "أفضل الشركات"
+  locale_en: "EN"
+  locale_ja: "日本語"
+recruiters:
+  index:
+    title: "أفضل المجندين"
+    subtitle: "عرض المجندين الذين لديهم %{count} مراجعات معتمدة على الأقل."
+    search: "بحث"
+    company: "شركة"
+    region: "المنطقة"
+    per_page: "لكل صفحة"
+    filter: "تصفية"
+    clear: "مسح"
+    th:
+      recruiter: "مجند"
+      company: "شركة"
+      avg_overall: "المعدل العام"
+      reviews: "المراجعات"
+  show:
+    aggregates: "الملخص"
+    average_overall: "المعدل العام"
+    recent_reviews: "المراجعات الأخيرة"
+    write_review: "كتابة مراجعة"
+    claim_profile: "المطالبة بهذا الملف الشخصي"
+    right_of_reply: "حق الرد"
+reviews:
+  new:
+    title_for: "كتابة مراجعة لـ %{name}"
+    overall_score: "الدرجة الإجمالية (1–5)"
+    your_experience: "تجربتك"
+    email_optional: "البريد الإلكتروني (اختياري؛ يُستخدم لمنع التكرار، لا يُعرض)"
+    submit: "إرسال المراجعة"
+admin:
+  reviews:
+    index:
+      title: "قائمة الإشراف"
+      approve: "موافقة"
+      flag: "تعليم"
+      remove: "إزالة"
+      post_response: "نشر الرد"
+      response_visible: "مرئي"
+      response_hidden: "مخفي"
+claim_identity:
+  new:
+    title: "المطالبة بالهوية"
+    subject: "الموضوع"
+    recruiter: "مجند"
+    user: "مستخدم"
+    recruiter_slug: "معرف المجند (لموضوع المجند)"
+    linkedin_url: "رابط LinkedIn"
+    email_user: "البريد الإلكتروني (لموضوع المستخدم)"
+    get_token: "الحصول على رمز التحقق"
+  instructions:
+    title: "تعليمات التحقق"
+    paste_instructions: "الصق هذا الرمز في ملفك الشخصي على LinkedIn (حول أو مميز أو موقع الويب). تأكد من أنه عام/مرئي:"
+    after_save: "بعد حفظ ملفك الشخصي، انقر على تحقق:"
+    verify: "تحقق"
+activerecord:
+  models:
+    user: "مستخدم"
+    recruiter: "مجند"
+    company: "شركة"
+    review: "مراجعة"
+    review_metric: "مقياس المراجعة"
+    identity_challenge: "تحدي الهوية"
+    takedown_request: "طلب إزالة"
+    moderation_action: "إجراء إشرافي"
+    profile_claim: "مطالبة بملف شخصي"

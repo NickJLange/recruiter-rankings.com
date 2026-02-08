@@ -92,3 +92,14 @@ en:
       paste_instructions: "Paste this token into your LinkedIn profile (About, Featured, or Website). Make sure it is public/visible:"
       after_save: "After saving your profile, click Verify:"
       verify: "Verify"
+  activerecord:
+    models:
+      user: "User"
+      recruiter: "Recruiter"
+      company: "Company"
+      review: "Review"
+      review_metric: "Review metric"
+      identity_challenge: "Identity challenge"
+      takedown_request: "Takedown request"
+      moderation_action: "Moderation action"
+      profile_claim: "Profile claim"
