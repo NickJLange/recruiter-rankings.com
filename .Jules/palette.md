@@ -17,3 +17,7 @@
 ## 2025-01-25 - Empty State Pattern & Card Usage
 **Learning:** The `.card` class provides a consistent container for "empty states" and other isolated content blocks, replacing ad-hoc inline styles.
 **Action:** When implementing empty states or highlighted content, prefer `class="card"` with minimal overrides (like padding/text-align) over full inline styling.
+
+## 2025-05-24 - Dynamic Character Counters for Textareas
+**Learning:** For `maxlength` constrained inputs, relying solely on browser validation provides poor UX as users may hit the limit unexpectedly. A dynamic character counter is essential for fields like reviews where verbose input is expected.
+**Action:** When adding `maxlength` to a textarea, always pair it with a visual counter (`aria-live` or `aria-describedby`) that updates via a simple script.
