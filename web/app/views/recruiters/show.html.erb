@@ -45,22 +45,34 @@
 
 <section>
   <h2><%= t('recruiters.show.recent_reviews') %></h2>
-  <% @reviews.each do |rev| %>
-    <article style="border:1px solid var(--border); padding:10px; margin-bottom:10px; background: var(--surface);">
-      <p><strong>Overall:</strong> <%= rev.overall_score %> — <em><%= rev.created_at.strftime("%Y-%m-%d") %></em></p>
-      <p class="review-text"><%= simple_format rev.text %></p>
-      <%# Performance: Use eager-loaded visible_review_responses to avoid N+1 queries %>
-      <% if rev.visible_review_responses.present? %>
-        <div style="margin-top:8px; padding:8px; border-left:3px solid var(--accent); background: transparent;">
-          <p style="margin:0 0 4px 0; color: var(--muted);"><strong>Right-of-reply</strong></p>
-          <% rev.visible_review_responses.each do |resp| %>
-            <p style="margin:0 0 8px 0;">
-              <%= simple_format resp.body %>
-              <small style="color: var(--muted);">— posted <%= time_ago_in_words(resp.created_at) %> ago</small>
-            </p>
-          <% end %>
-        </div>
-      <% end %>
-    </article>
+  <% if @reviews.any? %>
+    <% @reviews.each do |rev| %>
+      <article style="border:1px solid var(--border); padding:10px; margin-bottom:10px; background: var(--surface);">
+        <p><strong>Overall:</strong> <%= rev.overall_score %> — <em><%= rev.created_at.strftime("%Y-%m-%d") %></em></p>
+        <p class="review-text"><%= simple_format rev.text %></p>
+        <%# Performance: Use eager-loaded visible_review_responses to avoid N+1 queries %>
+        <% if rev.visible_review_responses.present? %>
+          <div style="margin-top:8px; padding:8px; border-left:3px solid var(--accent); background: transparent;">
+            <p style="margin:0 0 4px 0; color: var(--muted);"><strong>Right-of-reply</strong></p>
+            <% rev.visible_review_responses.each do |resp| %>
+              <p style="margin:0 0 8px 0;">
+                <%= simple_format resp.body %>
+                <small style="color: var(--muted);">— posted <%= time_ago_in_words(resp.created_at) %> ago</small>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+      </article>
+    <% end %>
+  <% else %>
+    <div class="card" style="padding: 32px; text-align: center; margin-top: 16px;">
+      <p class="muted" style="margin-bottom: 16px;"><%= t('recruiters.show.no_reviews') %></p>
+      <%= link_to t('recruiters.show.write_review'),
+          new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug),
+          class: "cta",
+          style: "margin-top: 0;",
+          aria: { label: t('reviews.new.title_for', name: @recruiter.name) }
+      %>
+    </div>
   <% end %>
 </section>

@@ -62,6 +62,7 @@ en:
       aggregates: "Aggregates"
       average_overall: "Average overall"
       recent_reviews: "Recent reviews"
+      no_reviews: "No reviews yet. Be the first to share your experience!"
       write_review: "Write a review"
       claim_profile: "Claim this profile"
       right_of_reply: "Right-of-reply"

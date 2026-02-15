@@ -32,6 +32,7 @@ ja:
       aggregates: "集計"
       average_overall: "平均スコア"
       recent_reviews: "最近のレビュー"
+      no_reviews: "まだレビューがありません。最初のレビューを書いてみましょう！"
       write_review: "レビューを書く"
       claim_profile: "プロフィールを申請"
       right_of_reply: "回答"
