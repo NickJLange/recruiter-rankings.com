@@ -58,10 +58,6 @@ class ApplicationController < ActionController::Base
     ActiveModel::Type::Boolean.new.cast(ENV.fetch("DEMO_AUTO_APPROVE", Rails.env.development?.to_s))
   end
 
-  def submission_email_hmac_pepper
-    ENV.fetch("SUBMISSION_EMAIL_HMAC_PEPPER", "demo-only-pepper-not-secret")
-  end
-
   def copy_overall_to_dimensions?
     ActiveModel::Type::Boolean.new.cast(ENV.fetch("SUBMISSION_COPY_OVERALL_TO_DIMENSIONS", "true"))
   end

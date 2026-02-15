@@ -49,15 +49,10 @@ class ReviewsController < ApplicationController
     params.require(:review).permit(:recruiter_slug, :overall_score, :text, :email)
   end
 
-  def hmac_email(email)
-    pepper = submission_email_hmac_pepper
-    OpenSSL::HMAC.hexdigest("SHA256", pepper, email)
-  end
-
   def find_or_create_user(email)
     email = email.to_s.strip
     email_to_hash = email.empty? ? "anon-#{SecureRandom.uuid}@example.com" : email
-    hmac = hmac_email(email_to_hash)
+    hmac = User.generate_email_hmac(email_to_hash)
     User.where(email_hmac: hmac).first_or_create! do |u|
       u.role = "candidate"
       u.email_kek_id = "demo"
