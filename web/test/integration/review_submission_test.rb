@@ -3,12 +3,12 @@ require "test_helper"
 class ReviewSubmissionTest < ActionDispatch::IntegrationTest
   setup do
     @company = Company.create!(name: "Massive Dynamic", region: "US")
-    @slug = "nina-sharp-#{SecureRandom.hex(4)}"
+    @slug = SecureRandom.hex(4).upcase
     @recruiter = Recruiter.create!(name: "Nina Sharp", company: @company, public_slug: @slug)
   end
 
   test "can submit a review" do
-    get "/recruiters/#{@slug}"
+    get "/person/#{@slug}"
     assert_response :success
 
     post "/reviews", params: {

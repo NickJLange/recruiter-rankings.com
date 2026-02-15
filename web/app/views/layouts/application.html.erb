@@ -26,6 +26,7 @@
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="shortcut icon" href="/favicon.ico">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app %>
@@ -48,19 +49,34 @@
       <nav class="container nav">
         <a class="brand" href="/">Recruiter Rankings</a>
         <div class="nav-links">
-          <a href="/"><%= t('nav.home') %></a>
+          <a href="/search"><%= t('nav.search', default: 'Search') %></a>
+          <a href="/companies?type=recruiting">Recruiting Companies</a>
+          <a href="/companies?type=hiring">Hiring Companies</a>
           <a href="/about"><%= t('nav.about') %></a>
-          <a href="/policies"><%= t('nav.policies') %></a>
-          <a href="/recruiters"><%= t('nav.recruiters') %></a>
-          <a href="/companies"><%= t('nav.companies', default: 'Companies') %></a>
-          <a href="/admin/reviews"><%= t('nav.approve') %></a>
-          <a href="<%= switch_locale_to(I18n.locale == :ja ? 'en' : 'ja') %>"><%= I18n.locale == :ja ? t('nav.locale_en') : t('nav.locale_ja') %></a>
-          <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme"></button>
+          <a href="/admin">Moderator Dashboard</a>
+          <a href="/identity_verifications/new">Register / Verify</a>
+          <a href="/reviews/new" class="nav-btn">Share a Review</a>
+          
+          <% if current_user %>
+            <span style="margin-left:10px; font-size:0.9em; color:#fff;">
+              Logged in as <%= current_user.role.humanize %>
+              <% if current_user.paid? %> (Paid)<% end %>
+              <% if Rails.env.development? %>
+                [<%= link_to "Logout", logout_path, method: :delete, style: "color:#fff; text-decoration:underline;" %>]
+              <% end %>
+            </span>
+          <% elsif Rails.env.development? || Rails.env.test? %>
+             <a href="<%= login_path %>" style="color:#aaf;">Dev Login</a>
+          <% end %>
         </div>
       </nav>
       <div class="container" style="padding-bottom:8px;">
         <small class="muted"><%= t('nav.top_companies', default: 'Top companies') %>:</small>
-        <ul id="top-companies-nav" style="display:inline-flex; gap:10px; list-style:none; margin:0 0 0 8px; padding:0;"></ul>
+        <ul id="top-companies-nav" style="display:inline-flex; gap:10px; list-style:none; margin:0 0 0 8px; padding:0;">
+          <% (@top_companies || []).each do |company| %>
+            <li><%= link_to company.name, company_path(company) %></li>
+          <% end %>
+        </ul>
       </div>
     </header>
 
@@ -77,18 +93,6 @@
       <p>© <%= Time.current.year %> Recruiter Rankings. All rights reserved.</p>
     </footer>
     <script src="/assets/theme.js"></script>
-    <script>
-      (function(){
-        fetch('/companies.json?per=5').then(function(r){return r.json()}).then(function(items){
-          var ul = document.getElementById('top-companies-nav'); if(!ul) return;
-          ul.innerHTML='';
-          items.slice(0,5).forEach(function(c){
-            var li=document.createElement('li');
-            var a=document.createElement('a'); a.href='/companies/'+c.id; a.textContent=c.name; li.appendChild(a);
-            ul.appendChild(li);
-          });
-        }).catch(function(){});
-      })();
-    </script>
+
   </body>
 </html>

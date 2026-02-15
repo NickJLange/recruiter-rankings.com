@@ -1,3 +1,4 @@
+---
 nav:
   home: Home
   about: About
@@ -5,16 +6,72 @@ nav:
   recruiters: Recruiters
   companies: Companies
   approve: Approve
+  top_companies: Top companies
   locale_en: EN
   locale_ja: 日本語
-  top_companies: Top companies
-pages:
-  home:
-    title: Recruiter Rankings — De‑identified recruiter quality signals
-    description: "Improve the recruiter–candidate experience by publishing standardized quality signals with a safe right‑of‑reply."
-  about:
-    title: About — Recruiter Rankings
-    description: "Learn how Recruiter Rankings works: users, identity verification, policies, and roadmap."
-  policies:
-    title: Policies — Recruiter Rankings
-    description: "Right-of-reply, takedown policy, and compliance details for the POC."
+recruiters:
+  index:
+    title: Top Recruiters
+    subtitle: Showing recruiters with at least %{count} approved reviews.
+    search: Search
+    company: Company
+    region: Region
+    per_page: Per page
+    filter: Filter
+    clear: Clear
+    th:
+      recruiter: Recruiter
+      company: Company
+      avg_overall: Avg Overall
+      reviews: Reviews
+  show:
+    aggregates: Aggregates
+    average_overall: Average overall
+    recent_reviews: Recent reviews
+    write_review: Write a review
+    claim_profile: Claim this profile
+    right_of_reply: Right-of-reply
+reviews:
+  new:
+    title_for: Write a review for %{name}
+    overall_score: Overall score (1–5)
+    your_experience: Your experience
+    email_optional: Email (optional; used for dedupe, not shown)
+    submit: Submit review
+admin:
+  reviews:
+    index:
+      title: Moderation Queue
+      approve: Approve
+      flag: Flag
+      remove: Remove
+      post_response: Post response
+      response_visible: visible
+      response_hidden: hidden
+claim_identity:
+  new:
+    title: Claim identity
+    subject: Subject
+    recruiter: Recruiter
+    user: User
+    recruiter_slug: Recruiter slug (for recruiter subject)
+    linkedin_url: LinkedIn URL
+    email_user: Email (for user subject)
+    get_token: Get verification token
+  instructions:
+    title: Verification instructions
+    paste_instructions: 'Paste this token into your LinkedIn profile (About, Featured,
+      or Website). Make sure it is public/visible:'
+    after_save: 'After saving your profile, click Verify:'
+    verify: Verify
+activerecord:
+  models:
+    user: "User"
+    recruiter: "Recruiter"
+    company: "Company"
+    review: "Review"
+    review_metric: "Review metric"
+    identity_challenge: "Identity challenge"
+    takedown_request: "Takedown request"
+    moderation_action: "Moderation action"
+    profile_claim: "Profile claim"

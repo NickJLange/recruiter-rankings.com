@@ -11,13 +11,24 @@ gem "puma", ">= 5.0"
 # Rate limiting
 gem "rack-attack", "~> 6.7"
 
+# Internationalization
+gem "rails-i18n"
+
 # Active Storage variant processing
 gem "image_processing", "~> 1.2"
 
 gem "jekyll", ">1.0"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
+# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
+
+# Payment Processing
+gem "pay", "~> 8.0"
+gem "paddle", "~> 2.0"
+
+# Backup Storage
+gem "aws-sdk-s3", "~> 1.120"
 
 group :development, :test do
   # Load environment variables from .env file

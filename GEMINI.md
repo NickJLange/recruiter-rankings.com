@@ -1,3 +1,29 @@
+
+# AI Agent Guidelines
+
+This file serves as a guide for AI agents working on the `recruiter-rankings.com` repository.
+
+## Repository Structure
+
+- `web/`: Ruby on Rails application (dynamic content, admin, API).
+- `site/`: Jekyll static site (marketing pages).
+- `AGENTS.md`: Comprehensive developer guide and project overview.
+- `gameplan.md`: Technical design and roadmap.
+
+## Key Workflows
+
+### 1. Code Changes
+- Always verify changes locally before committing.
+- For `web/`: Run `bin/dev` to start the Rails server. Run `rails test` for tests.
+- For `site/`: Run `bundle exec jekyll build` to verify the static site builds correctly.
+
+### 2. Documentation
+- Keep `GEMINI.md` up to date with major architectural changes.
+- Update `README.md` if high-level project information changes.
+
+### 3. Task Management
+- Use `task.md` to track progress on complex tasks.
+- Create `implementation_plan.md` for significant changes requiring user approval.
 # GEMINI.md
 
 This file provides guidance to Gemini when working with code in this repository.
@@ -22,7 +48,9 @@ Recruiter-Rankings.com is a platform for de-identified recruiter quality signals
 ### Data Model Core Entities
 - **Users**: Candidates, recruiters, moderators, admins with role-based access
 - **Recruiters**: Public profiles with company affiliations, verified via LinkedIn or email
-- **Reviews**: Star ratings (1-5) across multiple dimensions with moderation workflow
+- **Interactions**: Represents a verified professional interaction between a User and a Recruiter (replaces `Review` ownership).
+- **Experiences**: qualitative feedback (rating, body) linked to an Interaction (formerly `Review`).
+- **Reviews** (Deprecated): Legacy table, migrated to Interaction/Experience.
 - **Companies**: Size-bucketed to protect small companies (<50 employees = "Small company")
 - **Identity Challenges**: Token-based verification system for LinkedIn/email validation
 

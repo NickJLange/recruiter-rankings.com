@@ -28,7 +28,19 @@ DIMENSIONS = %w[
   feedback_quality
   professionalism_respect
   job_match_quality
+  professionalism_respect
+  job_match_quality
 ].freeze
+
+job_titles = [
+  "Software Engineer",
+  "Senior Software Engineer",
+  "Product Manager",
+  "Engineering Manager",
+  "Product Designer",
+  "Data Scientist",
+  "Solutions Architect"
+]
 
 # Helpers
 module SeedHelpers
@@ -43,8 +55,13 @@ module SeedHelpers
   end
 
   def metric_value
-    # Skewed distribution: mostly 3-5, occasional 1-2
     (rand * 10 > 2) ? rand(3..5) : rand(1..2)
+  end
+
+  def random_comp
+    min = (rand(80..220) * 1000)
+    max = min + (rand(10..50) * 1000)
+    [min, max]
   end
 end
 
@@ -53,7 +70,6 @@ include SeedHelpers
 puts "Seeding synthetic data with Faker..."
 
 # 1. Companies
-# Create a mix of small, medium, large companies
 companies = []
 20.times do
   name = Faker::Company.unique.name
@@ -68,25 +84,23 @@ companies = []
 end
 
 # 2. Recruiters
-# Create 50 recruiters distributed across companies
 recruiters = []
 50.times do
   name = Faker::Name.unique.name
-  slug = slugify(name)
+  slug = SecureRandom.hex(4).upcase
   company = companies.sample
   
   recruiters << Recruiter.where(public_slug: slug).first_or_create!(
     name: name,
     company: company,
     region: company.region,
-    verified_at: (rand > 0.7 ? Time.now : nil), # 30% verified
+    verified_at: (rand > 0.7 ? Time.now : nil),
     email_hmac: (rand > 0.5 ? hmac_email("#{slug}@example.com") : nil)
   )
 end
 
-# 3. Users (Candidates & Staff)
+# 3. Users
 users = []
-# Fixed demo users
 fixed_users = [
   { email: "alice@example.com", role: "candidate" },
   { email: "bob@example.com", role: "candidate" },
@@ -102,7 +116,6 @@ fixed_users.each do |u|
   )
 end
 
-# Random candidates
 30.times do
   email = Faker::Internet.unique.email
   users << User.where(email_hmac: hmac_email(email)).first_or_create!(
@@ -112,49 +125,95 @@ end
   )
 end
 
-# 4. Reviews
-# Generate ~200 reviews
-review_statuses = ["approved"] * 8 + ["pending"] * 1 + ["flagged"] * 1 # Mostly approved
+# 4. Interactions
+puts "Generating interactions..."
 
-200.times do
-  recruiter = recruiters.sample
-  user = users.select { |u| u.role == "candidate" }.sample
-  
-  # Skip if this user already reviewed this recruiter (simple uniqueness check)
-  next if Review.exists?(user: user, recruiter: recruiter)
-
-  overall = (rand * 10 > 1) ? rand(3..5) : rand(1..2) # Mostly positive
-  status = review_statuses.sample
-  
-  # Varied text length
-  text = if rand > 0.8
-           Faker::Lorem.paragraphs(number: 3).join("\n\n") # Long review
-         elsif rand > 0.3
-           Faker::Lorem.paragraph # Medium review
-         else
-           Faker::Lorem.sentence # Short review
-         end
-
-  review = Review.create!(
-    user: user,
-    recruiter: recruiter,
-    company: recruiter.company,
-    overall_score: overall,
-    text: text,
-    status: status,
-    created_at: Faker::Time.backward(days: 365)
-  )
-
-  # Metrics
-  # Randomly skip some dimensions to test partial data
-  DIMENSIONS.each do |dim|
-    next if rand > 0.9 # 10% chance to miss a metric
-    ReviewMetric.create!(
-      review: review,
-      dimension: dim,
-      score: metric_value
+recruiters.first(10).each do |recruiter|
+  7.times do
+    target = users.sample
+    occurred = rand(1..24).months.ago
+    target_company = (companies - [recruiter.company]).sample || companies.first
+    
+    c_min, c_max = random_comp
+    role = Role.create!(
+      title: job_titles.sample,
+      recruiting_company: recruiter.company,
+      target_company: target_company,
+      min_compensation: c_min,
+      max_compensation: c_max,
+      posted_date: rand(1..60).days.ago,
+      description: Faker::Lorem.paragraph
     )
+
+    i = Interaction.create!(
+      recruiter: recruiter,
+      target: target,
+      occurred_at: occurred,
+      status: "approved",
+      role: role
+    )
+
+    exp = Experience.create!(
+      interaction: i,
+      rating: rand(3..5),
+      body: Faker::Lorem.paragraph(sentence_count: 3),
+      status: "approved",
+      would_recommend: true
+    )
+
+    ReviewMetric::DIMENSIONS.values.sample(3).each do |dim|
+      ReviewMetric.create!(
+        experience: exp,
+        dimension: dim,
+        score: rand(3..5)
+      )
+    end
   end
 end
 
-puts "Seed complete: #{Company.count} companies, #{Recruiter.count} recruiters, #{User.count} users, #{Review.count} reviews."
+100.times do
+  recruiter = recruiters.drop(10).sample
+  user = users.sample
+  next if Interaction.exists?(target: user, recruiter: recruiter)
+
+  target_company = (companies - [recruiter.company]).sample || companies.first
+  c_min, c_max = random_comp
+  
+  role = Role.create!(
+    title: job_titles.sample,
+    recruiting_company: recruiter.company,
+    target_company: target_company,
+    min_compensation: c_min,
+    max_compensation: c_max,
+    posted_date: rand(1..60).days.ago
+  )
+
+  status = (rand > 0.1) ? "approved" : "pending"
+  i = Interaction.create!(
+    recruiter: recruiter,
+    target: user,
+    occurred_at: rand(1..12).months.ago,
+    status: status,
+    role: role
+  )
+
+  exp = Experience.create!(
+    interaction: i,
+    rating: rand(1..5),
+    body: Faker::Lorem.sentence,
+    status: status,
+    would_recommend: rand > 0.5
+  )
+
+  if status == "approved"
+    ReviewMetric::DIMENSIONS.values.sample(2).each do |dim|
+      ReviewMetric.create!(
+        experience: exp,
+        dimension: dim,
+        score: rand(1..5)
+      )
+    end
+  end
+end
+
+puts "Seed complete: #{Company.count} companies, #{Recruiter.count} recruiters, #{User.count} users, #{Interaction.count} interactions."

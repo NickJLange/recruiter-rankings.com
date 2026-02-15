@@ -1,0 +1,76 @@
+---
+nav:
+  home: "Accueil"
+  about: "À propos"
+  policies: "Règlement"
+  recruiters: "Recruteurs"
+  companies: "Entreprises"
+  approve: "Approuver"
+  top_companies: "Meilleures entreprises"
+  locale_en: "EN"
+  locale_ja: "日本語"
+recruiters:
+  index:
+    title: "Meilleurs recruteurs"
+    subtitle: "Affichage des recruteurs avec au moins %{count} avis approuvés."
+    search: "Rechercher"
+    company: "Entreprise"
+    region: "Région"
+    per_page: "Par page"
+    filter: "Filtrer"
+    clear: "Effacer"
+    th:
+      recruiter: "Recruteur"
+      company: "Entreprise"
+      avg_overall: "Moyenne générale"
+      reviews: "Avis"
+  show:
+    aggregates: "Résumé"
+    average_overall: "Moyenne générale"
+    recent_reviews: "Avis récents"
+    write_review: "Rédiger un avis"
+    claim_profile: "Revendiquer ce profil"
+    right_of_reply: "Droit de réponse"
+reviews:
+  new:
+    title_for: "Rédiger un avis pour %{name}"
+    overall_score: "Note globale (1–5)"
+    your_experience: "Votre expérience"
+    email_optional: "E-mail (facultatif ; utilisé pour la déduplication, non affiché)"
+    submit: "Soumettre l'avis"
+admin:
+  reviews:
+    index:
+      title: "File de modération"
+      approve: "Approuver"
+      flag: "Signaler"
+      remove: "Supprimer"
+      post_response: "Publier la réponse"
+      response_visible: "visible"
+      response_hidden: "masquée"
+claim_identity:
+  new:
+    title: "Revendiquer une identité"
+    subject: "Sujet"
+    recruiter: "Recruteur"
+    user: "Utilisateur"
+    recruiter_slug: "Slug du recruteur (pour sujet recruteur)"
+    linkedin_url: "URL LinkedIn"
+    email_user: "E-mail (pour sujet utilisateur)"
+    get_token: "Obtenir le jeton de vérification"
+  instructions:
+    title: "Instructions de vérification"
+    paste_instructions: "Collez ce jeton dans votre profil LinkedIn (À propos, En vedette ou Site web). Assurez-vous qu'il est public/visible :"
+    after_save: "Après avoir enregistré votre profil, cliquez sur Vérifier :"
+    verify: "Vérifier"
+activerecord:
+  models:
+    user: "Utilisateur"
+    recruiter: "Recruteur"
+    company: "Entreprise"
+    review: "Avis"
+    review_metric: "Métrique d'avis"
+    identity_challenge: "Défi d'identité"
+    takedown_request: "Demande de suppression"
+    moderation_action: "Action de modération"
+    profile_claim: "Revendication de profil"
