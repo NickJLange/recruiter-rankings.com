@@ -22,6 +22,7 @@ ja:
       per_page: "件数"
       filter: "絞り込み"
       clear: "クリア"
+      no_results: "条件に一致するリクルーターは見つかりませんでした。"
       clear_filters: "フィルターをクリア"
       th:
         recruiter: "リクルーター"
