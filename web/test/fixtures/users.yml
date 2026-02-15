@@ -1,0 +1,4 @@
+one:
+  role: "candidate"
+  email_hmac: "fixture_user_hmac"
+  public_slug: "USR00001"

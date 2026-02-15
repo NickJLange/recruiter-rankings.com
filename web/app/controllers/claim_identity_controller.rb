@@ -26,9 +26,7 @@ class ClaimIdentityController < ApplicationController
     challenge = IdentityChallenge.find(params[:challenge_id])
     
     # Verify logic (simplified for test pass)
-    # The test mocks LinkedInFetcher.
-    fetcher = LinkedInFetcher.new
-    content = fetcher.fetch(params[:linkedin_url])
+    content = linkedin_fetcher.fetch(params[:linkedin_url])
     
     # Check if token is in content (Test mock returns content with token)
     expected_token = "RR-VERIFY-#{challenge.token_hash}"
@@ -40,5 +38,11 @@ class ClaimIdentityController < ApplicationController
     else
       redirect_to new_claim_identity_path, alert: "Verification failed."
     end
+  end
+
+  private
+
+  def linkedin_fetcher
+    @linkedin_fetcher ||= LinkedinFetcher.new
   end
 end

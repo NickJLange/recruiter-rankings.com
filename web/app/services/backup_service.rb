@@ -21,23 +21,28 @@ class BackupService
     temp_file = Rails.root.join('tmp', filename)
 
     begin
-      # Use pg_dump and pipe to gzip
-      dump_command = "pg_dump \"#{connection_string}\" | gzip > #{temp_file}"
-      
-      stdout, stderr, status = Open3.capture3(dump_command)
-      
-      unless status.success?
-        raise BackupError, "pg_dump failed: #{stderr}"
+      # Use pg_dump piped to gzip — array-form avoids shell injection
+      Open3.pipeline_r(
+        ["pg_dump", connection_string],
+        ["gzip"]
+      ) do |output, wait_threads|
+        File.open(temp_file.to_s, "wb") { |f| IO.copy_stream(output, f) }
+        statuses = wait_threads.map(&:value)
+        unless statuses.all?(&:success?)
+          raise BackupError, "pg_dump/gzip pipeline failed"
+        end
       end
 
-      # Encrypt the file
+      # Encrypt the file — array-form avoids shell injection
       encryption_key = ENV['BACKUP_ENCRYPTION_KEY']
       if encryption_key.present?
         encrypted_file = "#{temp_file}.enc"
-        encrypt_command = "openssl enc -aes-256-cbc -salt -in #{temp_file} -out #{encrypted_file} -k \"#{encryption_key}\""
-        
-        stdout, stderr, status = Open3.capture3(encrypt_command)
-        
+        _stdout, stderr, status = Open3.capture3(
+          "openssl", "enc", "-aes-256-cbc", "-salt", "-pbkdf2",
+          "-in", temp_file.to_s, "-out", encrypted_file.to_s,
+          "-k", encryption_key
+        )
+
         unless status.success?
           raise BackupError, "Encryption failed: #{stderr}"
         end

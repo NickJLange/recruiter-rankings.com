@@ -7,7 +7,7 @@ module Admin
     def index
       @statuses = params[:statuses].present? ? params[:statuses].split(",") : ["pending", "flagged"]
       @reviews = Review.where(status: @statuses)
-        .includes(:recruiter, :company)
+        .includes(:recruiter, :company, :review_responses)
         .order(created_at: :desc)
         .limit((params[:limit] || 100).to_i)
     end

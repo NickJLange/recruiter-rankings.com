@@ -16,35 +16,45 @@ class BackupServiceTest < ActiveSupport::TestCase
   end
 
   test "perform executes pg_dump, encrypts, and uploads" do
-    db_info = { 
-      'name' => 'main-db', 
-      'connectionInfo' => { 'externalConnectionString' => 'postgres://user:pass@host:5432/db' } 
+    db_info = {
+      'name' => 'main-db',
+      'connectionInfo' => { 'externalConnectionString' => 'postgres://user:pass@host:5432/db' }
     }
     @render_client.expect :find_database_by_name, db_info, ['main-db']
 
-    # Mocking Open3.capture3
-    stub_capture3 = ->(cmd) {
-      if cmd.include?('pg_dump')
-        path = cmd.split('>').last.strip
-        File.write(path, "fake dump")
-      elsif cmd.include?('openssl')
-        out_path = cmd.match(/-out ([^\s]+)/)[1]
-        File.write(out_path, "fake encrypted")
-      end
+    # Stub Open3.pipeline_r for the pg_dump | gzip step
+    stub_pipeline_r = ->(*_commands, &block) {
+      # Create a fake IO that yields compressed content
+      read_io, write_io = IO.pipe
+      write_io.write("fake gzipped dump")
+      write_io.close
+      wait_threads = [OpenStruct.new(value: OpenStruct.new(success?: true)),
+                      OpenStruct.new(value: OpenStruct.new(success?: true))]
+      block.call(read_io, wait_threads)
+      read_io.close unless read_io.closed?
+    }
+
+    # Stub Open3.capture3 for the openssl encryption step (array-form)
+    stub_capture3 = ->(*args) {
+      # Find the output file from the -out argument
+      out_idx = args.index("-out")
+      out_path = args[out_idx + 1] if out_idx
+      File.write(out_path, "fake encrypted") if out_path
       ["", "", OpenStruct.new(success?: true)]
     }
 
-    Open3.stub :capture3, stub_capture3 do
-      FileUtils.stub :rm, nil do
-        # Stub BackupMailer to avoid background job issues in unit test
-        mock_mail = Minitest::Mock.new
-        mock_mail.expect :deliver_later, nil
-        
-        BackupMailer.stub :success_notification, mock_mail do
-          result = @service.perform(db_name: 'main-db')
-          assert_equal :success, result[:status]
-          assert result[:filename].end_with?('.sql.gz.enc')
-          assert File.exist?(result[:storage_path])
+    Open3.stub :pipeline_r, stub_pipeline_r do
+      Open3.stub :capture3, stub_capture3 do
+        FileUtils.stub :rm, nil do
+          mock_mail = Minitest::Mock.new
+          mock_mail.expect :deliver_later, nil
+
+          BackupMailer.stub :success_notification, mock_mail do
+            result = @service.perform(db_name: 'main-db')
+            assert_equal :success, result[:status]
+            assert result[:filename].end_with?('.sql.gz.enc')
+            assert File.exist?(result[:storage_path])
+          end
         end
       end
     end
