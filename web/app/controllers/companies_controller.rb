@@ -50,7 +50,9 @@ class CompaniesController < ApplicationController
     @avg_overall = overall[1]&.to_f
 
     # Recruiters under this company with aggregates
-    aggregates = Review.where(status: "approved").group(:recruiter_id).select(:recruiter_id, "COUNT(*) AS reviews_count", "AVG(overall_score) AS avg_overall")
+    aggregates = Review.where(status: "approved", recruiter_id: Recruiter.where(company: @company).select(:id))
+      .group(:recruiter_id)
+      .select(:recruiter_id, "COUNT(*) AS reviews_count", "AVG(overall_score) AS avg_overall")
     @recruiters = Recruiter.where(company: @company)
       .joins("LEFT JOIN (#{aggregates.to_sql}) agg ON agg.recruiter_id = recruiters.id")
       .select("recruiters.*, COALESCE(agg.reviews_count, 0) AS reviews_count, agg.avg_overall")
