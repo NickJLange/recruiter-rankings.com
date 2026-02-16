@@ -1,11 +1,17 @@
 class ApplicationController < ActionController::Base
+  include AccessControlHelper
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
   before_action :set_locale
-  helper_method :public_min_reviews, :demo_auto_approve?, :submission_email_hmac_pepper, :copy_overall_to_dimensions?, :canonical_url, :public_per_page, :public_max_per_page, :switch_locale_to
+  helper_method :current_user, :public_min_reviews, :demo_auto_approve?, :submission_email_hmac_pepper, :copy_overall_to_dimensions?, :canonical_url, :public_per_page, :public_max_per_page, :switch_locale_to, :can_view_details?
 
   private
+
+  def current_user
+    @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
+  end
 
   def set_locale
     # priority: params[:locale] or params[:local] -> cookie -> Accept-Language -> default

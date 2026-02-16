@@ -1,6 +1,5 @@
 module Admin
-  class ReviewsController < ApplicationController
-    before_action :require_moderator_auth
+  class ReviewsController < BaseController
     before_action :set_review, only: [:approve, :flag, :remove]
 
     # List reviews to moderate (pending + flagged by default)
@@ -35,19 +34,6 @@ module Admin
 
     def set_review
       @review = Review.find(params[:id])
-    end
-
-    def current_moderator_actor
-      User.find_by(role: "moderator")
-    end
-
-    def require_moderator_auth
-      expected_user = ENV["DEMO_MOD_USER"].presence || "mod"
-      expected_pass = ENV["DEMO_MOD_PASSWORD"].presence || "mod"
-      authenticate_or_request_with_http_basic("Moderation") do |u, p|
-        ActiveSupport::SecurityUtils.secure_compare(u, expected_user) &&
-          ActiveSupport::SecurityUtils.secure_compare(p, expected_pass)
-      end
     end
 
     # CSRF: our forms include tokens; for API-style PATCH via curl, you can disable below (kept enabled for demo UI)

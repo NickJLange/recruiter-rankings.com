@@ -1,10 +1,7 @@
 class CompaniesController < ApplicationController
   def index
     threshold = public_min_reviews
-    aggregates = Experience.where(status: "approved")
-      .joins(interaction: :recruiter)
-      .group("recruiters.company_id")
-      .select("recruiters.company_id as company_id, COUNT(*) AS reviews_count, AVG(rating) AS avg_overall")
+    aggregates = Experience.approved_aggregates_by_company
 
     scope = Company
       .joins("INNER JOIN (#{aggregates.to_sql}) agg ON agg.company_id = companies.id")
@@ -67,10 +64,7 @@ class CompaniesController < ApplicationController
     # Recruiters under this company with aggregates
     # Recruiters under this company with aggregates
     if can_view_details?
-      aggregates = Experience.where(status: "approved")
-        .joins(:interaction)
-        .group("interactions.recruiter_id")
-        .select("interactions.recruiter_id, COUNT(*) AS reviews_count, AVG(rating) AS avg_overall")
+      aggregates = Experience.approved_aggregates_by_recruiter
 
       @recruiters = Recruiter.where(company: @company)
         .joins("LEFT JOIN (#{aggregates.to_sql}) agg ON agg.recruiter_id = recruiters.id")
@@ -119,12 +113,4 @@ class CompaniesController < ApplicationController
   end
 
   private
-
-  def can_view_details?
-    return true if current_user&.admin?
-    return true if current_user&.paid?
-    # TODO: Add logic for 'owner_of_review?' if checking specific recruiter
-    false
-  end
-  helper_method :can_view_details?
 end

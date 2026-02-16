@@ -51,28 +51,8 @@ class ReviewsController < ApplicationController
     params.require(:review).permit(:recruiter_slug, :overall_score, :text, :email)
   end
 
-  def hmac_email(email)
-    pepper = submission_email_hmac_pepper
-    OpenSSL::HMAC.hexdigest("SHA256", pepper, email)
-  end
-
   def find_or_create_user(email)
-    email = email.to_s.strip
-    email_to_hash = email.empty? ? "anon-#{SecureRandom.uuid}@example.com" : email
-    hmac = hmac_email(email_to_hash)
-    User.where(email_hmac: hmac).first_or_create! do |u|
-      u.role = "candidate"
-      u.email_kek_id = "demo"
-      u.linked_in_url = nil
-    end
-  end
-
-  def demo_auto_approve?
-    super
-  end
-
-  def copy_overall_to_dimensions?
-    super
+    EmailIdentityService.new(pepper: submission_email_hmac_pepper).find_or_create_user(email)
   end
 end
 

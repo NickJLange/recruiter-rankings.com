@@ -2,10 +2,7 @@ class RecruitersController < ApplicationController
   def index
     threshold = public_min_reviews
 
-    aggregates = Experience.where(status: "approved")
-      .joins(:interaction)
-      .group("interactions.recruiter_id")
-      .select("interactions.recruiter_id, COUNT(*) AS reviews_count, AVG(rating) AS avg_overall")
+    aggregates = Experience.approved_aggregates_by_recruiter
 
     scope = Recruiter
       .joins("INNER JOIN (#{aggregates.to_sql}) agg ON agg.recruiter_id = recruiters.id")
@@ -63,11 +60,7 @@ class RecruitersController < ApplicationController
     @recruiter = Recruiter.includes(:company).find_by!(public_slug: params[:slug])
     
     # Access Control
-    @can_view_details = current_user && (
-      current_user.admin? || 
-      current_user.paid? || 
-      current_user.owner_of_review?(@recruiter)
-    )
+    @can_view_details = can_view_details?(@recruiter)
 
     # Base scope for approved experiences
     base_scope = Experience.where(status: "approved")
