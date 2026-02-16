@@ -1,3 +1,7 @@
+# DEPRECATED: Review is the legacy data model from the admin moderation pipeline.
+# New public submissions use Interaction + Experience (see those models).
+# Admin controllers (Admin::ReviewsController) still read/write Review records.
+# Future: migrate admin to read from Experience, migrate historical data, drop Review table.
 class Review < ApplicationRecord
   belongs_to :user
   belongs_to :recruiter, optional: true

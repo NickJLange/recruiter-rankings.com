@@ -93,11 +93,13 @@ Recruiter-Rankings.com is a privacy-focused platform for de-identified recruiter
 #### Entities
 - **Users**: Candidates, recruiters, moderators, and admins with role-based permissions
 - **Recruiters**: Public profiles with company affiliations, verified via LinkedIn/email
-- **Interactions**: Verified professional interactions between Users and Recruiters (replaces deprecated Review ownership)
-- **Experiences**: Qualitative feedback (rating, body, dimensions) linked to an Interaction
+- **Interactions**: Verified professional interactions between Users and Recruiters (current model)
+- **Experiences**: Qualitative feedback (rating, body, dimensions) linked to an Interaction (current model)
+- **Reviews (Deprecated)**: Legacy feedback model used by admin moderation pipeline. Being replaced by Interaction/Experience. See `openspec/changes/document-dual-data-model/specs/data-model-migration/spec.md` for migration plan.
+- **ReviewMetric**: Dimensional scores (belongs_to Experience despite the "review_" prefix — naming artifact)
 - **Companies**: Recruiting target companies with size-based bucketing for privacy
 - **Identity Challenges**: Token-based verification system for LinkedIn/email validation
-- **Responses**: Recruiter right-of-reply to experiences
+- **ReviewResponse (Deprecated)**: Recruiter right-of-reply, currently linked to Review. Will migrate to Experience.
 
 #### Workflows
 1. **Review Submission**: User creates interaction → submits experience → moderation → approval → public display
