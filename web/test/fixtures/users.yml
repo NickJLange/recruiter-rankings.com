@@ -2,3 +2,30 @@ one:
   role: "candidate"
   email_hmac: "fixture_user_hmac"
   public_slug: "USR00001"
+
+candidate_paid:
+  role: "candidate"
+  email_hmac: "paid_user_hmac"
+  public_slug: "PAIDUSR1"
+  paid: true
+
+candidate_free:
+  role: "candidate"
+  email_hmac: "free_user_hmac"
+  public_slug: "FREEUSR1"
+  paid: false
+
+admin:
+  role: "admin"
+  email_hmac: "admin_user_hmac"
+  public_slug: "ADMN0001"
+
+owner:
+  role: "candidate"
+  email_hmac: "owner_user_hmac"
+  public_slug: "OWNR0001"
+
+moderator:
+  role: "moderator"
+  email_hmac: "moderator_user_hmac"
+  public_slug: "MOD00001"
