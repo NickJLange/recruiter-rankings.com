@@ -76,3 +76,19 @@
 - [ ] 13.2 Confirm pre-existing failures (review_metrics bug, locale issues) are unchanged
 - [ ] 13.3 Confirm `sign_in_as` failures are resolved by ClerkTestHelper
 - [ ] 13.4 Manual smoke test: public pages, auth flow, admin access, review submission
+
+## 14. Fix pre-existing test failures (separate PR)
+**Status as of 2026-02-21: 5 failures / 5 errors — all pre-existing, none introduced by Clerk migration.**
+Can be a standalone PR that does not depend on the Clerk integration being complete.
+
+- [ ] 14.1 **Locale — missing Japanese translations** (`test/integration/locale_integration_test.rb`, `test/integration/locale_translation_coverage_test.rb`)
+  - Root cause: `config/locales/ja.yml` is missing Rails framework keys (date formats, number formats, ActiveRecord error messages in Japanese)
+  - Fix: add missing keys to `ja.yml` or narrow the coverage test to only app-defined keys
+
+- [ ] 14.2 **`review_id` bug on ReviewMetric** (`test/integration/review_submission_test.rb`, `test/integration/registration_flows_test.rb`)
+  - Root cause: `ReviewsController#create` calls `review.review_metrics.create!` but `ReviewMetric` `belongs_to :experience`, not `:review` — causes `ActiveModel::UnknownAttributeError: unknown attribute 'review_id'`
+  - Fix: remove the `review.review_metrics.create!` call from `ReviewsController#create` (Reviews are deprecated; metrics belong to Experiences via the Interaction/Experience data model)
+
+- [ ] 14.3 **`any_instance` not available** (`test/integration/registration_flows_test.rb:10`)
+  - Root cause: `test/integration/registration_flows_test.rb` calls `ClaimIdentityController.any_instance.stub(...)` which requires mocha; project uses minitest's built-in `stub` (block-scoped only)
+  - Fix: rewrite the stub using minitest's block form: `ClaimIdentityController.any_instance.stub(:linkedin_fetcher, mock_fetcher) { ... }` wrapping the relevant HTTP calls
