@@ -20,6 +20,34 @@
 
     <%= yield :head %>
 
+    <%# ClerkJS — loads the Clerk frontend SDK for session management and auth UI.
+        Only injected when CLERK_PUBLISHABLE_KEY is present (safe to omit in CI). %>
+    <% if (clerk_js_url = Rails.application.config.clerk_js_url).present? %>
+      <script>
+        function initClerkNav() {
+          window.Clerk.load().then(function() {
+            var auth = document.getElementById('clerk-nav-auth');
+            if (!auth) return;
+            if (window.Clerk.user) {
+              var addr = (window.Clerk.user.emailAddresses[0] || {}).emailAddress || 'user';
+              var name = window.Clerk.user.firstName || addr;
+              auth.innerHTML = '<span style="margin-left:10px;font-size:0.9em;color:#fff;">'
+                + name
+                + ' &mdash; <a href="#" onclick="window.Clerk.signOut().then(function(){location.reload()});return false;" style="color:#aaf;">Sign out</a>'
+                + '</span>';
+            } else {
+              auth.innerHTML = '<a href="#" onclick="window.Clerk.redirectToSignIn();return false;" style="color:#aaf;margin-left:10px;">Sign in</a>';
+            }
+          });
+        }
+      </script>
+      <script async crossorigin="anonymous"
+        data-clerk-publishable-key="<%= h ENV['CLERK_PUBLISHABLE_KEY'] %>"
+        src="<%= h clerk_js_url %>"
+        onload="initClerkNav()"
+        type="text/javascript"></script>
+    <% end %>
+
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
@@ -57,17 +85,7 @@
           <a href="/identity_verifications/new">Register / Verify</a>
           <a href="/reviews/new" class="nav-btn">Share a Review</a>
           
-          <% if current_user %>
-            <span style="margin-left:10px; font-size:0.9em; color:#fff;">
-              Logged in as <%= current_user.role.humanize %>
-              <% if current_user.paid? %> (Paid)<% end %>
-              <% if Rails.env.development? %>
-                [<%= link_to "Logout", logout_path, method: :delete, style: "color:#fff; text-decoration:underline;" %>]
-              <% end %>
-            </span>
-          <% elsif Rails.env.development? || Rails.env.test? %>
-             <a href="<%= login_path %>" style="color:#aaf;">Dev Login</a>
-          <% end %>
+          <div id="clerk-nav-auth"></div>
         </div>
       </nav>
       <div class="container" style="padding-bottom:8px;">

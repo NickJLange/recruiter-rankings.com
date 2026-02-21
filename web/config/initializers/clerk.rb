@@ -12,3 +12,15 @@ Clerk.configure do |config|
     "/assets/"
   ]
 end
+
+# Derive the Clerk frontend API URL from the publishable key so ClerkJS can be
+# loaded from the correct instance CDN. Format: pk_(test|live)_BASE64 where
+# Base64 decodes to "subdomain.clerk.accounts.dev$" (trailing $ is a checksum).
+Rails.application.config.clerk_js_url = begin
+  key = ENV["CLERK_PUBLISHABLE_KEY"].to_s
+  if key.present?
+    encoded = key.split("_").last
+    domain = Base64.decode64(encoded).delete_suffix("$")
+    "https://#{domain}/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"
+  end
+end
