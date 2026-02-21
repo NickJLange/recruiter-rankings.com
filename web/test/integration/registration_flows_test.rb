@@ -17,22 +17,22 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
         email: "miles@example.com"
       }
     }
-    
+
     assert_response :success
     assert_select "h1", "Verification instructions"
-    
+
     # Extract challenge ID from the form or URL (simulated here by querying DB)
     challenge = IdentityChallenge.last
     assert_equal "Recruiter", challenge.subject_type
     assert_equal @recruiter.id, challenge.subject_id
-    
+
     # 2. Verify claim (Mocking LinkedInFetcher to return the token)
     token = "RR-VERIFY-#{challenge.token_hash}"
-    
+
     # Create a mock fetcher that returns the token in the response
     mock_fetcher = Minitest::Mock.new
     mock_fetcher.expect(:fetch, "<html><body>Profile content with #{token}</body></html>", [String])
-    
+
     # Inject the mock into the controller
     ClaimIdentityController.any_instance.stub(:linkedin_fetcher, mock_fetcher) do
       post "/claim_identity/verify", params: {
@@ -43,43 +43,32 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
       assert_redirected_to recruiter_path("A1B2C3D4")
       follow_redirect!
       assert_select ".alert-info", "Recruiter verified."
-      
+
       assert @recruiter.reload.verified_at.present?
     end
-    
+
     # Verify the mock was called
     mock_fetcher.verify
   end
 
-  test "user review submission creates user" do
-    email = "newuser@example.com"
-    
-    assert_nil User.find_by_email_hmac(OpenSSL::HMAC.hexdigest("SHA256", submission_email_hmac_pepper, email))
+  test "review submission creates user record for clerk identity" do
+    clerk_user_id = "user_test_#{SecureRandom.hex(8)}"
+    sign_in_as_clerk(role: :candidate, providers: [:email], user_id: clerk_user_id)
+
+    assert_nil User.find_by(clerk_user_id: clerk_user_id)
 
     post "/reviews", params: {
       review: {
         recruiter_slug: "A1B2C3D4",
         overall_score: 5,
-        text: "Great recruiter!",
-        email: email
+        text: "Great recruiter!"
       }
     }
 
     assert_redirected_to recruiter_path("A1B2C3D4")
-    
-    # Verify user created
-    # We need to calculate HMAC to find the user
-    pepper = submission_email_hmac_pepper
-    hmac = OpenSSL::HMAC.hexdigest("SHA256", pepper, email)
-    user = User.find_by(email_hmac: hmac)
-    
+
+    user = User.find_by(clerk_user_id: clerk_user_id)
     assert_not_nil user
     assert_equal "candidate", user.role
-  end
-  
-  private
-  
-  def submission_email_hmac_pepper
-    ENV.fetch("SUBMISSION_EMAIL_HMAC_PEPPER", "test-pepper")
   end
 end

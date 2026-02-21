@@ -8,15 +8,13 @@ class ReviewSubmissionTest < ActionDispatch::IntegrationTest
   end
 
   test "can submit a review" do
-    get "/person/#{@slug}"
-    assert_response :success
+    sign_in_as_clerk(role: :candidate, providers: [:email])
 
     post "/reviews", params: {
       review: {
         recruiter_slug: @slug,
         overall_score: 5,
-        text: "Fantastic experience!",
-        email: "candidate@example.com"
+        text: "Fantastic experience!"
       }
     }
 
@@ -24,25 +22,37 @@ class ReviewSubmissionTest < ActionDispatch::IntegrationTest
     follow_redirect!
     assert_response :success
     assert_select ".alert-info", /Thanks! Your review has been submitted./
-    
-    # Verify review was created
-    review = Review.last
-    assert_equal @slug, review.recruiter.public_slug
-    assert_equal 5, review.overall_score
-    assert_equal "Fantastic experience!", review.text
+
+    experience = Experience.last
+    assert_equal @slug, experience.interaction.recruiter.public_slug
+    assert_equal 5, experience.rating
+    assert_equal "Fantastic experience!", experience.body
   end
 
   test "invalid submission shows errors" do
+    sign_in_as_clerk(role: :candidate, providers: [:email])
+
     post "/reviews", params: {
       review: {
         recruiter_slug: @slug,
         overall_score: "", # Invalid
-        text: "",
-        email: "candidate@example.com"
+        text: ""
       }
     }
 
     assert_response :unprocessable_entity
     assert_select ".alert-danger", /Please correct the errors below./
+  end
+
+  test "unauthenticated user cannot submit review" do
+    post "/reviews", params: {
+      review: {
+        recruiter_slug: @slug,
+        overall_score: 5,
+        text: "Great!"
+      }
+    }
+
+    assert_response :redirect
   end
 end

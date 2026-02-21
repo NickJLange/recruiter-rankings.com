@@ -1,5 +1,6 @@
 class ReviewsController < ApplicationController
   protect_from_forgery with: :exception
+  before_action -> { require_policy!(:candidate_submit) }, only: [:new, :create]
 
   def index
     recruiter = Recruiter.find_by!(public_slug: params[:recruiter_slug] || params[:recruiter_id])
@@ -12,47 +13,59 @@ class ReviewsController < ApplicationController
 
   def new
     @recruiter = Recruiter.find_by!(public_slug: params[:recruiter_slug] || params[:recruiter_id])
-    @review = Review.new(recruiter: @recruiter, company: @recruiter.company)
   end
 
   def create
     recruiter = Recruiter.find_by!(public_slug: review_params[:recruiter_slug])
-    user = find_or_create_user(review_params[:email])
-
     status = demo_auto_approve? ? "approved" : "pending"
+    rating = review_params[:overall_score].to_i
 
-    review = Review.new(
-      user: user,
-      recruiter: recruiter,
-      company: recruiter.company,
-      overall_score: review_params[:overall_score],
-      text: review_params[:text],
-      status: status
-    )
+    unless (1..5).cover?(rating)
+      @recruiter = recruiter
+      flash.now[:alert] = "Please correct the errors below."
+      return render :new, status: :unprocessable_entity
+    end
 
-    if review.save
+    user = find_or_create_clerk_user
+
+    Interaction.transaction do
+      interaction = Interaction.create!(
+        recruiter: recruiter,
+        target: user,
+        occurred_at: Time.current,
+        status: status,
+        clerk_user_id: auth_service.user_id
+      )
+      experience = interaction.create_experience!(
+        rating: rating,
+        body: review_params[:text],
+        status: status
+      )
       if copy_overall_to_dimensions?
         ReviewMetric::DIMENSIONS.keys.each do |dim|
-          review.review_metrics.create!(dimension: dim, score: review.overall_score)
+          experience.review_metrics.create!(dimension: dim, score: experience.rating)
         end
       end
-      redirect_to recruiter_path(recruiter.public_slug), notice: "Thanks! Your review has been submitted."
-    else
-      @recruiter = recruiter
-      @review = review
-      flash.now[:alert] = "Please correct the errors below."
-      render :new, status: :unprocessable_entity
     end
+
+    redirect_to recruiter_path(recruiter.public_slug), notice: "Thanks! Your review has been submitted."
+  rescue ActiveRecord::RecordInvalid
+    @recruiter = recruiter
+    flash.now[:alert] = "Please correct the errors below."
+    render :new, status: :unprocessable_entity
   end
 
   private
 
   def review_params
-    params.require(:review).permit(:recruiter_slug, :overall_score, :text, :email)
+    params.require(:review).permit(:recruiter_slug, :overall_score, :text)
   end
 
-  def find_or_create_user(email)
-    EmailIdentityService.new(pepper: submission_email_hmac_pepper).find_or_create_user(email)
+  def find_or_create_clerk_user
+    cuid = auth_service.user_id
+    User.where(clerk_user_id: cuid).first_or_create! do |u|
+      u.email_hmac = OpenSSL::HMAC.hexdigest("SHA256", submission_email_hmac_pepper, "clerk:#{cuid}")
+      u.role = "candidate"
+    end
   end
 end
-
