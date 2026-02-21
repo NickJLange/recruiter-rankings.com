@@ -42,8 +42,7 @@ class CompaniesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should get show as paid user" do
-    paid_user = User.create!(role: "candidate", paid: true, email_hmac: SecureRandom.hex)
-    sign_in_as(paid_user)
+    sign_in_as_clerk(role: :paid, providers: [:email, :linkedin])
     
     get company_url(@company)
     assert_response :success

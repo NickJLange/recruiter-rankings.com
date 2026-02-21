@@ -1,20 +1,14 @@
 module Admin
   class BaseController < ApplicationController
-    before_action :require_moderator_auth
+    before_action :require_admin!
 
     private
 
-    def require_moderator_auth
-      expected_user = ENV["DEMO_MOD_USER"].presence || "mod"
-      expected_pass = ENV["DEMO_MOD_PASSWORD"].presence || "mod"
-      authenticate_or_request_with_http_basic("Moderation") do |u, p|
-        ActiveSupport::SecurityUtils.secure_compare(u, expected_user) &&
-          ActiveSupport::SecurityUtils.secure_compare(p, expected_pass)
-      end
-    end
-
+    # Returns the local User record for the currently authenticated admin,
+    # looked up by Clerk user ID. Used for ModerationAction audit logging.
+    # Returns nil if no matching local record exists (optional on ModerationAction).
     def current_moderator_actor
-      @current_moderator_actor ||= User.find_by(role: "moderator")
+      @current_moderator_actor ||= User.find_by(clerk_user_id: auth_service.user_id)
     end
   end
 end

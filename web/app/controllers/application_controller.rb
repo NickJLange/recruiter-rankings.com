@@ -1,16 +1,49 @@
 class ApplicationController < ActionController::Base
+  include ClerkAuthenticatable
+  include AuthPolicy
   include AccessControlHelper
 
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
   before_action :set_locale
-  helper_method :current_user, :public_min_reviews, :demo_auto_approve?, :submission_email_hmac_pepper, :copy_overall_to_dimensions?, :canonical_url, :public_per_page, :public_max_per_page, :switch_locale_to, :can_view_details?
+  helper_method :current_user, :public_min_reviews, :demo_auto_approve?,
+                :submission_email_hmac_pepper, :copy_overall_to_dimensions?,
+                :canonical_url, :public_per_page, :public_max_per_page,
+                :switch_locale_to, :can_view_details?, :paid_subscriber?
+
+  # A simple struct that provides the duck-typed interface expected by
+  # Recruiter#display_name and legacy view code. Wraps the Clerk auth state
+  # so views don't need to be rewritten in this change.
+  ClerkViewerProxy = Struct.new(:admin?, :paid?) do
+    def owner_of_review?(_resource)
+      false # Needs clerk_user_id on resources to implement; deferred to follow-up
+    end
+
+    def role
+      admin? ? "admin" : (paid? ? "paid" : "candidate")
+    end
+  end
 
   private
 
+  # Compatibility helper for views still referencing current_user.
+  # Returns a ClerkViewerProxy backed by Clerk auth, or nil if not authenticated.
   def current_user
-    @current_user ||= User.find_by(id: session[:user_id]) if session[:user_id]
+    return nil unless authenticated?
+
+    ClerkViewerProxy.new(
+      auth_service.meets_requirements?(:admin),
+      paid_subscriber?
+    )
+  end
+
+  # Returns true if the authenticated Clerk user has the "paid" role in their
+  # public metadata. Triggers a cached Clerk API call.
+  def paid_subscriber?
+    return false unless authenticated?
+
+    clerk.user&.public_metadata&.dig("role") == "paid"
   end
 
   def set_locale

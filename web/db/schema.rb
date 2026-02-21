@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_19_170411) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_21_015622) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -53,6 +53,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_19_170411) do
   end
 
   create_table "interactions", force: :cascade do |t|
+    t.string "clerk_user_id"
     t.datetime "created_at", null: false
     t.datetime "occurred_at"
     t.bigint "recruiter_id", null: false
@@ -60,6 +61,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_19_170411) do
     t.string "status", default: "pending"
     t.bigint "target_id", null: false
     t.datetime "updated_at", null: false
+    t.index ["clerk_user_id"], name: "index_interactions_on_clerk_user_id"
     t.index ["recruiter_id"], name: "index_interactions_on_recruiter_id"
     t.index ["role_id"], name: "index_interactions_on_role_id"
     t.index ["target_id"], name: "index_interactions_on_target_id"
@@ -279,6 +281,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_19_170411) do
   end
 
   create_table "users", force: :cascade do |t|
+    t.string "clerk_user_id"
     t.datetime "created_at", null: false
     t.text "email_ciphertext"
     t.string "email_hmac", null: false
@@ -290,6 +293,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_19_170411) do
     t.datetime "updated_at", null: false
     t.string "verification_status"
     t.datetime "verified_at"
+    t.index ["clerk_user_id"], name: "index_users_on_clerk_user_id", unique: true
     t.index ["email_hmac"], name: "index_users_on_email_hmac", unique: true
     t.index ["public_slug"], name: "index_users_on_public_slug"
     t.index ["role"], name: "index_users_on_role"

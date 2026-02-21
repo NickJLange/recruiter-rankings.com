@@ -48,9 +48,8 @@ class RobustnessTest < ActionDispatch::IntegrationTest
     # Text should be HIDDEN for anonymous user
     assert_select ".review-text", false
     
-    # Create and sign in as paid user
-    paid_user = User.create!(role: "candidate", paid: true, email_hmac: SecureRandom.hex)
-    sign_in_as(paid_user)
+    # Sign in as a paid user via Clerk
+    sign_in_as_clerk(role: :paid, providers: [:email, :linkedin])
     
     get "/person/#{@recruiter.public_slug}"
     assert_response :success

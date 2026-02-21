@@ -40,13 +40,13 @@ class RecruitersControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "paid user sees full view and real name" do
-    sign_in_as(@user_paid)
-    
+    sign_in_as_clerk(role: :paid, providers: [:email, :linkedin])
+
     get recruiter_url(@recruiter)
     assert_response :success
     assert_select "h1", text: @recruiter.name
     assert_select "h2", text: "Recent reviews"
-    
+
     get recruiter_url(@recruiter, format: :json)
     json = JSON.parse(response.body)
     assert json.key?("reviews")
@@ -54,9 +54,11 @@ class RecruitersControllerTest < ActionDispatch::IntegrationTest
     assert_not json.key?("quarterly")
   end
 
-  test "owner sees full view and real name" do
-    sign_in_as(@owner)
-    
+  test "admin sees full view and real name" do
+    # Owner detection via recruiter.clerk_user_id is a follow-up task.
+    # Admin always has full access.
+    sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: true)
+
     get recruiter_url(@recruiter)
     assert_response :success
     assert_select "h1", text: @recruiter.name

@@ -17,7 +17,7 @@ module Admin
       redirect_to admin_reviews_path, notice: "Response hidden."
     end
 
-    def show
+    def unhide
       resp = ReviewResponse.find(params[:id])
       resp.update!(visible: true)
       ModerationAction.create!(actor: current_moderator_actor, action: "response_show", subject: resp.review, notes: "response_id=#{resp.id}")

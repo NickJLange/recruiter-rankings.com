@@ -2,39 +2,44 @@ require "test_helper"
 
 class SecurityTest < ActionDispatch::IntegrationTest
   # --- Admin Auth Boundary Tests ---
+  # Admin access is now enforced via Clerk auth (email + LinkedIn + GitHub + 2FA),
+  # not HTTP Basic Auth. Unauthenticated requests redirect to sign-in rather than
+  # returning 401.
 
   test "admin reviews requires authentication" do
     get "/admin/reviews"
-    assert_response :unauthorized
+    assert_response :redirect
   end
 
   test "admin dashboard requires authentication" do
     get "/admin"
-    assert_response :unauthorized
+    assert_response :redirect
   end
 
-  test "admin reviews rejects wrong credentials" do
-    auth = ActionController::HttpAuthentication::Basic.encode_credentials("wrong", "creds")
-    get "/admin/reviews", headers: { "HTTP_AUTHORIZATION" => auth }
-    assert_response :unauthorized
-  end
-
-  test "admin dashboard rejects wrong credentials" do
-    auth = ActionController::HttpAuthentication::Basic.encode_credentials("hacker", "password")
-    get "/admin", headers: { "HTTP_AUTHORIZATION" => auth }
-    assert_response :unauthorized
-  end
-
-  test "admin reviews accepts correct credentials" do
-    auth = ActionController::HttpAuthentication::Basic.encode_credentials("mod", "mod")
-    get "/admin/reviews", headers: { "HTTP_AUTHORIZATION" => auth }
+  test "admin reviews accessible with full admin credentials" do
+    sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: true)
+    get "/admin/reviews"
     assert_response :success
   end
 
-  test "admin dashboard accepts correct credentials" do
-    auth = ActionController::HttpAuthentication::Basic.encode_credentials("mod", "mod")
-    get "/admin", headers: { "HTTP_AUTHORIZATION" => auth }
+  test "admin dashboard accessible with full admin credentials" do
+    sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: true)
+    get "/admin"
     assert_response :success
+  end
+
+  test "admin reviews rejected without 2FA" do
+    sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: false)
+    get "/admin/reviews"
+    assert_response :redirect
+    assert_redirected_to root_path
+  end
+
+  test "admin reviews rejected without all required providers" do
+    sign_in_as_clerk(role: :candidate, providers: [:email], two_factor: false)
+    get "/admin/reviews"
+    assert_response :redirect
+    assert_redirected_to root_path
   end
 
   # --- PII Leak Prevention ---

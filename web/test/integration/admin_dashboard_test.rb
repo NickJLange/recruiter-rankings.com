@@ -1,10 +1,6 @@
 require "test_helper"
 
 class AdminDashboardTest < ActionDispatch::IntegrationTest
-  def auth_headers
-    { "HTTP_AUTHORIZATION" => ActionController::HttpAuthentication::Basic.encode_credentials("mod", "mod") }
-  end
-
   setup do
     @company = Company.create!(name: "Acme", region: "US")
     @recruiter = Recruiter.create!(name: "Diego Fernández", company: @company, public_slug: "diego-fernandez")
@@ -19,11 +15,12 @@ class AdminDashboardTest < ActionDispatch::IntegrationTest
 
   test "dashboard requires auth" do
     get "/admin"
-    assert_response :unauthorized
+    assert_response :redirect
   end
 
   test "dashboard renders metrics and links with auth" do
-    get "/admin", headers: auth_headers
+    sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: true)
+    get "/admin"
     assert_response :success
     assert_includes @response.body, "Admin Dashboard"
     assert_includes @response.body, "Pending reviews"
@@ -32,4 +29,3 @@ class AdminDashboardTest < ActionDispatch::IntegrationTest
     assert_includes @response.body, "Recent moderation actions"
   end
 end
-
