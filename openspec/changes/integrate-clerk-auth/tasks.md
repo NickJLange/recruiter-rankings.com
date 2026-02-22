@@ -92,3 +92,13 @@ Can be a standalone PR that does not depend on the Clerk integration being compl
 - [ ] 14.3 **`any_instance` not available** (`test/integration/registration_flows_test.rb:10`)
   - Root cause: `test/integration/registration_flows_test.rb` calls `ClaimIdentityController.any_instance.stub(...)` which requires mocha; project uses minitest's built-in `stub` (block-scoped only)
   - Fix: rewrite the stub using minitest's block form: `ClaimIdentityController.any_instance.stub(:linkedin_fetcher, mock_fetcher) { ... }` wrapping the relevant HTTP calls
+
+## 15. Clerk Dashboard Configuration (manual, one-time)
+Steps required in the Clerk dashboard for the dev sign-in flow to work end-to-end in a browser.
+
+- [ ] 15.1 In **Settings → Domains**, add `http://localhost:3000` as an allowed origin
+- [ ] 15.2 In **Settings → Paths**, set Home URL to `http://localhost:3000`
+- [ ] 15.3 In **Settings → Paths**, set After sign-in redirect URL to `http://localhost:3000/person`
+- [ ] 15.4 In **Social connections**, enable Email, LinkedIn OIDC, and GitHub
+- [ ] 15.5 Create a test admin user in Clerk with all three providers connected + 2FA enabled
+- [ ] 15.6 Verify: sign in via nav "Sign in" link, confirm name appears, confirm `/admin` is accessible
