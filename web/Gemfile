@@ -38,5 +38,10 @@ group :development, :test do
   gem "brakeman", require: false
 end
 
+group :test do
+  # Headless Chrome system tests via Chrome DevTools Protocol (no chromedriver needed)
+  gem "cuprite"
+end
+
 gem "faker", "~> 3.5", group: :development
 gem "test", "~> 1.0", group: :development

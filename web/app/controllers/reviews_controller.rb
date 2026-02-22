@@ -11,6 +11,10 @@ class ReviewsController < ApplicationController
     }
   end
 
+  def new_global
+    redirect_to recruiters_path, notice: "Find a recruiter below, then click their profile to share your experience."
+  end
+
   def new
     @recruiter = Recruiter.find_by!(public_slug: params[:recruiter_slug] || params[:recruiter_id])
   end
