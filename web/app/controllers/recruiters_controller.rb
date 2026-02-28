@@ -1,4 +1,32 @@
 class RecruitersController < ApplicationController
+  before_action -> { require_policy!(:candidate_submit) }, only: [:new, :create]
+
+  def new
+    @recruiter = Recruiter.new(
+      name: params[:name],
+      linkedin_url: params[:linkedin_url]
+    )
+  end
+
+  def create
+    company = Company.find_or_create_by!(name: recruiter_params[:company_name].strip) \
+      if recruiter_params[:company_name].present?
+
+    @recruiter = Recruiter.new(
+      name:         recruiter_params[:name],
+      linkedin_url: recruiter_params[:linkedin_url].presence,
+      region:       recruiter_params[:region].presence,
+      company:      company
+    )
+
+    if @recruiter.save
+      redirect_to new_recruiter_review_path(@recruiter),
+        notice: "Recruiter added. Now write your review."
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
   def index
     threshold = public_min_reviews
 
@@ -58,7 +86,7 @@ class RecruitersController < ApplicationController
 
   def show
     @recruiter = Recruiter.includes(:company).find_by!(public_slug: params[:slug])
-    
+
     # Access Control
     @can_view_details = can_view_details?(@recruiter)
 
@@ -107,9 +135,9 @@ class RecruitersController < ApplicationController
           avg_overall: @avg_overall,
           dimensional_averages: @dimensional_averages
         }
-        
+
         if @can_view_details
-          payload[:reviews] = @reviews.map { |r| 
+          payload[:reviews] = @reviews.map { |r|
             {
               id: r.id,
               rating: r.rating,
@@ -120,10 +148,15 @@ class RecruitersController < ApplicationController
         else
           payload[:quarterly] = @quarterly_aggregates.map { |q, c, m| { quarter: q, count: c, median: m } }
         end
-        
+
         render json: payload
       end
     end
   end
-end
 
+  private
+
+  def recruiter_params
+    params.require(:recruiter).permit(:name, :company_name, :linkedin_url, :region)
+  end
+end

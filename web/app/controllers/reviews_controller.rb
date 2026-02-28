@@ -12,7 +12,7 @@ class ReviewsController < ApplicationController
   end
 
   def new_global
-    redirect_to recruiters_path, notice: "Find a recruiter below, then click their profile to share your experience."
+    # Renders contextually — auth state checked in the view via auth_service helper
   end
 
   def new
