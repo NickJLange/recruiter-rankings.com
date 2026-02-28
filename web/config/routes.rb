@@ -1,9 +1,17 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   
-  root "recruiters#index"
+  root "pages#home"
+  get '/about',    to: 'pages#about'
+  get '/policies', to: 'pages#policies'
+  get '/search',   to: 'search#index'
 
-  resources :recruiters, only: [:index, :show], path: 'person', param: :slug do
+  # Legacy /recruiters URL — redirect to /person (SEO-safe 301, no named helper)
+  get '/recruiters', to: redirect { |_p, req|
+    "/person#{req.query_string.present? ? "?#{req.query_string}" : ''}"
+  }, as: nil
+
+  resources :recruiters, only: [:index, :show, :new, :create], path: 'person', param: :slug do
     resources :reviews, only: [:new, :index]
   end
   resources :reviews, only: [:create]
@@ -46,16 +54,4 @@ Rails.application.routes.draw do
     end
   end
 
-  if Rails.env.test? || Rails.env.development?
-    # Utils for dev/test login
-    get  "/login",  to: "sessions#new",     as: :login
-    post "/login",  to: "sessions#create"
-    match "/logout", to: "sessions#destroy", via: [:delete, :get], as: :logout
-    
-    match '/utils/login', via: [:get, :post], as: :utils_login, to: ->(env) {
-      req = Rack::Request.new(env)
-      env['rack.session'][:user_id] = req.params['user_id']
-      [200, {}, ['ok']]
-    }
-  end
 end
