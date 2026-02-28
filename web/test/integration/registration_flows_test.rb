@@ -29,12 +29,11 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
     # 2. Verify claim (Mocking LinkedInFetcher to return the token)
     token = "RR-VERIFY-#{challenge.token_hash}"
 
-    # Create a mock fetcher that returns the token in the response
+    # Stub LinkedinFetcher.new to return a mock that yields the token
     mock_fetcher = Minitest::Mock.new
     mock_fetcher.expect(:fetch, "<html><body>Profile content with #{token}</body></html>", [String])
 
-    # Inject the mock into the controller
-    ClaimIdentityController.any_instance.stub(:linkedin_fetcher, mock_fetcher) do
+    LinkedinFetcher.stub(:new, mock_fetcher) do
       post "/claim_identity/verify", params: {
         challenge_id: challenge.id,
         linkedin_url: "https://linkedin.com/in/miles"
@@ -47,7 +46,6 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
       assert @recruiter.reload.verified_at.present?
     end
 
-    # Verify the mock was called
     mock_fetcher.verify
   end
 

@@ -104,13 +104,14 @@ class LocaleIntegrationTest < ActionDispatch::IntegrationTest
   end
 
   test "locale parameter and params[:local] both work for backwards compatibility" do
+    # Home page (pages#home) — check a key that appears on that page in Japanese
     get "/", params: { locale: :ja }
     assert_response :success
-    assert_includes @response.body, "上位のリクルーター"
-    
+    assert_includes @response.body, "あなたが商品だ"  # pages.home.headline_1 in ja.yml
+
     get "/", params: { local: :ja }
     assert_response :success
-    assert_includes @response.body, "上位のリクルーター"
+    assert_includes @response.body, "あなたが商品だ"
   end
 
   test "locale affects recruiter index page" do
@@ -126,13 +127,15 @@ class LocaleIntegrationTest < ActionDispatch::IntegrationTest
   end
 
   test "locale affects review form" do
+    sign_in_as_clerk(role: :candidate, providers: [:email])
+
     get new_recruiter_review_path(@recruiter), params: { locale: :ja }
     assert_response :success
-    assert_includes @response.body, "総合スコア" || "体験の内容" || "送信"
-    
+    assert_includes @response.body, "総合スコア"  # reviews.new.overall_score in ja.yml
+
     get new_recruiter_review_path(@recruiter), params: { locale: :en }
     assert_response :success
-    assert_includes @response.body, "Overall score" || "Your experience" || "Submit"
+    assert_includes @response.body, "Overall score"  # reviews.new.overall_score in en.yml
   end
 
   test "I18n.available_locales matches allowed locales" do

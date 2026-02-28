@@ -1,22 +1,28 @@
 require "test_helper"
 
 class LocaleTranslationCoverageTest < ActiveSupport::TestCase
+  # Keys from Rails framework and gems — not app-defined, so JA coverage is not required.
+  FRAMEWORK_KEY_PREFIXES = %w[
+    activerecord.errors activemodel.errors errors
+    date time support number datetime helpers
+    pay faker
+  ].freeze
+
   test "all translation keys in English exist in Japanese" do
     en_keys = flatten_keys(I18n.backend.translations[:en] || {})
     ja_keys = flatten_keys(I18n.backend.translations[:ja] || {})
-    
-    skip_keys = ["activerecord.errors", "errors", "activemodel.errors"]
-    filtered_en_keys = en_keys.keys.reject { |k| skip_keys.any? { |skip| k.start_with?(skip) } }
+
+    filtered_en_keys = en_keys.keys.reject { |k| FRAMEWORK_KEY_PREFIXES.any? { |skip| k.start_with?(skip) } }
     missing_keys = filtered_en_keys - ja_keys.keys
-    
-    assert_empty missing_keys, 
+
+    assert_empty missing_keys,
                  "English keys missing from Japanese: #{missing_keys.join(', ')}"
   end
 
   test "all translation keys use consistent placeholder syntax" do
     en_flat = flatten_keys(I18n.backend.translations[:en] || {})
-    
-    skip_keys = ["activerecord.errors", "errors", "activemodel.errors"]
+
+    skip_keys = FRAMEWORK_KEY_PREFIXES
     
     en_flat.each do |key, value|
       next unless value.is_a?(String)
@@ -24,10 +30,11 @@ class LocaleTranslationCoverageTest < ActiveSupport::TestCase
       
       placeholders = value.scan(/%\{(\w+)\}/).flatten
       if placeholders.any?
-        ja_value = I18n.backend.translations.dig(*key.split(".")) || ""
-        
+        # Dig into :ja locale with symbol keys to find the Japanese translation
+        ja_value = I18n.backend.translations.dig(:ja, *key.split(".").map(&:to_sym)).to_s
+
         placeholders.each do |placeholder|
-          assert ja_value.include?("%{#{placeholder}}"), 
+          assert ja_value.include?("%{#{placeholder}}"),
                  "Key #{key} has placeholder %{#{placeholder}} in English but missing in Japanese"
         end
       end

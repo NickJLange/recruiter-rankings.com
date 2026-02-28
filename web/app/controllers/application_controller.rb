@@ -6,8 +6,8 @@ class ApplicationController < ActionController::Base
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern
 
-  before_action :set_locale
-  helper_method :current_user, :public_min_reviews, :demo_auto_approve?,
+  around_action :set_locale
+  helper_method :current_user, :current_local_user, :public_min_reviews, :demo_auto_approve?,
                 :submission_email_hmac_pepper, :copy_overall_to_dimensions?,
                 :canonical_url, :public_per_page, :public_max_per_page,
                 :switch_locale_to, :can_view_details?, :paid_subscriber?
@@ -26,6 +26,14 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  # Returns the local User record for the authenticated Clerk user, or nil.
+  # Used by controllers that need Pay gem methods or other ActiveRecord behavior.
+  def current_local_user
+    return nil unless authenticated?
+
+    @current_local_user ||= User.find_by(clerk_user_id: auth_service.user_id)
+  end
 
   # Compatibility helper for views still referencing current_user.
   # Returns a ClerkViewerProxy backed by Clerk auth, or nil if not authenticated.
@@ -50,14 +58,16 @@ class ApplicationController < ActionController::Base
     # priority: params[:locale] or params[:local] -> cookie -> Accept-Language -> default
     requested = params[:locale].to_s.presence || params[:local].to_s.presence || cookies[:locale].to_s.presence
     allowed = %w[en ja]
-    if requested && allowed.include?(requested)
-      I18n.locale = requested
+    locale = if requested && allowed.include?(requested)
+      requested
     else
       header = request.env["HTTP_ACCEPT_LANGUAGE"].to_s
-      I18n.locale = header&.downcase&.include?("ja") ? :ja : I18n.default_locale
+      header&.downcase&.include?("ja") ? :ja : I18n.default_locale
     end
     # Persist selection in a long-lived cookie so subsequent pages honor it
-    cookies.permanent[:locale] = I18n.locale
+    cookies.permanent[:locale] = locale
+    # Use with_locale so the locale is scoped to this request and reset afterwards
+    I18n.with_locale(locale) { yield }
   end
 
   def switch_locale_to(to)
