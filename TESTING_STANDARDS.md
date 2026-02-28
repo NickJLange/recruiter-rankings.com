@@ -291,6 +291,38 @@ web/test/system/slug_routing_consistency_test.rb        ✓ Implemented
 
 ---
 
+## ClerkTestHelper — Authentication in Tests
+
+All controller/integration/system tests that touch authenticated routes must use `ClerkTestHelper`.
+
+### Usage
+
+```ruby
+# In an integration test (ActionDispatch::IntegrationTest):
+sign_in_as_clerk(role: :candidate, providers: [:email])
+sign_in_as_clerk(role: :candidate, providers: [:linkedin])
+sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: true)
+sign_out_clerk   # also called automatically in teardown
+```
+
+### How it works
+
+- `sign_in_as_clerk` calls `build_clerk_mock` to construct a fake `Clerk::Proxy`-like `OpenStruct` and stores it in `Thread.current[:fake_clerk]`.
+- `FakeClerkMiddleware` (registered in `config/initializers/test_clerk_middleware.rb`) reads the thread-local on each request and injects it as `env["clerk"]`.
+- System tests (real browser) use a cookie-based store: `ApplicationSystemTestCase` overrides `sign_in_as_clerk` to call `FakeClerkMiddleware.store_session(key, mock)` and set a `_clerk_test_key` cookie in the browser.
+- The mock user object uses `OpenStruct` with attribute methods (`.verification&.status`, `.provider`) matching Clerk SDK v5 typed models — **not** plain hash access.
+
+### Policy requirements for routes
+
+| Policy | Required providers | 2FA |
+|---|---|---|
+| `:candidate_submit` | email **or** linkedin | — |
+| `:candidate_paid` | email **and** linkedin | — |
+| `:recruiter` | linkedin | — |
+| `:admin` | email + linkedin + github | required |
+
+---
+
 ## Tools & CI Integration
 
 ### Recommended Testing Tools

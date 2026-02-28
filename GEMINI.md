@@ -103,6 +103,8 @@ Deployment is automatic via Render.com when pushing to the main branch. The `ren
 
 ### Environment Variables
 Key variables defined in `web/.env.example`:
+- `CLERK_SECRET_KEY`: Clerk Backend API secret key (required; format: `sk_test_...` / `sk_live_...`)
+- `CLERK_PUBLISHABLE_KEY`: Clerk frontend publishable key (required; format: `pk_test_...` / `pk_live_...`)
 - `PUBLIC_MIN_REVIEWS`: Minimum reviews threshold for public display (default: 5)
 - `SUBMISSION_EMAIL_HMAC_PEPPER`: Cryptographic pepper for email hashing
 - `LINKEDIN_FETCH_TIMEOUT`: Timeout for LinkedIn verification requests
@@ -135,7 +137,7 @@ The migration includes comprehensive check constraints for data integrity:
 - Verification methods: li|email for identity challenges
 
 ### Admin Interface
-Admin functions accessible at `/admin/` with basic auth (development defaults: mod/mod). Includes:
+Admin functions accessible at `/admin/`, protected by Clerk authentication. The signed-in user must have email + LinkedIn + GitHub connected and 2FA enabled (`require_admin!` policy). Includes:
 - Review moderation queue
 - Response management for recruiter replies
 - Dashboard with key metrics
@@ -150,9 +152,20 @@ Admin functions accessible at `/admin/` with basic auth (development defaults: m
 
 Tests are primarily integration tests focusing on user flows:
 - Site endpoint functionality
-- Admin moderation workflows  
+- Admin moderation workflows
 - Recruiter profile and review JSON APIs
 - Locale persistence
 - Response creation and management
 
-Use `rails test` to run the full test suite. Tests use Rails' built-in Minitest framework with parallel execution enabled.
+Use `PARALLEL_WORKERS=1 bundle exec rails test` to run the full test suite (`PARALLEL_WORKERS=1` avoids Ruby/pg segfaults). Tests use Rails' built-in Minitest framework.
+
+### Auth in Tests
+Use `ClerkTestHelper#sign_in_as_clerk` to simulate an authenticated Clerk session:
+
+```ruby
+sign_in_as_clerk(role: :candidate, providers: [:email])           # review submission
+sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: true)  # admin
+sign_out_clerk   # clear session
+```
+
+`FakeClerkMiddleware` (injected in test env) intercepts requests and sets `env["clerk"]` from thread-local state. System tests use a cookie-based store instead (`_clerk_test_key`).

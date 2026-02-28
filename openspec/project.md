@@ -12,9 +12,10 @@ Recruiter-Rankings.com is a privacy-focused platform for de-identified recruiter
 - **Database**: PostgreSQL (managed via Render.com)
 - **Server**: Puma web server
 - **Asset Pipeline**: Propshaft (modern Rails asset management)
-- **Key Gems**: 
+- **Key Gems**:
   - `pg` (PostgreSQL adapter)
   - `rack-attack` (rate limiting)
+  - `clerk-sdk-ruby-backend` (Clerk identity provider SDK)
   - `pay` + `paddle` (payment processing)
   - `jekyll` (static site integration)
   - `faker` (seed data generation)
@@ -63,12 +64,16 @@ Recruiter-Rankings.com is a privacy-focused platform for de-identified recruiter
 
 #### Role-Based Access Control
 - **Roles**: candidate, recruiter, moderator, admin
-- **Protected Namespaces**: Admin interface at `/admin/` with basic auth
+- **Identity Provider**: Clerk (hosted sign-in, JWT session tokens, provider verification)
+- **Auth abstraction**: `AuthenticationService` wraps Clerk SDK; `ClerkAuthenticatable` + `AuthPolicy` concerns gate controllers
+- **Policy requirements**: `:candidate_submit` (email or LinkedIn), `:admin` (email + LinkedIn + GitHub + 2FA)
+- **Protected Namespaces**: Admin interface at `/admin/` gated by `require_admin!` (full Clerk credentials)
 - **Moderation Pipeline**: pending → approved → public (or removed/flagged)
 
 ### Testing Strategy
 
 - **Framework**: Minitest (Rails built-in)
+- **Auth in tests**: `ClerkTestHelper#sign_in_as_clerk(role:, providers:, two_factor:)` — injects a fake Clerk session; `FakeClerkMiddleware` swaps the real Clerk middleware in test env
 - **Test Types**: Primarily integration tests covering user flows
 - **Key Coverage Areas**:
   - Site endpoint functionality
@@ -137,7 +142,7 @@ Recruiter-Rankings.com is a privacy-focused platform for de-identified recruiter
 - **Rate Limits**: ≤10 reviews per 24 hours per IP
 - **Minimum Account Age**: Required prevent abuse
 - **Approval Required**: All reviews need moderator approval (except demo mode)
-- **Admin Access**: Basic HTTP auth on `/admin/*` namespace
+- **Admin Access**: Clerk auth on `/admin/*` (email + LinkedIn + GitHub + 2FA required)
 
 ### Regulatory & Privacy
 - **k-Anonymity**: No aggregate data displayed below minimum thresholds
@@ -148,6 +153,7 @@ Recruiter-Rankings.com is a privacy-focused platform for de-identified recruiter
 ## External Dependencies
 
 ### Third-Party Services
+- **Clerk**: Identity provider (hosted sign-in UI, JWT sessions, OAuth connections for LinkedIn/GitHub/email). See `GEMINI.md` for required env vars.
 - **LinkedIn**: Public profile scraping for verification (no API usage)
 - **Render.com**: Hosting platform with managed PostgreSQL
 - **Paddle**: Payment processing via Pay gem
