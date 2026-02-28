@@ -33,9 +33,9 @@ class AuthenticationService
 
     case provider
     when :email
-      clerk_user.email_addresses.any? { |e| e["verification"]["status"] == "verified" }
+      clerk_user.email_addresses.any? { |e| e.verification&.status == "verified" }
     when :linkedin, :github
-      clerk_user.external_accounts.any? { |a| a["provider"] == provider.to_s }
+      clerk_user.external_accounts.any? { |a| a.provider == provider.to_s }
     else
       false
     end

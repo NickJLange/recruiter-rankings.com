@@ -33,11 +33,11 @@ module ClerkTestHelper
 
     external_accounts = providers.filter_map do |p|
       next if p == :email
-      { "provider" => p.to_s, "verification" => { "status" => "verified" } }
+      OpenStruct.new(provider: p.to_s)
     end
 
     email_addresses = if providers.include?(:email)
-      [{ "email_address" => "test+#{user_id}@example.com", "verification" => { "status" => "verified" } }]
+      [OpenStruct.new(verification: OpenStruct.new(status: "verified"))]
     else
       []
     end
