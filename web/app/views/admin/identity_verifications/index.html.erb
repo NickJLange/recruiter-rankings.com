@@ -1,0 +1,55 @@
+<h1>Identity Verification Queue</h1>
+
+<p>Showing pending challenges (not yet verified, not expired). <%= @pending.size %> total.</p>
+
+<% if @pending.empty? %>
+  <p style="color:var(--muted);">No pending verifications.</p>
+<% else %>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Created</th>
+        <th>Expires</th>
+        <th>Subject</th>
+        <th>Token</th>
+        <th>LinkedIn URL</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @pending.each do |challenge| %>
+        <tr>
+          <td><%= challenge.id %></td>
+          <td><%= challenge.created_at.strftime("%Y-%m-%d %H:%M") %></td>
+          <td><%= challenge.expires_at.strftime("%Y-%m-%d %H:%M") %></td>
+          <td>
+            <%= challenge.subject_type %>#<%= challenge.subject_id %>
+            <% if challenge.subject.respond_to?(:name) %>
+              — <%= challenge.subject.name %>
+            <% end %>
+          </td>
+          <td style="font-family:monospace; font-size:0.8rem; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            <%= challenge.token %>
+          </td>
+          <td>
+            <% linkedin_url = challenge.subject.try(:linkedin_url).presence %>
+            <% if linkedin_url %>
+              <a href="<%= linkedin_url %>" target="_blank" rel="noopener noreferrer" style="font-size:0.875rem;">View profile</a>
+            <% else %>
+              <span style="color:var(--muted); font-size:0.875rem;">—</span>
+            <% end %>
+          </td>
+          <td>
+            <%= form_with url: approve_admin_identity_verification_path(challenge), method: :patch, style: "display:inline-block;", data: { turbo: false } do %>
+              <button type="submit">Approve</button>
+            <% end %>
+            <%= form_with url: reject_admin_identity_verification_path(challenge), method: :patch, style: "display:inline-block; margin-left:6px;", data: { turbo: false } do %>
+              <button type="submit" data-confirm="Reject and delete this challenge?">Reject</button>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>

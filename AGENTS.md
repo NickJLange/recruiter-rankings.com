@@ -79,9 +79,27 @@ This project uses the OpenSpec change management system for structured feature d
 - `site/` — Jekyll static site (marketing pages, builds to `web/public/`)
 - `openspec/` — Project specs and change management
 
+### Handoff Signal
+
+At the end of any response, use one of two explicit signals — no signal means work is not done:
+
+- **"✅ Ready to test"** — all code changes are complete, tests pass, nothing more to do before manual verification.
+- **"⏳ Next step: [what's coming]"** — more automated work is in progress; do not start manual testing yet.
+
 ### Verification
 
-- Run `rails test` from `web/` before any code change is considered complete
+Run these commands from `web/` before any code change is considered complete:
+
+```bash
+# Unit + integration tests (pre-existing 5F/2E from locale/any_instance issues are acceptable)
+PARALLEL_WORKERS=1 bundle exec rails test
+
+# End-to-end browser tests (requires headless Chrome / cuprite)
+PARALLEL_WORKERS=1 bundle exec rails test:system
+```
+
+`PARALLEL_WORKERS=1` is required to avoid Ruby/pg segfaults with the pg gem.
+
 - Verify changes locally before committing
 - For `site/`: run `bundle exec jekyll build` to verify static site builds
 

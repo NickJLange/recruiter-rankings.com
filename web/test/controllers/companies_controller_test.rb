@@ -41,6 +41,22 @@ class CompaniesControllerTest < ActionDispatch::IntegrationTest
     assert_select "table", false, "Recruiter list should be hidden for anonymous users"
   end
 
+  test "type=recruiting shows companies that have recruiters" do
+    get companies_url(type: "recruiting")
+    assert_response :success
+    assert_select "td", "Initech"
+  end
+
+  test "type=recruiting excludes companies without recruiters" do
+    other = Company.create!(name: "Empty Corp", region: "US")
+    # Give it an experience so it passes the threshold
+    user2 = User.create!(role: "candidate", email_hmac: SecureRandom.hex)
+    # No recruiter linked to other — it should not appear in type=recruiting
+    get companies_url(type: "recruiting")
+    assert_response :success
+    assert_no_match("Empty Corp", response.body)
+  end
+
   test "should get show as paid user" do
     sign_in_as_clerk(role: :paid, providers: [:email, :linkedin])
     

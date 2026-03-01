@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   root "pages#home"
   get '/about',    to: 'pages#about'
   get '/policies', to: 'pages#policies'
+  get '/settings', to: 'pages#settings'
   get '/search',   to: 'search#index'
 
   # Legacy /recruiters URL — redirect to /person (SEO-safe 301, no named helper)
@@ -25,7 +26,6 @@ Rails.application.routes.draw do
   post "/claim_identity",        to: "claim_identity#create", as: :claim_identity
   post "/claim_identity/verify", to: "claim_identity#verify", as: :verify_claim_identity
 
-  resources :identity_verifications, only: [:new, :create, :show]
   resource :subscription, only: [:new, :create]
 
   get "/sitemap.xml", to: "sitemaps#show", defaults: { format: :xml }

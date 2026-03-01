@@ -1,0 +1,73 @@
+<% content_for :title, "Settings — Recruiter Rankings" %>
+
+<div style="max-width:600px; margin:0 auto; padding:32px 0 64px;">
+  <h1 style="font-size:1.5rem; font-weight:700; margin:0 0 24px;">Settings</h1>
+
+  <div id="settings-loading" style="color:var(--muted);">Loading account details…</div>
+
+  <div id="settings-content" hidden>
+    <section style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 24px; margin-bottom:20px;">
+      <h2 style="font-size:1rem; font-weight:600; margin:0 0 16px;">Account</h2>
+      <dl style="margin:0; display:grid; grid-template-columns:max-content 1fr; gap:8px 16px; align-items:baseline;">
+        <dt style="color:var(--muted); font-size:0.875rem;">Name</dt>
+        <dd id="settings-name" style="margin:0; font-weight:500;"></dd>
+        <dt style="color:var(--muted); font-size:0.875rem;">Email</dt>
+        <dd id="settings-email" style="margin:0;"></dd>
+      </dl>
+    </section>
+
+    <section style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 24px; margin-bottom:20px;">
+      <h2 style="font-size:1rem; font-weight:600; margin:0 0 16px;">Connected accounts</h2>
+      <ul id="settings-providers" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;"></ul>
+    </section>
+
+    <section style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 24px;">
+      <h2 style="font-size:1rem; font-weight:600; margin:0 0 12px;">Sign out</h2>
+      <p style="margin:0 0 12px; color:var(--muted); font-size:0.875rem;">You will be signed out on all devices.</p>
+      <button onclick="window.Clerk.signOut().then(function(){ location.href = '/'; }); return false;"
+              style="padding:8px 18px; border-radius:6px; background:var(--accent); color:#fff; font-weight:600; border:none; cursor:pointer; font-size:0.9rem;">
+        Sign out
+      </button>
+    </section>
+  </div>
+</div>
+
+<script>
+  (function waitForClerk() {
+    if (window.Clerk && window.Clerk.user) {
+      renderSettings(window.Clerk.user);
+    } else if (window.Clerk) {
+      window.Clerk.load().then(function() {
+        if (window.Clerk.user) renderSettings(window.Clerk.user);
+        else location.href = '/';
+      });
+    } else {
+      setTimeout(waitForClerk, 100);
+    }
+  })();
+
+  function renderSettings(user) {
+    var name = [user.firstName, user.lastName].filter(Boolean).join(' ')
+              || (user.emailAddresses[0] || {}).emailAddress || 'Unknown';
+    var email = (user.emailAddresses[0] || {}).emailAddress || '—';
+
+    document.getElementById('settings-name').textContent = name;
+    document.getElementById('settings-email').textContent = email;
+
+    var list = document.getElementById('settings-providers');
+    var accounts = user.externalAccounts || [];
+    if (accounts.length === 0) {
+      list.innerHTML = '<li style="color:var(--muted); font-size:0.875rem;">No connected accounts.</li>';
+    } else {
+      list.innerHTML = accounts.map(function(acct) {
+        var provider = acct.provider || 'unknown';
+        var label = provider.charAt(0).toUpperCase() + provider.slice(1);
+        var username = acct.username || acct.emailAddress || '';
+        return '<li style="font-size:0.875rem;">' + label + (username ? ' — ' + username : '') + '</li>';
+      }).join('');
+    }
+
+    document.getElementById('settings-loading').hidden = true;
+    document.getElementById('settings-content').hidden = false;
+  }
+</script>

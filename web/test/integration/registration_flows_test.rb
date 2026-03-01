@@ -19,34 +19,25 @@ class RegistrationFlowsTest < ActionDispatch::IntegrationTest
     }
 
     assert_response :success
-    assert_select "h1", "Verification instructions"
+    assert_select "h1", "Identity claim submitted"
 
-    # Extract challenge ID from the form or URL (simulated here by querying DB)
+    # Challenge should be created in DB
     challenge = IdentityChallenge.last
     assert_equal "Recruiter", challenge.subject_type
     assert_equal @recruiter.id, challenge.subject_id
 
-    # 2. Verify claim (Mocking LinkedInFetcher to return the token)
-    token = "RR-VERIFY-#{challenge.token_hash}"
+    # linkedin_url should be persisted on the recruiter
+    assert_equal "https://linkedin.com/in/miles", @recruiter.reload.linkedin_url
 
-    # Stub LinkedinFetcher.new to return a mock that yields the token
-    mock_fetcher = Minitest::Mock.new
-    mock_fetcher.expect(:fetch, "<html><body>Profile content with #{token}</body></html>", [String])
+    # 2. Verify endpoint now queues the claim for manual admin review
+    post "/claim_identity/verify", params: {
+      challenge_id: challenge.id,
+      linkedin_url: "https://linkedin.com/in/miles"
+    }
 
-    LinkedinFetcher.stub(:new, mock_fetcher) do
-      post "/claim_identity/verify", params: {
-        challenge_id: challenge.id,
-        linkedin_url: "https://linkedin.com/in/miles"
-      }
-
-      assert_redirected_to recruiter_path("A1B2C3D4")
-      follow_redirect!
-      assert_select ".alert-info", "Recruiter verified."
-
-      assert @recruiter.reload.verified_at.present?
-    end
-
-    mock_fetcher.verify
+    assert_redirected_to root_path
+    follow_redirect!
+    assert_match(/queue/i, flash[:notice])
   end
 
   test "review submission creates user record for clerk identity" do

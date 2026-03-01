@@ -20,8 +20,8 @@ class CompaniesController < ApplicationController
       scope = scope.where("companies.region ILIKE ?", "%#{@region}%")
     end
     if @type == "recruiting"
-      # Companies that have acted as recruiting agencies (recruiting_roles)
-      scope = scope.where(id: Role.select(:recruiting_company_id))
+      # Companies that have recruiters (any company with a recruiter IS a recruiting company)
+      scope = scope.where(id: Recruiter.where.not(company_id: nil).select(:company_id))
     elsif @type == "hiring"
       # Companies that have been hired for (target_roles)
       scope = scope.where(id: Role.select(:target_company_id))
@@ -87,7 +87,7 @@ class CompaniesController < ApplicationController
       dates = raw_data.keys.map(&:first).uniq.sort
       titles = raw_data.keys.map(&:last).uniq.sort
 
-      @chart_labels = dates.map { |d| d.strftime("Q%q %Y") }
+      @chart_labels = dates.map { |d| "Q#{((d.month - 1) / 3) + 1} #{d.year}" }
       
       @chart_datasets = titles.map do |title|
         data_points = dates.map do |date|

@@ -1,48 +1,46 @@
 class ClaimIdentityController < ApplicationController
   def new
-    @recruiter = Recruiter.find_by(public_slug: params[:recruiter_slug])
+    @subject_type  = params[:subject_type].presence || "recruiter"
+    @recruiter_slug = params[:recruiter_slug].to_s
+    @recruiter = Recruiter.find_by(public_slug: @recruiter_slug)
   end
 
   def create
-    @recruiter = Recruiter.find_by(public_slug: params[:claim][:recruiter_slug])
-    # Create challenge
-    # Ideally should use current user, but test implies implicit user or session?
-    # Test passes email: "miles@example.com" in params.
-    
-    # Simple implementation based on test
-    _challenge = IdentityChallenge.create!(
-      subject: @recruiter, # Polymorphic subject
-      token: SecureRandom.hex(16),
-      token_hash: SecureRandom.hex(16), # Simplified
-      expires_at: 1.day.from_now
+    @subject_type   = params.dig(:claim, :subject_type).to_s
+    @recruiter_slug = params.dig(:claim, :recruiter_slug).to_s
+    @linkedin_url   = params.dig(:claim, :linkedin_url).to_s
+
+    @recruiter = Recruiter.find_by(public_slug: @recruiter_slug)
+
+    if @subject_type == "recruiter" && @recruiter.nil?
+      flash.now[:alert] = "Recruiter not found. Check the slug and try again."
+      return render :new, status: :unprocessable_entity
+    end
+
+    subject = @recruiter
+
+    # Persist the linkedin_url on the recruiter so admins can check it manually.
+    @recruiter.update!(linkedin_url: @linkedin_url) if @recruiter&.linkedin_url.blank? && @linkedin_url.present?
+
+    # Generate a cleartext token to paste into LinkedIn; store its hash for DB uniqueness/lookup.
+    raw_token  = SecureRandom.hex(16)
+    token_hash = Digest::SHA256.hexdigest(raw_token)
+    paste_token = "RR-VERIFY-#{raw_token}"
+
+    challenge = IdentityChallenge.create!(
+      subject:    subject,
+      token:      paste_token,
+      token_hash: token_hash,
+      expires_at: 7.days.from_now
     )
-    
-    # In a real app we would email instructions.
-    # Here we just render.
-    render plain: "<h1>Verification instructions</h1>"
+
+    @paste_token  = paste_token
+    @challenge_id = challenge.id
+    render :instructions
   end
 
   def verify
-    challenge = IdentityChallenge.find(params[:challenge_id])
-    
-    # Verify logic (simplified for test pass)
-    content = linkedin_fetcher.fetch(params[:linkedin_url])
-    
-    # Check if token is in content (Test mock returns content with token)
-    expected_token = "RR-VERIFY-#{challenge.token_hash}"
-    
-    if content.include?(expected_token)
-      challenge.subject.update!(verified_at: Time.current)
-      flash[:notice] = "Recruiter verified."
-      redirect_to recruiter_path(challenge.subject.public_slug)
-    else
-      redirect_to new_claim_identity_path, alert: "Verification failed."
-    end
-  end
-
-  private
-
-  def linkedin_fetcher
-    @linkedin_fetcher ||= LinkedinFetcher.new
+    flash[:notice] = "Your claim is in the queue. An admin will verify your LinkedIn profile within 7 days."
+    redirect_to root_path
   end
 end

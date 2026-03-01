@@ -1,19 +1,16 @@
-<h1>Verification instructions</h1>
+<% content_for :title, "Claim Identity — Recruiter Rankings" %>
 
-<p>Paste this token into your LinkedIn profile (About, Featured, or Website). Make sure it is public/visible:</p>
+<div style="max-width:600px; margin:0 auto; padding:32px 0 64px;">
+  <h1 style="font-size:1.5rem; font-weight:700; margin:0 0 16px;">Identity claim submitted</h1>
 
-<pre style="background: var(--surface); border:1px solid var(--border); padding:12px; border-radius:8px; overflow:auto;">{{ <%= @paste_token %> }}</pre>
+  <p>Paste this token into your LinkedIn profile (About section, Featured, or Website field). Make sure it is publicly visible:</p>
 
-<p>After saving your profile, click Verify:</p>
+  <pre style="background:var(--surface); border:1px solid var(--border); padding:12px; border-radius:8px; overflow:auto; user-select:all;"><%= @paste_token %></pre>
 
-<%= form_with url: verify_claim_identity_path do |f| %>
-  <%= hidden_field_tag :challenge_id, @challenge_id %>
-  <div>
-    <label for="verify_linkedin_url">LinkedIn URL</label><br>
-    <input type="url" id="verify_linkedin_url" name="linkedin_url" value="<%= h @linkedin_url %>" required>
+  <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin-top:20px;">
+    <p style="margin:0; color:var(--muted); font-size:0.9rem;">
+      Once you've added the token to your profile, your claim is in the queue.
+      An admin will verify your LinkedIn profile within 7 days and notify you if approved.
+    </p>
   </div>
-  <div style="margin-top: 10px;">
-    <button type="submit">Verify</button>
-  </div>
-<% end %>
-
+</div>
