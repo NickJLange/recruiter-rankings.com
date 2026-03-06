@@ -9,7 +9,7 @@ namespace :db do
       end
 
       puts "Starting backup for #{db_name}..."
-      
+
       # Use the same logic as the job, but we can call it directly
       storage_adapter = if ENV['AWS_BUCKET'].present?
         BackupStorage::S3Adapter.new(
@@ -33,20 +33,42 @@ namespace :db do
       puts "Stored at: #{result[:storage_path]}"
     end
 
-    desc "Restore a database backup"
-    task :restore, [:filename] => :environment do |t, args|
-      filename = args[:filename]
-      if filename.blank?
-        puts "Error: filename is required. Usage: rake db:backup:restore[filename.sql.gz.enc]"
-        exit 1
+    desc "Restore a database backup from R2. Usage: rake 'db:backup:restore[s3_key,target_db_url]'"
+    task :restore, [:s3_key, :target_db_url] => :environment do |_t, args|
+      require "shellwords"
+
+      s3_key        = args[:s3_key].presence
+      target_db_url = args[:target_db_url].presence || ENV["DATABASE_URL"]
+
+      unless s3_key
+        abort "Error: s3_key required.\n" \
+              "Usage: rake 'db:backup:restore[backup-YYYYMMDD-HHMMSS.sql.gz,postgres://user:pass@host/db]'"
+      end
+      abort "Error: target_db_url required (or set DATABASE_URL)" unless target_db_url
+
+      bucket       = ENV.fetch("R2_BUCKET")       { abort "Error: R2_BUCKET must be set" }
+      endpoint_url = ENV.fetch("R2_ENDPOINT_URL") { abort "Error: R2_ENDPOINT_URL must be set" }
+
+      # Map R2_* credential names to the AWS_* names the aws CLI expects
+      ENV["AWS_ACCESS_KEY_ID"]     = ENV["R2_ACCESS_KEY_ID"]     if ENV["R2_ACCESS_KEY_ID"]
+      ENV["AWS_SECRET_ACCESS_KEY"] = ENV["R2_SECRET_ACCESS_KEY"] if ENV["R2_SECRET_ACCESS_KEY"]
+      ENV["AWS_DEFAULT_REGION"]    = "auto"
+
+      redacted_url = target_db_url.sub(%r{:[^:@/]+@}, ":***@")
+      puts "Downloading s3://#{bucket}/#{s3_key} and restoring to #{redacted_url} ..."
+
+      restore_cmd = "aws s3 cp s3://#{Shellwords.escape("#{bucket}/#{s3_key}")} -" \
+                    " --endpoint-url #{Shellwords.escape(endpoint_url)}" \
+                    " | gunzip | psql #{Shellwords.escape(target_db_url)}"
+      system(restore_cmd) or abort("Restore failed")
+
+      puts "\nVerifying row counts:"
+      %w[experiences recruiters users].each do |table|
+        count = `psql #{Shellwords.escape(target_db_url)} -t -A -c "SELECT COUNT(*) FROM #{table};"`.strip
+        puts "  #{table}: #{count}"
       end
 
-      # Restore logic will be implemented here
-      # 1. Download from storage
-      # 2. Decrypt
-      # 3. Gunzip and pg_restore
-      puts "Restore logic for #{filename} not yet fully implemented in CLI helper."
-      puts "Manual restore: openssl enc -d ... | gunzip | psql ..."
+      puts "\nRestore complete."
     end
   end
 end

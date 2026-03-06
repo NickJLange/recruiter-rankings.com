@@ -1,0 +1,97 @@
+name: Monthly Restore Test
+
+# Daily backups are handled by the RPi4 container (scripts/).
+# This workflow only runs an independent monthly restore verification in CI.
+
+on:
+  schedule:
+    - cron: '0 3 1 * *'   # 1st of each month, 3 AM UTC
+  workflow_dispatch:
+
+jobs:
+  restore-test:
+    name: Restore Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: rr_restore_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpassword
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      RESTORE_DB_URL: postgres://postgres:testpassword@localhost:5432/rr_restore_test
+
+    steps:
+      - name: Install tools
+        run: |
+          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y rclone
+
+      - name: Find latest backup in R2
+        id: find-backup
+        env:
+          RCLONE_CONFIG_R2_TYPE: s3
+          RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+          RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT_URL }}
+          RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
+        run: |
+          LATEST=$(rclone lsf "r2:${{ secrets.R2_BUCKET }}/" \
+            | grep 'backup-' | sort | tail -1)
+
+          if [[ -z "${LATEST}" ]]; then
+            echo "::error::No backups found in R2 bucket"
+            exit 1
+          fi
+
+          echo "Latest backup: ${LATEST}"
+          echo "filename=${LATEST}" >> "$GITHUB_OUTPUT"
+
+      - name: Download and restore
+        env:
+          RCLONE_CONFIG_R2_TYPE: s3
+          RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+          RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT_URL }}
+          RCLONE_CONFIG_R2_NO_CHECK_BUCKET: "true"
+        run: |
+          rclone cat "r2:${{ secrets.R2_BUCKET }}/${{ steps.find-backup.outputs.filename }}" \
+            | gunzip \
+            | psql "${RESTORE_DB_URL}"
+
+      - name: Verify row counts
+        run: |
+          EXPERIENCES=$(psql "${RESTORE_DB_URL}" -t -A -c "SELECT COUNT(*) FROM experiences;")
+          RECRUITERS=$(psql "${RESTORE_DB_URL}"  -t -A -c "SELECT COUNT(*) FROM recruiters;")
+          USERS=$(psql "${RESTORE_DB_URL}"       -t -A -c "SELECT COUNT(*) FROM users;")
+
+          echo "### Monthly Restore Verification" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Table | Count |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|------:|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| experiences | ${EXPERIENCES} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| recruiters  | ${RECRUITERS}  |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| users       | ${USERS}       |" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source: ${{ steps.find-backup.outputs.filename }}" >> "$GITHUB_STEP_SUMMARY"
+
+          for COUNT in "${EXPERIENCES}" "${RECRUITERS}" "${USERS}"; do
+            if [[ -z "${COUNT}" || "${COUNT}" -le 0 ]]; then
+              echo "::error::Restore verification failed — empty table (count: ${COUNT})"
+              exit 1
+            fi
+          done
+
+          echo "Restore verification passed."
