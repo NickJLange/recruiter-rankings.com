@@ -110,6 +110,7 @@ Key variables defined in `web/.env.example`:
 - `LINKEDIN_FETCH_TIMEOUT`: Timeout for LinkedIn verification requests
 - `DEMO_AUTO_APPROVE`: Auto-approve reviews in demo mode
 - `CANONICAL_URL`: Base URL for sitemap and meta tags
+- `BYPASS_ADMIN_PROVIDERS`: Set to `true` in development to skip the email+LinkedIn+GitHub+2FA check for admin access (ignored in production)
 
 ### Moderation & Privacy
 - Reviews require approval before public display (unless `DEMO_AUTO_APPROVE=true`)

@@ -30,6 +30,7 @@
 en:
   nav:
     home: "Home"
+    search: "Search"
     about: "About"
     policies: "Policies"
     recruiters: "Recruiters"
@@ -67,6 +68,29 @@ en:
       your_experience: "Your experience"
       email_optional: "Email (optional; used for dedupe, not shown)"
       submit: "Submit review"
+      dimensions_section: "Rate specific dimensions (optional)"
+      dimensions_hint: "Skip any you can't rate"
+      dimension_responsiveness: "Responsiveness"
+      dimension_role_clarity: "Role clarity"
+      dimension_candidate_understanding: "Candidate understanding"
+      dimension_fairness_inclusivity: "Fairness & inclusivity"
+      dimension_timeline_management: "Timeline management"
+      dimension_feedback_quality: "Feedback quality"
+      dimension_professionalism_respect: "Professionalism & respect"
+      dimension_job_match_quality: "Job match quality"
+      job_section: "Job info (optional)"
+      job_title: "Job title"
+      job_min_comp: "Min compensation ($)"
+      job_max_comp: "Max compensation ($)"
+      target_company: "Target company"
+      occurred_at: "When did this happen?"
+      outcome_section: "Outcome (optional)"
+      would_recommend: "I would recommend this recruiter"
+      outcome: "How did it go?"
+      outcome_hired: "Hired"
+      outcome_declined_offer: "Declined offer"
+      outcome_ghosted: "Ghosted"
+      outcome_still_interviewing: "Still interviewing"
   admin:
     reviews:
       index:
@@ -77,6 +101,25 @@ en:
         post_response: "Post response"
         response_visible: "visible"
         response_hidden: "hidden"
+  pages:
+    home:
+      overline: "Recruiter Rankings"
+      headline_1: "You are the product."
+      headline_2: "At least enjoy the ride."
+      search_placeholder: "Search for a recruiter, firm, or agency…"
+      trust_badge: "100% Anonymous. No tracking pixels. No login required."
+      how_it_works: "How it works"
+      anonymous_title: "Anonymous by design"
+      anonymous_body: "Reviews are de-identified before publication — no names, no emails, just standardised quality scores."
+      reply_title: "Right-of-reply"
+      reply_body: "Verified recruiters can respond to reviews before they go public, keeping the record fair."
+      kanon_title: "K-anonymity threshold"
+      kanon_body: "Recruiter profiles appear only once enough reviews exist, preventing easy re-identification."
+      top_companies: "Top companies by reviews"
+      no_companies: "No company data yet."
+      reviews_count:
+        one: "1 review"
+        other: "%{count} reviews"
   claim_identity:
     new:
       title: "Claim identity"

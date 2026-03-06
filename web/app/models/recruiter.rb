@@ -9,6 +9,10 @@ class Recruiter < ApplicationRecord
   validates :name, presence: true
   validates :public_slug, presence: true, uniqueness: true
   validates :email_hmac, uniqueness: true, allow_nil: true
+  validates :linkedin_url, format: {
+    with: %r{\Ahttps?://(www\.)?linkedin\.com/},
+    message: "must be a linkedin.com URL"
+  }, allow_blank: true
 
   # Override to use public_slug for routing
   def to_param

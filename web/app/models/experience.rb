@@ -2,8 +2,11 @@ class Experience < ApplicationRecord
   belongs_to :interaction
   has_many :review_metrics, dependent: :destroy
 
+  OUTCOMES = %w[hired declined_offer ghosted still_interviewing].freeze
+
   validates :rating, presence: true, inclusion: { in: 1..5 }
   validates :status, presence: true
+  validates :outcome, inclusion: { in: OUTCOMES }, allow_nil: true
 
   scope :approved_aggregates_by_recruiter, -> {
     where(status: "approved")

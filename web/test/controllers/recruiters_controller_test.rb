@@ -65,6 +65,40 @@ class RecruitersControllerTest < ActionDispatch::IntegrationTest
     assert_select "h2", text: "Recent reviews"
   end
 
+  test "create succeeds with name and linkedin_url" do
+    sign_in_as_clerk(role: :candidate, providers: [:email])
+
+    post recruiters_url, params: {
+      recruiter: { name: "Jane Smith", linkedin_url: "https://linkedin.com/in/jane-smith" }
+    }
+
+    created = Recruiter.find_by(name: "Jane Smith")
+    assert created, "Expected recruiter to be created"
+    assert_redirected_to new_recruiter_review_path(created)
+  end
+
+  test "create fails without name" do
+    sign_in_as_clerk(role: :candidate, providers: [:email])
+
+    post recruiters_url, params: {
+      recruiter: { name: "", linkedin_url: "https://linkedin.com/in/jane-smith" }
+    }
+
+    assert_response :unprocessable_entity
+    assert_not Recruiter.exists?(linkedin_url: "https://linkedin.com/in/jane-smith")
+  end
+
+  test "create rejects non-linkedin URL" do
+    sign_in_as_clerk(role: :candidate, providers: [:email])
+
+    post recruiters_url, params: {
+      recruiter: { name: "Jane Smith", linkedin_url: "https://example.com/in/jane-smith" }
+    }
+
+    assert_response :unprocessable_entity
+    assert_not Recruiter.exists?(name: "Jane Smith")
+  end
+
   private
 
   def get_json_response

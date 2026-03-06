@@ -30,6 +30,8 @@ jobs:
       DB_HOST: localhost
       DB_USER: postgres
       DB_PASSWORD: password
+      SUBMISSION_EMAIL_HMAC_PEPPER: test-pepper
+      CANONICAL_URL: http://localhost:3000
 
     steps:
       - uses: actions/checkout@v4
@@ -47,10 +49,12 @@ jobs:
         run: |
           cd web
           bin/rails db:prepare
-      - name: Build Verification
+      - name: Run Tests
         run: |
           cd web
-          bin/rails runner "puts 'App boots successfully'"
+          PARALLEL_WORKERS=1 bundle exec rails test
+      # System tests require a display/Chrome driver — skip in CI for now
+      # TODO: add headless Chrome setup and enable rails test:system
 
   deploy:
     name: Trigger Render Deploy

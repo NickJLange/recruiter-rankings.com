@@ -1,0 +1,76 @@
+<% content_for :title, "Recruiter Rankings — Honest signals for tech job seekers" %>
+<% content_for :meta_description, "De-identified recruiter quality scores with right-of-reply. Browse ratings, share your experience." %>
+
+<%# Hero — fills most of viewport, content vertically centered %>
+<section style="text-align:center; min-height: calc(80vh - 64px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 0;">
+  <p style="font-size:0.75rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin:0 0 16px;">
+    <%= t('pages.home.overline') %>
+  </p>
+  <h1 style="font-size: 2.8rem; line-height: 1.15; margin: 0 0 24px; font-weight: 800;">
+    <span style="color:var(--accent-text);"><%= t('pages.home.headline_1') %></span><br>
+    <%= t('pages.home.headline_2') %>
+  </h1>
+
+  <%# Search bar %>
+  <%= form_with url: "/search", method: :get, local: true,
+        style: "display:flex; gap:8px; max-width:560px; margin:0 auto 20px;" do |f| %>
+    <%= f.search_field :q,
+          placeholder: t('pages.home.search_placeholder'),
+          autocomplete: "off",
+          style: "flex:1; padding:11px 14px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:1rem;" %>
+    <%= f.submit t('nav.search', default: 'Search'),
+          style: "padding:11px 20px; border-radius:8px; background:var(--accent); color:#fff; font-weight:600; border:none; cursor:pointer; font-size:1rem;" %>
+  <% end %>
+
+  <p style="font-size:0.85rem; color:var(--muted); margin:0;">
+    🛡 <%= t('pages.home.trust_badge') %>
+  </p>
+</section>
+
+<%# Two-column body %>
+<div style="display:flex; gap:32px; align-items:flex-start; margin-bottom: 48px;">
+
+  <%# Left — How it works %>
+  <div style="flex:2;">
+    <h2 style="font-size:1rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); font-weight:600; margin:0 0 16px;">
+      <%= t('pages.home.how_it_works') %>
+    </h2>
+    <div class="grid" style="gap:16px;">
+      <div class="card">
+        <h3 style="margin:0 0 8px;"><%= t('pages.home.anonymous_title') %></h3>
+        <p style="margin:0; color:var(--muted);"><%= t('pages.home.anonymous_body') %></p>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px;"><%= t('pages.home.reply_title') %></h3>
+        <p style="margin:0; color:var(--muted);"><%= t('pages.home.reply_body') %></p>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 8px;"><%= t('pages.home.kanon_title') %></h3>
+        <p style="margin:0; color:var(--muted);"><%= t('pages.home.kanon_body') %></p>
+      </div>
+    </div>
+  </div>
+
+  <%# Right — Top companies %>
+  <div style="flex:1; min-width:200px;">
+    <h2 style="font-size:1rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); font-weight:600; margin:0 0 16px;">
+      <%= t('pages.home.top_companies') %>
+    </h2>
+    <% if @home_company_stats.any? %>
+      <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;">
+        <% @home_company_stats.each do |company, count| %>
+          <li style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
+            <%= link_to company.name, company_path(company),
+                  style: "color:var(--ink); text-decoration:none; font-weight:500; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" %>
+            <span style="font-size:0.8rem; color:var(--muted); margin-left:8px; white-space:nowrap;">
+              <%= t('pages.home.reviews_count', count: count) %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p style="color:var(--muted); font-size:0.9rem;"><%= t('pages.home.no_companies') %></p>
+    <% end %>
+  </div>
+
+</div>

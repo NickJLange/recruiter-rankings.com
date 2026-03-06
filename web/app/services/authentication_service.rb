@@ -49,6 +49,14 @@ class AuthenticationService
   end
 
   def meets_requirements?(policy_key)
+    # Dev-only escape hatch: set BYPASS_ADMIN_PROVIDERS=true to skip provider/2FA checks.
+    # Never set this in production — the env var is ignored outside development.
+    if policy_key == :admin &&
+        !Rails.env.production? &&
+        ActiveModel::Type::Boolean.new.cast(ENV.fetch("BYPASS_ADMIN_PROVIDERS", "false"))
+      return authenticated?
+    end
+
     reqs = PROVIDER_REQUIREMENTS.fetch(policy_key)
 
     providers_met = if reqs[:any_of]

@@ -22,6 +22,13 @@ class Rack::Attack
     end
   end
 
+  # Throttle search: unauthenticated users only (by IP). Authenticated users are exempt.
+  throttle("search/ip", limit: (ENV["RATE_LIMIT_SEARCH_PER_MIN"] || 20).to_i, period: 1.minute) do |req|
+    if req.get? && req.path == "/search"
+      req.env.dig("clerk")&.user_id.blank? ? req.ip : nil
+    end
+  end
+
   # Basic safelist for healthchecks
   safelist("healthcheck") do |req|
     req.get? && req.path == "/up"

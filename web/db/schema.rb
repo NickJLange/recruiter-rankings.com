@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_21_015622) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_01_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -30,11 +30,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_21_015622) do
     t.text "body"
     t.datetime "created_at", null: false
     t.bigint "interaction_id", null: false
+    t.string "outcome"
     t.integer "rating", null: false
     t.string "status", default: "pending"
     t.datetime "updated_at", null: false
     t.boolean "would_recommend"
     t.index ["interaction_id"], name: "index_experiences_on_interaction_id"
+    t.check_constraint "outcome IS NULL OR (outcome::text = ANY (ARRAY['hired'::character varying, 'declined_offer'::character varying, 'ghosted'::character varying, 'still_interviewing'::character varying]::text[]))", name: "check_experiences_outcome"
     t.check_constraint "rating >= 1 AND rating <= 5", name: "check_experiences_rating_range"
   end
 

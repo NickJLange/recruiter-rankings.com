@@ -13,8 +13,84 @@
     <%= f.text_area :text, rows: 6, required: true %>
   </div>
 
-  <div style="margin-top:10px;">
+  <%# Section A — Dimensional scores (optional) %>
+  <details style="margin-top:16px;">
+    <summary style="cursor:pointer; font-weight:600; font-size:0.95rem; margin-bottom:12px;">
+      <%= t('reviews.new.dimensions_section') %>
+    </summary>
+    <p style="font-size:0.85rem; color:var(--muted); margin:0 0 12px;"><%= t('reviews.new.dimensions_hint') %></p>
+    <% ReviewMetric::DIMENSIONS.keys.each do |dim| %>
+      <div style="margin-bottom:10px; display:flex; align-items:center; gap:12px;">
+        <%= f.label :"dimension_#{dim}", t("reviews.new.dimension_#{dim}"),
+              style: "min-width:200px; font-size:0.9rem;" %>
+        <%= f.number_field :"dimension_#{dim}", in: 1..5, step: 1,
+              placeholder: "1–5",
+              style: "width:70px;" %>
+      </div>
+    <% end %>
+  </details>
+
+  <%# Section B — Job info (optional) %>
+  <details style="margin-top:16px;">
+    <summary style="cursor:pointer; font-weight:600; font-size:0.95rem; margin-bottom:12px;">
+      <%= t('reviews.new.job_section') %>
+    </summary>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div>
+        <%= f.label :role_title, t('reviews.new.job_title'), style: "display:block; font-size:0.9rem;" %><br>
+        <%= f.text_field :role_title, placeholder: "e.g. Senior Software Engineer",
+              style: "width:100%; box-sizing:border-box;" %>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <div style="flex:1;">
+          <%= f.label :role_min_compensation, t('reviews.new.job_min_comp'), style: "display:block; font-size:0.9rem;" %><br>
+          <%= f.number_field :role_min_compensation, placeholder: "e.g. 120000", min: 0,
+                style: "width:100%; box-sizing:border-box;" %>
+        </div>
+        <div style="flex:1;">
+          <%= f.label :role_max_compensation, t('reviews.new.job_max_comp'), style: "display:block; font-size:0.9rem;" %><br>
+          <%= f.number_field :role_max_compensation, placeholder: "e.g. 160000", min: 0,
+                style: "width:100%; box-sizing:border-box;" %>
+        </div>
+      </div>
+      <div>
+        <%= f.label :role_target_company, t('reviews.new.target_company'), style: "display:block; font-size:0.9rem;" %><br>
+        <%= f.text_field :role_target_company, placeholder: "e.g. Acme Corp",
+              style: "width:100%; box-sizing:border-box;" %>
+      </div>
+      <div>
+        <%= f.label :occurred_at, t('reviews.new.occurred_at'), style: "display:block; font-size:0.9rem;" %><br>
+        <%= f.date_field :occurred_at %>
+      </div>
+    </div>
+  </details>
+
+  <%# Section C — Outcome (optional) %>
+  <details style="margin-top:16px;">
+    <summary style="cursor:pointer; font-weight:600; font-size:0.95rem; margin-bottom:12px;">
+      <%= t('reviews.new.outcome_section') %>
+    </summary>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div>
+        <%= f.label :would_recommend do %>
+          <%= f.check_box :would_recommend %>
+          <%= t('reviews.new.would_recommend') %>
+        <% end %>
+      </div>
+      <div>
+        <%= f.label :outcome, t('reviews.new.outcome'), style: "display:block; font-size:0.9rem;" %><br>
+        <%= f.select :outcome, [
+              ["", ""],
+              [t('reviews.new.outcome_hired'), "hired"],
+              [t('reviews.new.outcome_declined_offer'), "declined_offer"],
+              [t('reviews.new.outcome_ghosted'), "ghosted"],
+              [t('reviews.new.outcome_still_interviewing'), "still_interviewing"]
+            ], {}, style: "padding:6px 10px; border-radius:6px; border:1px solid var(--border);" %>
+      </div>
+    </div>
+  </details>
+
+  <div style="margin-top:16px;">
     <%= f.submit t('reviews.new.submit') %>
   </div>
 <% end %>
-
