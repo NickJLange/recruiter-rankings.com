@@ -12,14 +12,14 @@ class ClerkAuthSmokeTest < ApplicationSystemTestCase
   test "recruiter listing loads without auth" do
     visit recruiters_path
     assert_selector "header"
-    assert_selector "a", text: "Share a Review"
+    assert_selector "a", text: "Submit Review"
   end
 
-  test "share a review nav button redirects to recruiter list with prompt" do
+  test "submit review nav button goes to review landing page prompting sign-in" do
     visit recruiters_path
-    click_link "Share a Review"
-    assert_current_path recruiters_path
-    assert_text "Find a recruiter below"
+    click_link "Submit Review"
+    assert_current_path "/reviews/new"
+    assert_text "Sign in to continue"
   end
 
   test "admin requires authentication — redirected when not signed in" do

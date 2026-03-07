@@ -17,7 +17,6 @@ class SearchSystemTest < ApplicationSystemTestCase
     visit "/search"
     fill_in placeholder: /recruiter/i, with: "Hiro"
     click_button "Search"
-    assert_text "Hiro Tanaka"
     assert_text "Globex Recruiting"
   end
 
@@ -41,13 +40,13 @@ class SearchSystemTest < ApplicationSystemTestCase
     fill_in placeholder: /recruiter/i, with: "Hiro"
     find("input[type='submit']").click
     assert_current_path "/search", ignore_query: true
-    assert_text "Hiro Tanaka"
+    assert_text "Globex Recruiting"
   end
 
   test "search result links to recruiter profile" do
     visit "/search?q=Hiro"
-    assert_selector "a", text: "Hiro Tanaka"
-    click_link "Hiro Tanaka"
+    # Unauthenticated users see anonymized display names; find the link by its href instead
+    find("a[href='#{recruiter_path(@recruiter.public_slug)}']").click
     assert_current_path recruiter_path(@recruiter.public_slug)
   end
 
