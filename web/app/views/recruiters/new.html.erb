@@ -1,13 +1,13 @@
 <% content_for :title, "Add a Recruiter — Recruiter Rankings" %>
 
-<div style="max-width:560px; margin:0 auto; padding:48px 0 64px;">
+<div class="page-sm">
   <h1 style="margin:0 0 8px;">Add a Recruiter</h1>
-  <p style="color:var(--muted); margin:0 0 36px;">
+  <p class="text-muted" style="margin:0 0 36px;">
     They'll be added to the directory and you'll go straight to the review form.
   </p>
 
   <% if @recruiter.errors.any? %>
-    <div class="card" style="padding:16px 24px; margin-bottom:24px; border-left:3px solid var(--error, #c0392b);">
+    <div class="card alert-error" style="padding:16px 24px; margin-bottom:24px;">
       <p style="margin:0 0 8px; font-weight:600; color:var(--error, #c0392b);">
         Please fix the following:
       </p>
@@ -23,44 +23,40 @@
         style: "display:flex; flex-direction:column; gap:20px;" do |f| %>
 
     <div>
-      <%= f.label :linkedin_url, "LinkedIn URL *",
-            style: "display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;" %>
+      <%= f.label :linkedin_url, "LinkedIn URL *", class: "field-label" %>
       <%= f.url_field :linkedin_url,
             id: "recruiter_linkedin_url",
             placeholder: "https://linkedin.com/in/jane-smith",
             autocomplete: "off",
             required: true,
             oninput: "fillNameFromLinkedIn(this.value)",
-            style: "width:100%; box-sizing:border-box; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--ink); font-size:1rem;" %>
+            class: "field-input" %>
     </div>
 
     <div>
-      <%= f.label :name, "Name *",
-            style: "display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;" %>
+      <%= f.label :name, "Name *", class: "field-label" %>
       <%= f.text_field :name,
             id: "recruiter_name",
             placeholder: "e.g. Jane Smith",
             autocomplete: "off",
             required: true,
-            style: "width:100%; box-sizing:border-box; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--ink); font-size:1rem;" %>
+            class: "field-input" %>
     </div>
 
     <div>
-      <%= f.label :company_name, "Company name (optional)",
-            style: "display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;" %>
+      <%= f.label :company_name, "Company name (optional)", class: "field-label" %>
       <%= f.text_field :company_name,
             placeholder: "e.g. Acme Staffing",
             autocomplete: "off",
-            style: "width:100%; box-sizing:border-box; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--ink); font-size:1rem;" %>
+            class: "field-input" %>
     </div>
 
     <div>
-      <%= f.label :region, "Region (optional)",
-            style: "display:block; font-weight:600; margin-bottom:6px; font-size:0.9rem;" %>
+      <%= f.label :region, "Region (optional)", class: "field-label" %>
       <%= f.text_field :region,
             placeholder: "e.g. US – New York",
             autocomplete: "off",
-            style: "width:100%; box-sizing:border-box; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg); color:var(--ink); font-size:1rem;" %>
+            class: "field-input" %>
     </div>
 
     <div style="display:flex; gap:12px; align-items:center; margin-top:8px;">

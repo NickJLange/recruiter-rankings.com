@@ -1,34 +1,35 @@
 <% content_for :title, @query.present? ? "Search: #{@query} — Recruiter Rankings" : "Search — Recruiter Rankings" %>
 
-<div style="max-width:720px; margin:0 auto; padding:32px 0 64px;">
+<div class="page-md">
 
   <%= form_with url: search_path, method: :get, local: true,
-        style: "display:flex; gap:8px; margin-bottom:32px;" do |f| %>
+        class: "search-form",
+        style: "margin-bottom:32px;" do |f| %>
     <%= f.search_field :q, value: @query,
           placeholder: "Search for a recruiter, firm, or agency…",
           autocomplete: "off",
           autofocus: true,
-          style: "flex:1; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font-size:1rem;" %>
+          class: "field-input" %>
     <%= f.submit "Search",
-          style: "padding:10px 20px; border-radius:8px; background:var(--accent); color:#fff; font-weight:600; border:none; cursor:pointer; font-size:1rem;" %>
+          class: "btn btn-primary" %>
   <% end %>
 
   <% if @query.length < 2 %>
-    <p style="color:var(--muted);">Enter at least 2 characters to search.</p>
+    <p class="text-muted">Enter at least 2 characters to search.</p>
   <% else %>
 
     <% if @recruiters.any? %>
-      <h2 style="font-size:1rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); font-weight:600; margin:0 0 12px;">Recruiters</h2>
-      <ul style="list-style:none; margin:0 0 32px; padding:0; display:flex; flex-direction:column; gap:8px;">
+      <h2 class="section-label">Recruiters</h2>
+      <ul class="result-list" style="margin-bottom:32px;">
         <% @recruiters.each do |r| %>
-          <li style="padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
+          <li class="result-item">
             <%= link_to r.display_name(current_local_user), recruiter_path(r.public_slug),
                   style: "color:var(--ink); text-decoration:none; font-weight:500;" %>
             <% if r.company.present? %>
-              <span style="color:var(--muted); font-size:0.875rem; margin-left:8px;">· <%= r.company.name %></span>
+              <span class="text-muted text-sm" style="margin-left:8px;">· <%= r.company.name %></span>
             <% end %>
             <% if r.region.present? %>
-              <span style="color:var(--muted); font-size:0.875rem; margin-left:4px;">· <%= r.region %></span>
+              <span class="text-muted text-sm" style="margin-left:4px;">· <%= r.region %></span>
             <% end %>
           </li>
         <% end %>
@@ -36,14 +37,14 @@
     <% end %>
 
     <% if @companies.any? %>
-      <h2 style="font-size:1rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--muted); font-weight:600; margin:0 0 12px;">Companies</h2>
-      <ul style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;">
+      <h2 class="section-label">Companies</h2>
+      <ul class="result-list">
         <% @companies.each do |c| %>
-          <li style="padding:12px 16px; background:var(--surface); border:1px solid var(--border); border-radius:8px;">
+          <li class="result-item">
             <%= link_to c.name, company_path(c),
                   style: "color:var(--ink); text-decoration:none; font-weight:500;" %>
             <% if c.industry.present? %>
-              <span style="color:var(--muted); font-size:0.875rem; margin-left:8px;">· <%= c.industry %></span>
+              <span class="text-muted text-sm" style="margin-left:8px;">· <%= c.industry %></span>
             <% end %>
           </li>
         <% end %>
@@ -51,7 +52,7 @@
     <% end %>
 
     <% if @recruiters.empty? && @companies.empty? %>
-      <p style="color:var(--muted);">No results for <strong style="color:var(--ink);">"<%= h @query %>"</strong>.</p>
+      <p class="text-muted">No results for <strong style="color:var(--ink);">"<%= h @query %>"</strong>.</p>
     <% end %>
 
   <% end %>

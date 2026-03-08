@@ -22,7 +22,7 @@
         <td><%= rev.status %></td>
         <td><%= rev.recruiter&.name || "—" %></td>
         <td><%= rev.company&.name || "—" %></td>
-        <td style="max-width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <td class="truncate" style="max-width:420px;">
           <%= rev.text %>
         </td>
         <td>

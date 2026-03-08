@@ -1,14 +1,14 @@
 <% content_for :title, "Claim Identity — Recruiter Rankings" %>
 
-<div style="max-width:600px; margin:0 auto; padding:32px 0 64px;">
+<div class="page-sm">
   <h1 style="font-size:1.5rem; font-weight:700; margin:0 0 16px;">Identity claim submitted</h1>
 
   <p>Paste this token into your LinkedIn profile (About section, Featured, or Website field). Make sure it is publicly visible:</p>
 
   <pre style="background:var(--surface); border:1px solid var(--border); padding:12px; border-radius:8px; overflow:auto; user-select:all;"><%= @paste_token %></pre>
 
-  <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px 20px; margin-top:20px;">
-    <p style="margin:0; color:var(--muted); font-size:0.9rem;">
+  <div class="card card--section" style="margin-top:20px;">
+    <p class="text-muted" style="margin:0; font-size:0.9rem;">
       Once you've added the token to your profile, your claim is in the queue.
       An admin will verify your LinkedIn profile within 7 days and notify you if approved.
     </p>

@@ -1,31 +1,31 @@
 <% content_for :title, "Settings — Recruiter Rankings" %>
 
-<div style="max-width:600px; margin:0 auto; padding:32px 0 64px;">
+<div class="page-sm">
   <h1 style="font-size:1.5rem; font-weight:700; margin:0 0 24px;">Settings</h1>
 
-  <div id="settings-loading" style="color:var(--muted);">Loading account details…</div>
+  <div id="settings-loading" class="text-muted">Loading account details…</div>
 
   <div id="settings-content" hidden>
-    <section style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 24px; margin-bottom:20px;">
-      <h2 style="font-size:1rem; font-weight:600; margin:0 0 16px;">Account</h2>
+    <section class="card card--section" style="margin-bottom:20px;">
+      <h2 class="section-label">Account</h2>
       <dl style="margin:0; display:grid; grid-template-columns:max-content 1fr; gap:8px 16px; align-items:baseline;">
-        <dt style="color:var(--muted); font-size:0.875rem;">Name</dt>
+        <dt class="text-muted text-sm">Name</dt>
         <dd id="settings-name" style="margin:0; font-weight:500;"></dd>
-        <dt style="color:var(--muted); font-size:0.875rem;">Email</dt>
+        <dt class="text-muted text-sm">Email</dt>
         <dd id="settings-email" style="margin:0;"></dd>
       </dl>
     </section>
 
-    <section style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 24px; margin-bottom:20px;">
-      <h2 style="font-size:1rem; font-weight:600; margin:0 0 16px;">Connected accounts</h2>
-      <ul id="settings-providers" style="list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px;"></ul>
+    <section class="card card--section" style="margin-bottom:20px;">
+      <h2 class="section-label">Connected accounts</h2>
+      <ul id="settings-providers" class="result-list"></ul>
     </section>
 
-    <section style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 24px;">
-      <h2 style="font-size:1rem; font-weight:600; margin:0 0 12px;">Sign out</h2>
-      <p style="margin:0 0 12px; color:var(--muted); font-size:0.875rem;">You will be signed out on all devices.</p>
+    <section class="card card--section">
+      <h2 class="section-label">Sign out</h2>
+      <p class="text-muted text-sm" style="margin:0 0 12px;">You will be signed out on all devices.</p>
       <button onclick="window.Clerk.signOut().then(function(){ location.href = '/'; }); return false;"
-              style="padding:8px 18px; border-radius:6px; background:var(--accent); color:#fff; font-weight:600; border:none; cursor:pointer; font-size:0.9rem;">
+              class="btn btn-primary btn-sm">
         Sign out
       </button>
     </section>

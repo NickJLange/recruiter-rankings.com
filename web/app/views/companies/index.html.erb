@@ -2,7 +2,7 @@
 <p><%= t('recruiters.index.subtitle', count: public_min_reviews) %></p>
 
 <%= form_with url: companies_path, method: :get, local: true do %>
-  <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin: 8px 0 16px;">
+  <div class="search-form" style="align-items:flex-end; flex-wrap:wrap; margin: 8px 0 16px;">
     <div>
       <label for="q"><%= t('recruiters.index.search') %></label><br>
       <input type="text" name="q" id="q" value="<%= h @q %>" placeholder="<%= t('recruiters.index.company') %>">
