@@ -135,3 +135,7 @@ web/log/*.log
 # Rails credentials key (never commit)
 web/config/master.key
 scripts/.env.local
+
+# Private inbox export + seed drafts (never commit)
+messages.csv
+recruiters_draft.csv
