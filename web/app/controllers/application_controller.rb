@@ -101,6 +101,18 @@ class ApplicationController < ActionController::Base
     (ENV["PUBLIC_MAX_PER_PAGE"].presence || 50).to_i
   end
 
+  # Paginates +scope+ using params[:page] and params[:per_page].
+  # Sets @page, @per_page, @has_next; returns the current page of records.
+  def paginate(scope)
+    @page = [params[:page].to_i, 1].max
+    requested_per = params[:per_page].presence&.to_i
+    @per_page = [[requested_per || public_per_page, 1].max, public_max_per_page].min
+    offset = (@page - 1) * @per_page
+    records = scope.offset(offset).limit(@per_page + 1).to_a
+    @has_next = records.length > @per_page
+    records.first(@per_page)
+  end
+
   def demo_auto_approve?
     ActiveModel::Type::Boolean.new.cast(ENV.fetch("DEMO_AUTO_APPROVE", Rails.env.development?.to_s))
   end

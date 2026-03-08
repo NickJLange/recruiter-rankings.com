@@ -1,0 +1,12 @@
+<div style="margin-top:16px; display:flex; justify-content:space-between;">
+  <div>
+    <% if @page > 1 %>
+      <%= link_to "← Previous", url_for(params.permit!.merge(page: @page - 1)), class: "cta" %>
+    <% end %>
+  </div>
+  <div>
+    <% if @has_next %>
+      <%= link_to "Next →", url_for(params.permit!.merge(page: @page + 1)), class: "cta" %>
+    <% end %>
+  </div>
+</div>

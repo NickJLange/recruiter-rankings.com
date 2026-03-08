@@ -95,6 +95,18 @@ h3 { margin: 0 0 8px; }
 /* ── Alerts ── */
 .alert-error { border-left: 3px solid var(--error, #c0392b); }
 
+/* ── Expandable sections ── */
+details { margin-top: 16px; }
+details summary { cursor: pointer; font-weight: 600; font-size: 0.95rem; margin-bottom: 12px; }
+
+/* ── Data table ── */
+.data-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+.data-table th, .data-table td { padding: 8px; }
+.data-table th:first-child, .data-table td:first-child { text-align: left; }
+.data-table th:not(:first-child), .data-table td:not(:first-child) { text-align: center; }
+.data-table thead tr { border-bottom: 2px solid var(--border); }
+.data-table tbody tr { border-bottom: 1px solid var(--border); }
+
 /* ── Utilities ── */
 .text-muted { color: var(--muted); }
 .text-sm    { font-size: 0.875rem; }

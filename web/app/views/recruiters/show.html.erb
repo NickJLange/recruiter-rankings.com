@@ -8,11 +8,11 @@
 <section>
   <h2><%= t('recruiters.show.aggregates') %></h2>
   <p><strong><%= t('recruiters.show.average_overall') %>:</strong> <%= @avg_overall&.round(2) || "—" %> (<%= @reviews_count %> <%= t('recruiters.index.th.reviews') %>)</p>
-  <ul style="list-style:none; padding:0;">
+  <ul style="list-style:none; padding:0; margin:0;">
     <% ReviewMetric::DIMENSIONS.each do |key, dimension_value| %>
       <% avg = @dimensional_averages[dimension_value] %>
       <% if avg %>
-        <li style="margin-bottom: 4px;">
+        <li style="margin-bottom:4px;">
           <strong><%= key.to_s.humanize %>:</strong>
           <%= avg.round(1) %> / 5.0
         </li>
@@ -31,10 +31,10 @@
   <% if @can_view_details %>
     <h2><%= t('recruiters.show.recent_reviews') %></h2>
     <% @reviews.each do |rev| %>
-      <article style="border:1px solid var(--border); padding:10px; margin-bottom:10px; background: var(--surface);">
-<p><strong>Overall:</strong> <%= rev.rating %> — <em><%= rev.interaction.occurred_at&.strftime("%Y-%m-%d") %></em>
+      <article class="card" style="margin-bottom:10px;">
+        <p style="margin:0 0 6px;"><strong>Overall:</strong> <%= rev.rating %> — <em><%= rev.interaction.occurred_at&.strftime("%Y-%m-%d") %></em>
         <% if rev.interaction.role&.formatted_compensation %>
-          <span style="margin-left: 10px; font-size: 0.9em; color: var(--muted);">
+          <span class="text-muted text-sm" style="margin-left:10px;">
             <%= rev.interaction.role.title %> (<%= rev.interaction.role.formatted_compensation %>)
           </span>
         <% end %>
@@ -47,28 +47,28 @@
     <div class="alert alert-info">
       <p>Detailed reviews are available to the Recruiter Owner or Paid Users.</p>
       <p>
-        <%= link_to "Claim this Profile", new_claim_identity_path(subject_type: 'recruiter', recruiter_slug: @recruiter.public_slug), class: "cta" %> 
-        or 
-        <%= link_to "Write a Review", new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug), class: "cta" %> 
+        <%= link_to "Claim this Profile", new_claim_identity_path(subject_type: 'recruiter', recruiter_slug: @recruiter.public_slug), class: "cta" %>
+        or
+        <%= link_to "Write a Review", new_recruiter_review_path(@recruiter.public_slug, recruiter_slug: @recruiter.public_slug), class: "cta" %>
         to see more.
       </p>
     </div>
-    
+
     <% if @quarterly_aggregates.any? %>
-      <table style="width:100%; border-collapse: collapse; margin-top: 16px;">
+      <table class="data-table">
         <thead>
-          <tr style="border-bottom: 2px solid var(--border);">
-            <th style="text-align:left; padding:8px;">Quarter</th>
-            <th style="text-align:center; padding:8px;">Reviews</th>
-            <th style="text-align:center; padding:8px;">Median Rating</th>
+          <tr>
+            <th>Quarter</th>
+            <th>Reviews</th>
+            <th>Median Rating</th>
           </tr>
         </thead>
         <tbody>
           <% @quarterly_aggregates.each do |quarter, count, median| %>
-            <tr style="border-bottom: 1px solid var(--border);">
-              <td style="padding:8px;"><%= quarter ? "#{quarter.year} Q#{((quarter.month - 1) / 3) + 1}" : "Unknown" %></td>
-              <td style="text-align:center; padding:8px;"><%= count %></td>
-              <td style="text-align:center; padding:8px;"><%= median %> / 5</td>
+            <tr>
+              <td><%= quarter ? "#{quarter.year} Q#{((quarter.month - 1) / 3) + 1}" : "Unknown" %></td>
+              <td><%= count %></td>
+              <td><%= median %> / 5</td>
             </tr>
           <% end %>
         </tbody>
@@ -78,4 +78,3 @@
     <% end %>
   <% end %>
 </section>
-

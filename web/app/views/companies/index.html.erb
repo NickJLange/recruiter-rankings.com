@@ -41,15 +41,4 @@
   </tbody>
 </table>
 
-<div style="margin-top: 16px; display:flex; justify-content: space-between;">
-  <div>
-    <% if @page > 1 %>
-      <%= link_to "← Previous", companies_path(request.query_parameters.merge(page: @page - 1)), class: "cta" %>
-    <% end %>
-  </div>
-  <div>
-    <% if @has_next %>
-      <%= link_to "Next →", companies_path(request.query_parameters.merge(page: @page + 1)), class: "cta" %>
-    <% end %>
-  </div>
-</div>
+<%= render 'shared/pagination' %>

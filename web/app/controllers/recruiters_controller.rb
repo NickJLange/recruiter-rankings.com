@@ -56,16 +56,7 @@ class RecruitersController < ApplicationController
     scope = scope.select("recruiters.*, agg.reviews_count, agg.avg_overall")
                  .order("agg.avg_overall DESC NULLS LAST, recruiters.name ASC")
 
-    # Pagination (fetch one extra to know if there is a next page)
-    @page = params[:page].to_i
-    @page = 1 if @page < 1
-    requested_per = params[:per_page].presence&.to_i
-    @per_page = [[requested_per || public_per_page, 1].max, public_max_per_page].min
-
-    offset = (@page - 1) * @per_page
-    records = scope.offset(offset).limit(@per_page + 1).to_a
-    @has_next = records.length > @per_page
-    @recruiters = records.first(@per_page)
+    @recruiters = paginate(scope)
 
     respond_to do |format|
       format.html
