@@ -36,7 +36,7 @@ module Admin
     end
 
     def challenge_params
-      params.require(:identity_challenge).permit(:expires_at, :verified_at)
+      params.require(:identity_challenge).permit(:expires_at)
     end
   end
 end

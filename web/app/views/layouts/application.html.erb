@@ -34,10 +34,27 @@
             if (!auth) return;
             if (window.Clerk.user) {
               var name = window.Clerk.user.firstName || (window.Clerk.user.emailAddresses[0] || {}).emailAddress || 'user';
-              auth.innerHTML = '<a href="/settings" class="nav-link" title="Settings for ' + name + '">Settings</a>' +
-                '<button class="nav-auth-btn nav-auth-btn--in" title="Signed in as ' + name + ' — click to sign out" onclick="window.Clerk.signOut().then(function(){location.reload()});return false;" aria-label="Sign out">' + _personIcon + '</button>';
+              var settingsLink = document.createElement('a');
+              settingsLink.href = '/settings';
+              settingsLink.className = 'nav-link';
+              settingsLink.title = 'Settings for ' + name;
+              settingsLink.textContent = 'Settings';
+              var signOutBtn = document.createElement('button');
+              signOutBtn.className = 'nav-auth-btn nav-auth-btn--in';
+              signOutBtn.title = 'Signed in as ' + name + ' \u2014 click to sign out';
+              signOutBtn.setAttribute('aria-label', 'Sign out');
+              signOutBtn.innerHTML = _personIcon;
+              signOutBtn.onclick = function() { window.Clerk.signOut().then(function(){location.reload()}); return false; };
+              auth.appendChild(settingsLink);
+              auth.appendChild(signOutBtn);
             } else {
-              auth.innerHTML = '<button class="nav-auth-btn" title="Sign in" onclick="window.Clerk.redirectToSignIn({redirectUrl:window.location.href});return false;" aria-label="Sign in">' + _personIcon + '</button>';
+              var signInBtn = document.createElement('button');
+              signInBtn.className = 'nav-auth-btn';
+              signInBtn.title = 'Sign in';
+              signInBtn.setAttribute('aria-label', 'Sign in');
+              signInBtn.innerHTML = _personIcon;
+              signInBtn.onclick = function() { window.Clerk.redirectToSignIn({redirectUrl: window.location.href}); return false; };
+              auth.appendChild(signInBtn);
             }
           });
         }

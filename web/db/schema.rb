@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_09_013150) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -36,7 +36,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_000001) do
     t.datetime "updated_at", null: false
     t.boolean "would_recommend"
     t.index ["interaction_id"], name: "index_experiences_on_interaction_id"
-    t.check_constraint "outcome IS NULL OR (outcome::text = ANY (ARRAY['hired'::character varying, 'declined_offer'::character varying, 'ghosted'::character varying, 'still_interviewing'::character varying]::text[]))", name: "check_experiences_outcome"
+    t.check_constraint "outcome IS NULL OR (outcome::text = ANY (ARRAY['hired'::character varying::text, 'declined_offer'::character varying::text, 'ghosted'::character varying::text, 'still_interviewing'::character varying::text]))", name: "check_experiences_outcome"
     t.check_constraint "rating >= 1 AND rating <= 5", name: "check_experiences_rating_range"
   end
 
@@ -297,7 +297,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_000001) do
     t.datetime "verified_at"
     t.index ["clerk_user_id"], name: "index_users_on_clerk_user_id", unique: true
     t.index ["email_hmac"], name: "index_users_on_email_hmac", unique: true
-    t.index ["public_slug"], name: "index_users_on_public_slug"
+    t.index ["public_slug"], name: "index_users_on_public_slug", unique: true
     t.index ["role"], name: "index_users_on_role"
     t.index ["verification_status"], name: "index_users_on_verification_status"
     t.check_constraint "role::text = ANY (ARRAY['candidate'::character varying::text, 'recruiter'::character varying::text, 'moderator'::character varying::text, 'admin'::character varying::text])", name: "check_users_role"

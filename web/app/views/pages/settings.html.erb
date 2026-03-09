@@ -56,15 +56,22 @@
 
     var list = document.getElementById('settings-providers');
     var accounts = user.externalAccounts || [];
+    list.innerHTML = '';
     if (accounts.length === 0) {
-      list.innerHTML = '<li style="color:var(--muted); font-size:0.875rem;">No connected accounts.</li>';
+      var empty = document.createElement('li');
+      empty.className = 'text-muted text-sm';
+      empty.textContent = 'No connected accounts.';
+      list.appendChild(empty);
     } else {
-      list.innerHTML = accounts.map(function(acct) {
+      accounts.forEach(function(acct) {
         var provider = acct.provider || 'unknown';
         var label = provider.charAt(0).toUpperCase() + provider.slice(1);
         var username = acct.username || acct.emailAddress || '';
-        return '<li style="font-size:0.875rem;">' + label + (username ? ' — ' + username : '') + '</li>';
-      }).join('');
+        var li = document.createElement('li');
+        li.className = 'text-sm';
+        li.textContent = label + (username ? ' \u2014 ' + username : '');
+        list.appendChild(li);
+      });
     }
 
     document.getElementById('settings-loading').hidden = true;

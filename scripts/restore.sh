@@ -48,7 +48,7 @@ echo "[restore] $(date -u) — restoring ${FILENAME} to ${REDACTED_URL} ..."
 # Stream R2 → gunzip → psql (no temp file)
 rclone cat "r2:${R2_BUCKET}/${FILENAME}" \
   | gunzip \
-  | psql "${TARGET_DB_URL}"
+  | psql --set ON_ERROR_STOP=1 "${TARGET_DB_URL}"
 
 echo ""
 echo "[restore] Row counts:"

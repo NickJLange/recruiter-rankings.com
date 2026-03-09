@@ -12,7 +12,12 @@ class ClaimIdentityController < ApplicationController
 
     @recruiter = Recruiter.find_by(public_slug: @recruiter_slug)
 
-    if @subject_type == "recruiter" && @recruiter.nil?
+    unless @subject_type == "recruiter"
+      flash.now[:alert] = "Unsupported identity type."
+      return render :new, status: :unprocessable_entity
+    end
+
+    if @recruiter.nil?
       flash.now[:alert] = "Recruiter not found. Check the slug and try again."
       return render :new, status: :unprocessable_entity
     end
@@ -20,16 +25,20 @@ class ClaimIdentityController < ApplicationController
     subject = @recruiter
 
     # Persist the linkedin_url on the recruiter so admins can check it manually.
-    @recruiter.update!(linkedin_url: @linkedin_url) if @recruiter&.linkedin_url.blank? && @linkedin_url.present?
+    if @recruiter.linkedin_url.blank? && @linkedin_url.present?
+      unless @recruiter.update(linkedin_url: @linkedin_url)
+        flash.now[:alert] = @recruiter.errors.full_messages.first || "Could not save LinkedIn URL."
+        return render :new, status: :unprocessable_entity
+      end
+    end
 
-    # Generate a cleartext token to paste into LinkedIn; store its hash for DB uniqueness/lookup.
-    raw_token  = SecureRandom.hex(16)
-    token_hash = Digest::SHA256.hexdigest(raw_token)
+    # Generate a cleartext token to paste into LinkedIn; store only its hash (not plaintext).
+    raw_token   = SecureRandom.hex(16)
+    token_hash  = Digest::SHA256.hexdigest(raw_token)
     paste_token = "RR-VERIFY-#{raw_token}"
 
     challenge = IdentityChallenge.create!(
       subject:    subject,
-      token:      paste_token,
       token_hash: token_hash,
       expires_at: 7.days.from_now
     )

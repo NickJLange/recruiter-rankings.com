@@ -16,6 +16,9 @@ set -euo pipefail
 #   HEALTHCHECK_URL     healthchecks.io ping URL — notifies on failure too
 # ---------------------------------------------------------------------------
 
+# Ping healthchecks.io /fail if the script exits with non-zero status
+trap 'if [[ -n "${HEALTHCHECK_URL:-}" ]]; then curl -fsS --retry 3 --max-time 10 "${HEALTHCHECK_URL}/fail" || true; fi' ERR
+
 : "${DATABASE_URL:?DATABASE_URL must be set}"
 : "${R2_BUCKET:?R2_BUCKET must be set}"
 : "${R2_ENDPOINT_URL:?R2_ENDPOINT_URL must be set}"

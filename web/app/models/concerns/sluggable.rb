@@ -10,8 +10,10 @@ module Sluggable
   def generate_masked_slug
     return if public_slug.present?
     loop do
-      self.public_slug = SecureRandom.hex(4).upcase
-      break unless self.class.exists?(public_slug: public_slug)
+      candidate = SecureRandom.hex(4).upcase
+      next if self.class.exists?(public_slug: candidate)
+      self.public_slug = candidate
+      break
     end
   end
 end
