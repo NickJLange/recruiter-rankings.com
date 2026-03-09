@@ -32,7 +32,7 @@ export RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
 FILE_ARG="${1:-latest}"
 
 if [[ "$FILE_ARG" == "latest" ]]; then
-  FILENAME=$(rclone lsf "r2:${R2_BUCKET}/" | grep 'backup-' | sort | tail -1)
+  FILENAME=$(rclone lsf "r2:${R2_BUCKET}/" | (grep 'backup-' || true) | sort | tail -1)
   if [[ -z "$FILENAME" ]]; then
     echo "[restore] Error: no backups found in r2:${R2_BUCKET}"
     exit 1

@@ -48,6 +48,12 @@ class AuthenticationService
     clerk_user.two_factor_enabled
   end
 
+  def clerk_role
+    return nil unless authenticated?
+
+    clerk_user.public_metadata&.dig("role").to_s
+  end
+
   def meets_requirements?(policy_key)
     # Dev-only escape hatch: set BYPASS_ADMIN_PROVIDERS=true to skip provider/2FA checks.
     # Never set this in production — the env var is ignored outside development.

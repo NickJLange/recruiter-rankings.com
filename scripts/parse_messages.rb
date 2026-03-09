@@ -50,7 +50,7 @@ def normalize_linkedin_url(raw)
   url = raw.strip.sub(%r{/+$}, "")
   uri = URI.parse(url)
   URI::HTTPS.build(host: uri.host, path: uri.path).to_s
-rescue URI::InvalidURIError
+rescue URI::InvalidURIError, URI::InvalidComponentError
   raw.strip
 end
 

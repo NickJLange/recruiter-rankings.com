@@ -18,5 +18,10 @@ module AuthPolicy
 
   def require_admin!
     require_policy!(:admin)
+    return if performed?
+
+    unless %w[admin moderator].include?(auth_service.clerk_role)
+      redirect_to root_path, alert: "Access denied."
+    end
   end
 end

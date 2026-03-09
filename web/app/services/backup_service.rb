@@ -29,7 +29,8 @@ class BackupService
         File.open(temp_file.to_s, "wb") { |f| IO.copy_stream(output, f) }
         statuses = wait_threads.map(&:value)
         unless statuses.all?(&:success?)
-          raise BackupError, "pg_dump/gzip pipeline failed"
+          codes = statuses.map(&:exitstatus).inspect
+          raise BackupError, "pg_dump/gzip pipeline failed (exit codes: #{codes})"
         end
       end
 

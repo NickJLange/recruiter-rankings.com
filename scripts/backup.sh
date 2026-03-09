@@ -61,7 +61,7 @@ REMOVED=0
 
 while IFS= read -r file; do
   [[ -z "$file" ]] && continue
-  FILEDATE=$(echo "$file" | grep -oP '(?<=backup-)\d{8}' || true)
+  FILEDATE="${file#backup-}"; FILEDATE="${FILEDATE%%-*}"  # extract YYYYMMDD
   if [[ -n "$FILEDATE" && "$FILEDATE" < "$CUTOFF" ]]; then
     rclone deletefile "r2:${R2_BUCKET}/${file}"
     REMOVED=$((REMOVED + 1))

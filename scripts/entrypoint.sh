@@ -3,6 +3,7 @@ set -e
 
 # Make container env vars available to crond jobs (Alpine crond doesn't inherit env)
 printenv | grep -v '^_=' > /etc/environment
+chmod 600 /etc/environment
 
 MODE="${1:-daemon}"
 

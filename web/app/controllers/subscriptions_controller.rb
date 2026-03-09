@@ -6,6 +6,11 @@ class SubscriptionsController < ApplicationController
   end
 
   def create
+    unless current_local_user
+      redirect_to root_path, alert: "Account not found. Please sign in again."
+      return
+    end
+
     # 1. Determine and Set Processor
     processor = (Rails.env.test? || Rails.env.development?) ? :fake_processor : :paddle_billing
     current_local_user.set_payment_processor processor, allow_fake: (processor == :fake_processor)

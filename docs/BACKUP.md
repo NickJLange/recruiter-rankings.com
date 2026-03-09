@@ -35,7 +35,7 @@ Backups run daily at 2 AM (container time). Logs stream to stdout — view with 
 docker compose run --rm backup backup
 
 # List what's in R2
-docker compose run --rm backup backup  # check logs for "Uploaded to r2:..."
+docker compose run --rm backup sh -c 'rclone lsf "r2:${R2_BUCKET}/"'
 ```
 
 ---

@@ -163,7 +163,7 @@ echo ""
 echo "=== [3/5] Restoring backup ==="
 
 if [[ "$RESTORE_FILE" == "latest" ]]; then
-  RESTORE_FILE=$(rclone lsf "r2:${R2_BUCKET}/" | grep 'backup-' | sort | tail -1)
+  RESTORE_FILE=$(rclone lsf "r2:${R2_BUCKET}/" | (grep 'backup-' || true) | sort | tail -1)
   if [[ -z "$RESTORE_FILE" ]]; then
     echo "ERROR: no backups found in r2:${R2_BUCKET}"
     exit 1
