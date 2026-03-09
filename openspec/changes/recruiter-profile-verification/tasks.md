@@ -52,9 +52,10 @@ Change:
 .where("agg.reviews_count >= ?", threshold)
 ```
 
-To:
+To (also change INNER JOIN → LEFT JOIN so zero-review recruiters with overrides are included):
 ```ruby
-.where("agg.reviews_count >= ? OR recruiters.visibility_override = true", threshold)
+.joins("LEFT JOIN (#{aggregates.to_sql}) agg ON agg.recruiter_id = recruiters.id")
+.where("COALESCE(agg.reviews_count, 0) >= ? OR recruiters.visibility_override = true", threshold)
 ```
 
 The rest of the index action (filters, pagination, JSON response) is unchanged.

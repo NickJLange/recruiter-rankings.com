@@ -10,7 +10,7 @@ A BIG CHANGE code review identified five DRY violations where identical or near-
 - **Non-Goals**:
   - Changing business logic or behavior (pure refactoring).
   - Adding caching to aggregate queries (separate concern).
-  - Migrating away from HTTP Basic Auth (separate change).
+  - Auth changes (HTTP Basic Auth was replaced by Clerk in the integrate-clerk-auth change).
 
 ## Decisions
 
@@ -43,7 +43,7 @@ All three admin controllers inherit from this. Delete duplicated methods.
 # web/app/services/email_identity_service.rb
 class EmailIdentityService
   def initialize(pepper: nil)
-    @pepper = pepper || ENV.fetch("SUBMISSION_EMAIL_HMAC_PEPPER", "demo-only-pepper-not-secret")
+    @pepper = pepper || ENV.fetch("SUBMISSION_EMAIL_HMAC_PEPPER")  # required; no default — fail fast
   end
 
   def hmac_email(email)

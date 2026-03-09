@@ -91,7 +91,7 @@ Can be a standalone PR that does not depend on the Clerk integration being compl
 
 - [ ] 14.3 **`any_instance` not available** (`test/integration/registration_flows_test.rb:10`)
   - Root cause: `test/integration/registration_flows_test.rb` calls `ClaimIdentityController.any_instance.stub(...)` which requires mocha; project uses minitest's built-in `stub` (block-scoped only)
-  - Fix: rewrite the stub using minitest's block form: `ClaimIdentityController.any_instance.stub(:linkedin_fetcher, mock_fetcher) { ... }` wrapping the relevant HTTP calls
+  - Fix: rewrite the stub using minitest's object-level stub (not `any_instance`). Instantiate a concrete fetcher double and inject it via a controller helper or a `stub` block on the specific instance returned by the setup call.
 
 ## 15. Clerk Dashboard Configuration (manual, one-time)
 Steps required in the Clerk dashboard for the dev sign-in flow to work end-to-end in a browser.

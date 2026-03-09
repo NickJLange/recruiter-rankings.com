@@ -59,8 +59,8 @@ Reference: `web/db/schema.rb:190` — existing `recruiters` columns.
 `Admin::RecruitersController < Admin::BaseController`
 
 This picks up:
-- `before_action :require_moderator_auth` (HTTP Basic Auth)
-- `current_moderator_actor` helper (returns the moderator `User`)
+- `before_action :require_admin!` (Clerk-based — checks providers, 2FA, and `public_metadata["role"]`)
+- `log_moderation` helper (via `Admin::BaseController`)
 
 Reference: `web/app/controllers/admin/base_controller.rb`
 
@@ -89,7 +89,9 @@ def toggle_visibility
     actor: current_moderator_actor,
     action: "set_visibility_override:#{new_val}",
     subject: @recruiter,
-    notes: "reviews_count at time of toggle: #{@recruiter.reviews_count}"
+    notes: "reviews_count at time of toggle: #{Recruiter.joins(...).where(id: @recruiter.id).pick('agg.reviews_count') || 0}"
+    # NOTE: @recruiter.reviews_count is NOT available on a plain Recruiter.find result.
+    # Either load via the aggregates JOIN, or omit the count from this note.
   )
   redirect_to admin_recruiters_path, notice: "Visibility override set to #{new_val} for #{@recruiter.name}."
 end

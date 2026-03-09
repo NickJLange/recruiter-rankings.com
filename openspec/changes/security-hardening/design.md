@@ -26,6 +26,8 @@ Open3.pipeline_r(
   ["gzip"]
 ) do |output, wait_threads|
   File.open(temp_file, "wb") { |f| IO.copy_stream(output, f) }
+  statuses = wait_threads.map(&:value)
+  raise "pg_dump/gzip pipeline failed (exit codes: #{statuses.map(&:exitstatus).inspect})" unless statuses.all?(&:success?)
 end
 ```
 
@@ -34,9 +36,13 @@ For encryption, replace string interpolation with array-form:
 # BEFORE (vulnerable)
 Open3.capture3("openssl enc -aes-256-cbc -salt -in #{temp_file} -out #{encrypted_file} -k \"#{encryption_key}\"")
 
-# AFTER (safe)
-Open3.capture3("openssl", "enc", "-aes-256-cbc", "-salt", "-pbkdf2",
-  "-in", temp_file, "-out", encrypted_file, "-k", encryption_key)
+# AFTER (safe) — pass key via env var, not CLI arg (CLI args visible in process table)
+Open3.capture3(
+  { "BACKUP_ENCRYPTION_KEY" => encryption_key },
+  "openssl", "enc", "-aes-256-cbc", "-salt", "-pbkdf2",
+  "-in", temp_file, "-out", encrypted_file,
+  "-pass", "env:BACKUP_ENCRYPTION_KEY"
+)
 ```
 
 ### LinkedInFetcher Consolidation

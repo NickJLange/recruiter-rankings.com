@@ -63,6 +63,10 @@ class AuthenticationService
     admin:            { all_of: [:email, :linkedin, :github], two_factor: true }
   }.freeze
 
+  # NOTE: Provider/2FA requirements are necessary but not sufficient for admin access.
+  # require_admin! also checks that the Clerk public_metadata["role"] is "admin" or
+  # "moderator" — preventing privilege escalation via account-linking alone.
+
   def initialize(clerk_helper)
     @clerk = clerk_helper
   end
