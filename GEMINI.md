@@ -1,3 +1,29 @@
+
+# AI Agent Guidelines
+
+This file serves as a guide for AI agents working on the `recruiter-rankings.com` repository.
+
+## Repository Structure
+
+- `web/`: Ruby on Rails application (dynamic content, admin, API).
+- `site/`: Jekyll static site (marketing pages).
+- `AGENTS.md`: Comprehensive developer guide and project overview.
+- `gameplan.md`: Technical design and roadmap.
+
+## Key Workflows
+
+### 1. Code Changes
+- Always verify changes locally before committing.
+- For `web/`: Run `bin/dev` to start the Rails server. Run `rails test` for tests.
+- For `site/`: Run `bundle exec jekyll build` to verify the static site builds correctly.
+
+### 2. Documentation
+- Keep `GEMINI.md` up to date with major architectural changes.
+- Update `README.md` if high-level project information changes.
+
+### 3. Task Management
+- Use `task.md` to track progress on complex tasks.
+- Create `implementation_plan.md` for significant changes requiring user approval.
 # GEMINI.md
 
 This file provides guidance to Gemini when working with code in this repository.
@@ -22,7 +48,9 @@ Recruiter-Rankings.com is a platform for de-identified recruiter quality signals
 ### Data Model Core Entities
 - **Users**: Candidates, recruiters, moderators, admins with role-based access
 - **Recruiters**: Public profiles with company affiliations, verified via LinkedIn or email
-- **Reviews**: Star ratings (1-5) across multiple dimensions with moderation workflow
+- **Interactions**: Represents a verified professional interaction between a User and a Recruiter (replaces `Review` ownership).
+- **Experiences**: qualitative feedback (rating, body) linked to an Interaction (formerly `Review`).
+- **Reviews** (Deprecated): Legacy table, migrated to Interaction/Experience.
 - **Companies**: Size-bucketed to protect small companies (<50 employees = "Small company")
 - **Identity Challenges**: Token-based verification system for LinkedIn/email validation
 
@@ -75,11 +103,14 @@ Deployment is automatic via Render.com when pushing to the main branch. The `ren
 
 ### Environment Variables
 Key variables defined in `web/.env.example`:
+- `CLERK_SECRET_KEY`: Clerk Backend API secret key (required; format: `sk_test_...` / `sk_live_...`)
+- `CLERK_PUBLISHABLE_KEY`: Clerk frontend publishable key (required; format: `pk_test_...` / `pk_live_...`)
 - `PUBLIC_MIN_REVIEWS`: Minimum reviews threshold for public display (default: 5)
 - `SUBMISSION_EMAIL_HMAC_PEPPER`: Cryptographic pepper for email hashing
 - `LINKEDIN_FETCH_TIMEOUT`: Timeout for LinkedIn verification requests
 - `DEMO_AUTO_APPROVE`: Auto-approve reviews in demo mode
 - `CANONICAL_URL`: Base URL for sitemap and meta tags
+- `BYPASS_ADMIN_PROVIDERS`: Set to `true` in development to skip the email+LinkedIn+GitHub+2FA check for admin access (ignored in production)
 
 ### Moderation & Privacy
 - Reviews require approval before public display (unless `DEMO_AUTO_APPROVE=true`)
@@ -107,7 +138,7 @@ The migration includes comprehensive check constraints for data integrity:
 - Verification methods: li|email for identity challenges
 
 ### Admin Interface
-Admin functions accessible at `/admin/` with basic auth (development defaults: mod/mod). Includes:
+Admin functions accessible at `/admin/`, protected by Clerk authentication. The signed-in user must have email + LinkedIn + GitHub connected and 2FA enabled (`require_admin!` policy). Includes:
 - Review moderation queue
 - Response management for recruiter replies
 - Dashboard with key metrics
@@ -122,9 +153,20 @@ Admin functions accessible at `/admin/` with basic auth (development defaults: m
 
 Tests are primarily integration tests focusing on user flows:
 - Site endpoint functionality
-- Admin moderation workflows  
+- Admin moderation workflows
 - Recruiter profile and review JSON APIs
 - Locale persistence
 - Response creation and management
 
-Use `rails test` to run the full test suite. Tests use Rails' built-in Minitest framework with parallel execution enabled.
+Use `PARALLEL_WORKERS=1 bundle exec rails test` to run the full test suite (`PARALLEL_WORKERS=1` avoids Ruby/pg segfaults). Tests use Rails' built-in Minitest framework.
+
+### Auth in Tests
+Use `ClerkTestHelper#sign_in_as_clerk` to simulate an authenticated Clerk session:
+
+```ruby
+sign_in_as_clerk(role: :candidate, providers: [:email])           # review submission
+sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: true)  # admin
+sign_out_clerk   # clear session
+```
+
+`FakeClerkMiddleware` (injected in test env) intercepts requests and sets `env["clerk"]` from thread-local state. System tests use a cookie-based store instead (`_clerk_test_key`).

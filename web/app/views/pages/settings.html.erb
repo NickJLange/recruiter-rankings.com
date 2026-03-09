@@ -1,0 +1,80 @@
+<% content_for :title, "Settings — Recruiter Rankings" %>
+
+<div class="page-sm">
+  <h1 style="font-size:1.5rem; font-weight:700; margin:0 0 24px;">Settings</h1>
+
+  <div id="settings-loading" class="text-muted">Loading account details…</div>
+
+  <div id="settings-content" hidden>
+    <section class="card card--section" style="margin-bottom:20px;">
+      <h2 class="section-label">Account</h2>
+      <dl style="margin:0; display:grid; grid-template-columns:max-content 1fr; gap:8px 16px; align-items:baseline;">
+        <dt class="text-muted text-sm">Name</dt>
+        <dd id="settings-name" style="margin:0; font-weight:500;"></dd>
+        <dt class="text-muted text-sm">Email</dt>
+        <dd id="settings-email" style="margin:0;"></dd>
+      </dl>
+    </section>
+
+    <section class="card card--section" style="margin-bottom:20px;">
+      <h2 class="section-label">Connected accounts</h2>
+      <ul id="settings-providers" class="result-list"></ul>
+    </section>
+
+    <section class="card card--section">
+      <h2 class="section-label">Sign out</h2>
+      <p class="text-muted text-sm" style="margin:0 0 12px;">You will be signed out of this session.</p>
+      <button onclick="window.Clerk.signOut().then(function(){ location.href = '/'; }); return false;"
+              class="btn btn-primary btn-sm">
+        Sign out
+      </button>
+    </section>
+  </div>
+</div>
+
+<script>
+  (function waitForClerk() {
+    if (window.Clerk && window.Clerk.user) {
+      renderSettings(window.Clerk.user);
+    } else if (window.Clerk) {
+      window.Clerk.load().then(function() {
+        if (window.Clerk.user) renderSettings(window.Clerk.user);
+        else location.href = '/';
+      });
+    } else {
+      setTimeout(waitForClerk, 100);
+    }
+  })();
+
+  function renderSettings(user) {
+    var name = [user.firstName, user.lastName].filter(Boolean).join(' ')
+              || (user.emailAddresses[0] || {}).emailAddress || 'Unknown';
+    var email = (user.emailAddresses[0] || {}).emailAddress || '—';
+
+    document.getElementById('settings-name').textContent = name;
+    document.getElementById('settings-email').textContent = email;
+
+    var list = document.getElementById('settings-providers');
+    var accounts = user.externalAccounts || [];
+    list.innerHTML = '';
+    if (accounts.length === 0) {
+      var empty = document.createElement('li');
+      empty.className = 'text-muted text-sm';
+      empty.textContent = 'No connected accounts.';
+      list.appendChild(empty);
+    } else {
+      accounts.forEach(function(acct) {
+        var provider = acct.provider || 'unknown';
+        var label = provider.charAt(0).toUpperCase() + provider.slice(1);
+        var username = acct.username || acct.emailAddress || '';
+        var li = document.createElement('li');
+        li.className = 'text-sm';
+        li.textContent = label + (username ? ' \u2014 ' + username : '');
+        list.appendChild(li);
+      });
+    }
+
+    document.getElementById('settings-loading').hidden = true;
+    document.getElementById('settings-content').hidden = false;
+  }
+</script>

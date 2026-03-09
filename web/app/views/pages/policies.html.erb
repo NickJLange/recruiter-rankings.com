@@ -1,0 +1,60 @@
+<% content_for :title, "Policies — Recruiter Rankings" %>
+<% content_for :meta_description, "Right-of-reply, takedown policy, anti-abuse, k-anonymity, and compliance details for the POC." %>
+
+<div class="page-md">
+
+  <h1 style="margin:0 0 8px;">Policies</h1>
+  <p class="text-muted" style="margin:0 0 40px;">How we handle reviews, identity, abuse, and compliance.</p>
+
+  <h2 id="right-of-reply">Right-of-reply</h2>
+  <p>
+    Verified recruiters may respond to any review of their profile before it goes public.
+    We aim to process responses within 7 days to minimise slander risk where feasible.
+    Responses that are themselves abusive or off-topic will be hidden by moderators.
+  </p>
+
+  <h2 id="takedown-policy">Takedown policy</h2>
+  <p>
+    During the POC, we default to takedown to reduce legal and reputational risk.
+    SLA: <strong>7 days</strong> standard, <strong>3 days</strong> urgent.
+    Submit takedown requests by email with the URL of the affected content and your reason.
+  </p>
+
+  <h2 id="account-authentication">Account &amp; authentication requirements</h2>
+  <ul>
+    <li>Authentication is managed by <a href="https://clerk.com">Clerk</a>.</li>
+    <li>Accounts must be at least <strong>24 hours old</strong> before submitting a review.</li>
+    <li>Maximum <strong>10 reviews per account per 24-hour window</strong>.</li>
+    <li>Review submission requires a verified email address or LinkedIn account.</li>
+  </ul>
+
+  <h2 id="anti-abuse">Anti-abuse</h2>
+  <ul>
+    <li>IP and user-agent rate limiting via Rack::Attack.</li>
+    <li>High-similarity text detection to catch duplicate or templated submissions.</li>
+    <li>Clerk identity verification provides an additional layer of authenticity.</li>
+    <li>Moderators may remove, flag, or escalate any submission.</li>
+  </ul>
+
+  <h2 id="public-aggregates-k-anonymity">Public aggregates &amp; k-anonymity</h2>
+  <ul>
+    <li>Recruiter profiles are suppressed until the k-anonymity threshold is reached (<strong>≥ 5 approved reviews</strong>).</li>
+    <li>Only aggregated scores are publicly visible — no individual review text is surfaced.</li>
+    <li>Company sizes are bucketed (&lt; 50 employees shown as "Small company") to reduce re-identification.</li>
+  </ul>
+
+  <h2 id="compliance-scope">Compliance scope (POC)</h2>
+  <ul>
+    <li>GDPR baseline for the US launch.</li>
+    <li>CCPA/CPRA access and deletion requests honoured on request.</li>
+    <li>Data subject requests: submitted by email, requester identity verified, all actions logged.</li>
+    <li>PII retention: <strong>180 days</strong>. Abuse metadata: <strong>30 days</strong>. Logs redact PII.</li>
+  </ul>
+
+  <h2 id="identity-verification-data">Identity &amp; verification data</h2>
+  <ul>
+    <li><strong>LinkedIn tokens</strong> — one-time use, TTL 7 days, stored as hash only (never plaintext), rate-limited fetching.</li>
+    <li><strong>Email addresses</strong> — stored as an HMAC hash for deduplication; raw email is envelope-encrypted at rest.</li>
+  </ul>
+
+</div>

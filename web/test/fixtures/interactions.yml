@@ -1,0 +1,5 @@
+one:
+  recruiter: one
+  target: one
+  status: "approved"
+  occurred_at: <%= 1.week.ago %>

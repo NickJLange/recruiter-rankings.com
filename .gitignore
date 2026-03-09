@@ -136,3 +136,7 @@ web/log/*.log
 web/config/master.key
 scripts/.env.local
 web/vendor/bundle
+
+# Private inbox export + seed drafts (never commit)
+messages.csv
+recruiters_draft.csv

@@ -1,10 +1,36 @@
 class Recruiter < ApplicationRecord
+  include Sluggable
+
   belongs_to :company, optional: true
   has_many :reviews, dependent: :nullify
+  has_many :interactions, dependent: :destroy
   has_many :profile_claims, dependent: :destroy
   has_many :identity_challenges, as: :subject, dependent: :destroy
 
   validates :name, presence: true
   validates :public_slug, presence: true, uniqueness: true
   validates :email_hmac, uniqueness: true, allow_nil: true
+  validates :linkedin_url, format: {
+    with: %r{\Ahttps?://(www\.)?linkedin\.com/},
+    message: "must be a linkedin.com URL"
+  }, allow_blank: true
+
+  # Override to use public_slug for routing
+  def to_param
+    public_slug
+  end
+
+  def display_name(viewer = nil)
+    return name if viewer&.admin? || viewer&.paid? || viewer&.owner_of_review?(self)
+
+    # Masked name
+    if public_slug.match?(/\A[0-9A-F]{8}\z/)
+      "Recruiter #{public_slug}"
+    elsif public_slug.start_with?("RR-")
+      "Recruiter #{public_slug.split('-').last}"
+    else
+      # Legacy or custom slug fallback
+      "Recruiter #{Digest::MD5.hexdigest(public_slug)[0..5].upcase}"
+    end
+  end
 end

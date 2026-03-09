@@ -70,6 +70,7 @@ Threat Model (prioritized)
 4) Spam/fake accounts
 5) Insider access misuse
 6) Data exfiltration
+7) Clerk IDP dependency / external service outage (mitigate: cached JWT claims for read paths; graceful degradation for write paths)
 
 Technical Design (POC)
 - Stack: Ruby on Rails app for dynamic functionality; Jekyll (optional) for static marketing pages
@@ -100,7 +101,8 @@ Indexes and Constraints
 - Suppress public aggregates until k-anonymity threshold (e.g., n ≥ 5 reviews)
 
 Identity/Verification Flow
-- User submits LinkedIn URL; app generates token; user places token on profile; app verifies by fetching profile (rate-limited); on success, set verified_at
+- **Identity provider**: Clerk (hosted sign-in, JWT session tokens). Users authenticate via email or OAuth (LinkedIn, GitHub). Provider presence is verified via Clerk Backend API at submission time.
+- **Recruiter profile verification**: User submits LinkedIn URL; app generates token; user places token on profile; app verifies by fetching profile (rate-limited); on success, set verified_at
 - Challenge tokens are 128-bit random; TTL 7 days; hashed tokens stored (no plaintext)
 
 Moderation Pipeline (cheap-first)
@@ -110,10 +112,10 @@ Moderation Pipeline (cheap-first)
 
 Access Controls
 - Anonymous: view aggregated metrics only
-- Candidate: submit reviews; view aggregates
-- Recruiter: claim profile; respond to reviews; view aggregates
+- Candidate: submit reviews; view aggregates (requires Clerk session with verified email or LinkedIn)
+- Recruiter: claim profile; respond to reviews; view aggregates (requires Clerk + LinkedIn)
 - Moderator: review flags; manage takedowns
-- Admin: full access; audit logs required for all privileged actions
+- Admin: full access; audit logs required for all privileged actions (requires Clerk with email + LinkedIn + GitHub + 2FA)
 
 Observability
 - Metrics: request rate, latency, error rates, moderation queue depth

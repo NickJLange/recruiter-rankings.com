@@ -1,0 +1,4 @@
+one:
+  name: "Acme Corp"
+  region: "US"
+  size_bucket: "Medium"

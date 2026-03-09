@@ -1,0 +1,8 @@
+services:
+  backup:
+    build: .
+    container_name: rr-backup
+    restart: unless-stopped
+    env_file: .env.local
+    # Uncomment if building on a non-ARM host and deploying to RPi4:
+    # platform: linux/arm64/v8

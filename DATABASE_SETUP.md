@@ -124,10 +124,83 @@ make setup    # Fresh setup
 - View Podman system info: `podman info`
 
 ### Reset Everything (Local PostgreSQL)
+
 ```bash
+
 cd web
+
 bin/rails db:drop
+
 bin/rails db:create
+
 bin/rails db:migrate
+
 bin/rails db:seed
+
 ```
+
+
+
+## Disaster Recovery & Backups
+
+
+
+The application includes a `BackupService` to protect data hosted on Render.
+
+
+
+### Automated Backups
+
+Backups are performed using `pg_dump`, compressed with `gzip`, and encrypted with `openssl` (AES-256). They can be stored locally on the ephemeral disk or uploaded to S3-compatible storage.
+
+
+
+### Triggering a Backup
+
+Use the provided Rake task:
+
+```bash
+
+# Set RENDER_DB_NAME to specify which database to backup via Render API
+
+RENDER_DB_NAME=my-database-name bundle exec rake db:backup:create
+
+```
+
+
+
+### Restore Procedure
+
+1. **Retrieve the Backup**: Download the `.sql.gz.enc` file from your storage provider.
+
+2. **Decrypt**:
+
+   ```bash
+
+   openssl enc -d -aes-256-cbc -k $BACKUP_ENCRYPTION_KEY -in backup.sql.gz.enc -out backup.sql.gz
+
+   ```
+
+3. **Decompress**:
+
+   ```bash
+
+   gunzip backup.sql.gz
+
+   ```
+
+4. **Restore**:
+
+   ```bash
+
+   psql $DATABASE_URL < backup.sql
+
+   ```
+
+   *Note: Ensure you are connecting to the correct target database.*
+
+
+
+### Retention Policy
+
+The system automatically prunes backups older than the configured `BACKUP_RETENTION_DAYS` (default: 7) after each successful backup.

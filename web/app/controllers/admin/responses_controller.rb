@@ -5,23 +5,26 @@ module Admin
       body = params.require(:review_response).permit(:body)[:body]
       raise ActionController::BadRequest, "Empty body" if body.blank?
 
-      resp = ReviewResponse.create!(review: review, user: current_moderator_actor, body: body, visible: true)
-      ModerationAction.create!(actor: current_moderator_actor, action: "respond", subject: review, notes: "response_id=#{resp.id}")
+      resp = ReviewResponse.create!(review: review, user: current_local_user, body: body, visible: true)
+      log_moderation("respond", review, "response_id=#{resp.id}")
       redirect_to admin_reviews_path, notice: "Response posted for review ##{review.id}."
     end
 
     def hide
-      resp = ReviewResponse.find(params[:id])
-      resp.update!(visible: false)
-      ModerationAction.create!(actor: current_moderator_actor, action: "response_hide", subject: resp.review, notes: "response_id=#{resp.id}")
-      redirect_to admin_reviews_path, notice: "Response hidden."
+      set_response_visibility(false)
     end
 
-    def show
+    def unhide
+      set_response_visibility(true)
+    end
+
+    private
+
+    def set_response_visibility(visible)
       resp = ReviewResponse.find(params[:id])
-      resp.update!(visible: true)
-      ModerationAction.create!(actor: current_moderator_actor, action: "response_show", subject: resp.review, notes: "response_id=#{resp.id}")
-      redirect_to admin_reviews_path, notice: "Response visible."
+      resp.update!(visible: visible)
+      log_moderation(visible ? "response_show" : "response_hide", resp.review, "response_id=#{resp.id}")
+      redirect_to admin_reviews_path, notice: "Response #{visible ? 'visible' : 'hidden'}."
     end
 
   end

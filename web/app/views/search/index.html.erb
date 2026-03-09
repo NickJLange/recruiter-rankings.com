@@ -1,0 +1,59 @@
+<% content_for :title, @query.present? ? "Search: #{@query} — Recruiter Rankings" : "Search — Recruiter Rankings" %>
+
+<div class="page-md">
+
+  <%= form_with url: search_path, method: :get, local: true,
+        class: "search-form",
+        style: "margin-bottom:32px;" do |f| %>
+    <%= f.search_field :q, value: @query,
+          placeholder: "Search for a recruiter, firm, or agency…",
+          autocomplete: "off",
+          autofocus: true,
+          class: "field-input" %>
+    <%= f.submit "Search",
+          class: "btn btn-primary" %>
+  <% end %>
+
+  <% if @query.length < 2 %>
+    <p class="text-muted">Enter at least 2 characters to search.</p>
+  <% else %>
+
+    <% if @recruiters.any? %>
+      <h2 class="section-label">Recruiters</h2>
+      <ul class="result-list" style="margin-bottom:32px;">
+        <% @recruiters.each do |r| %>
+          <li class="result-item">
+            <%= link_to r.display_name(current_local_user), recruiter_path(r.public_slug),
+                  style: "color:var(--ink); text-decoration:none; font-weight:500;" %>
+            <% if r.company.present? %>
+              <span class="text-muted text-sm" style="margin-left:8px;">· <%= r.company.name %></span>
+            <% end %>
+            <% if r.region.present? %>
+              <span class="text-muted text-sm" style="margin-left:4px;">· <%= r.region %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if @companies.any? %>
+      <h2 class="section-label">Companies</h2>
+      <ul class="result-list">
+        <% @companies.each do |c| %>
+          <li class="result-item">
+            <%= link_to c.name, company_path(c),
+                  style: "color:var(--ink); text-decoration:none; font-weight:500;" %>
+            <% if c.industry.present? %>
+              <span class="text-muted text-sm" style="margin-left:8px;">· <%= c.industry %></span>
+            <% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <% if @recruiters.empty? && @companies.empty? %>
+      <p class="text-muted">No results for <strong style="color:var(--ink);">"<%= h @query %>"</strong>.</p>
+    <% end %>
+
+  <% end %>
+</div>

@@ -2,7 +2,7 @@
 <p><%= t('recruiters.index.subtitle', count: public_min_reviews) %></p>
 
 <%= form_with url: recruiters_path, method: :get, local: true do |f| %>
-  <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin: 8px 0 16px;">
+  <div class="search-form" style="align-items:flex-end; flex-wrap:wrap; margin: 8px 0 16px;">
     <div>
       <label for="q"><%= t('recruiters.index.search') %></label><br>
       <input type="text" name="q" id="q" value="<%= h @q %>" placeholder="Recruiter name">
@@ -21,49 +21,31 @@
     </div>
     <div>
       <button type="submit"><%= t('recruiters.index.filter') %></button>
-      <%= link_to t('recruiters.index.clear'), recruiters_path, style: "margin-left:6px;", aria: { label: t('recruiters.index.clear_filters') } %>
+      <%= link_to t('recruiters.index.clear'), recruiters_path, style: "margin-left:6px;" %>
     </div>
   </div>
 <% end %>
 
-<% if @recruiters.any? %>
-  <table>
-    <thead>
-      <tr>
-        <th><%= t('recruiters.index.th.recruiter') %></th>
-        <th><%= t('recruiters.index.th.company') %></th>
-        <th><%= t('recruiters.index.th.avg_overall') %></th>
-        <th><%= t('recruiters.index.th.reviews') %></th>
+<table>
+  <thead>
+    <tr>
+      <th><%= t('recruiters.index.th.recruiter') %></th>
+      <th><%= t('recruiters.index.th.company') %></th>
+      <th><%= t('recruiters.index.th.avg_overall') %></th>
+      <th><%= t('recruiters.index.th.reviews') %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @recruiters.each do |r| %>
+      <tr class="recruiter-row">
+        <td><%= link_to r.display_name(current_user), recruiter_path(r.public_slug) %></td>
+        <td><%= r.company&.name || "—" %></td>
+        <td><%= r.attributes["avg_overall"].to_f.round(2) %></td>
+        <td><%= r.attributes["reviews_count"] %></td>
       </tr>
-    </thead>
-    <tbody>
-      <% @recruiters.each do |r| %>
-        <tr class="recruiter-row">
-          <td><%= link_to r.name, recruiter_path(r.public_slug) %></td>
-          <td><%= r.company&.name || "—" %></td>
-          <td><%= r.attributes["avg_overall"].to_f.round(2) %></td>
-          <td><%= r.attributes["reviews_count"] %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+    <% end %>
+  </tbody>
+</table>
 
-  <div style="margin-top: 16px; display:flex; justify-content: space-between;">
-    <div>
-      <% if @page > 1 %>
-        <%= link_to "← Previous", recruiters_path(request.query_parameters.merge(page: @page - 1)), class: "cta", style: "margin-top: 0;", aria: { label: t('pagination.previous') } %>
-      <% end %>
-    </div>
-    <div>
-      <% if @has_next %>
-        <%= link_to "Next →", recruiters_path(request.query_parameters.merge(page: @page + 1)), class: "cta", style: "margin-top: 0;", aria: { label: t('pagination.next') } %>
-      <% end %>
-    </div>
-  </div>
-<% else %>
-  <div class="card" style="padding: 32px; text-align: center; margin-top: 16px;">
-    <p class="muted" style="margin-bottom: 16px;"><%= t('recruiters.index.no_results') %></p>
-    <%= link_to t('recruiters.index.clear_filters'), recruiters_path, class: "cta", style: "margin-top: 0;" %>
-  </div>
-<% end %>
+<%= render 'shared/pagination' %>
 

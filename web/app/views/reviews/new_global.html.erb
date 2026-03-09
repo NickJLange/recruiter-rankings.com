@@ -1,0 +1,68 @@
+<% content_for :title, "Submit a Review — Recruiter Rankings" %>
+
+<div class="page-sm">
+  <h1 style="margin:0 0 8px;">Submit a Review</h1>
+  <p class="text-muted" style="margin:0 0 36px;">Share your experience with a recruiter — anonymously, with right-of-reply.</p>
+
+  <% if !authenticated? %>
+    <%# ── Not signed in ── %>
+    <div class="card card--section" style="text-align:center;">
+      <p style="margin:0 0 8px; font-weight:600;">Sign in to continue</p>
+      <p class="text-muted" style="font-size:0.9rem; margin:0 0 20px;">
+        We need a verified email or LinkedIn account to prevent duplicate reviews.<br>
+        Your identity is never shown publicly.
+      </p>
+      <a href="#"
+         onclick="window.Clerk && window.Clerk.redirectToSignIn({redirectUrl: window.location.href}); return false;"
+         class="cta" style="margin-top:0;">Sign in with Clerk</a>
+    </div>
+
+  <% elsif !auth_service.meets_requirements?(:candidate_submit) %>
+    <%# ── Signed in but missing required provider ── %>
+    <div class="card card--section">
+      <p style="margin:0 0 8px; font-weight:600;">One more step</p>
+      <p class="text-muted" style="font-size:0.9rem; margin:0 0 16px;">
+        Submitting a review requires a verified <strong>email address</strong> or
+        <strong>LinkedIn account</strong> connected to your Clerk profile.
+        This prevents duplicate submissions — your identity stays private.
+      </p>
+      <ul class="text-muted" style="font-size:0.9rem; margin:0 0 20px; padding-left:1.2em; line-height:1.8;">
+        <li>Go to your Clerk account settings</li>
+        <li>Connect a verified email <em>or</em> LinkedIn</li>
+        <li>Return here to submit your review</li>
+      </ul>
+      <a href="#"
+         onclick="window.Clerk && window.Clerk.openUserProfile(); return false;"
+         class="cta" style="margin-top:0;">Open account settings</a>
+    </div>
+
+  <% else %>
+    <%# ── Authorized — find the recruiter to review ── %>
+    <div class="card card--section">
+      <p style="font-weight:600; margin:0 0 4px;">Find the recruiter you want to review</p>
+      <p class="text-muted" style="font-size:0.9rem; margin:0 0 16px;">
+        Search by name or company, then open their profile to submit your review.
+      </p>
+      <%= form_with url: "/search", method: :get, local: true,
+            class: "search-form" do |f| %>
+        <%= f.search_field :q,
+              placeholder: "Recruiter name or company…",
+              autocomplete: "off",
+              autofocus: true,
+              class: "field-input" %>
+        <%= f.submit "Search",
+              class: "btn btn-primary" %>
+      <% end %>
+    </div>
+
+    <p class="text-muted" style="font-size:0.8rem; margin-top:16px;">
+      Can't find the recruiter? They may not have a profile yet.
+      <%= link_to "Browse all recruiters", recruiters_path, style: "color:var(--accent-text);" %> to check.
+    </p>
+    <p class="text-muted" style="font-size:0.8rem; margin-top:8px;">
+      Not finding them?
+      <%= link_to "Add a new recruiter entry", new_recruiter_path, style: "color:var(--accent-text);" %>
+    </p>
+  <% end %>
+
+</div>
