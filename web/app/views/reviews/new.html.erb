@@ -4,43 +4,87 @@
   <%= f.hidden_field :recruiter_slug, value: @recruiter.public_slug %>
 
   <div>
-    <%= f.label :overall_score, t('reviews.new.overall_score') %> <span style="color:#ef4444" aria-hidden="true">*</span><br>
-    <%= f.number_field :overall_score, in: 1..5, step: 1, required: true, autofocus: true, aria: { describedby: 'score-help' } %>
-    <small id="score-help" class="muted" style="display:block; margin-top:4px;"><%= t('reviews.new.overall_score_help') %></small>
+    <%= f.label :overall_score, t('reviews.new.overall_score') %><br>
+    <%= f.number_field :overall_score, in: 1..5, step: 1, required: true %>
   </div>
 
   <div>
-    <%= f.label :text, t('reviews.new.your_experience') %> <span style="color:#ef4444" aria-hidden="true">*</span><br>
-    <%= f.text_area :text, rows: 6, required: true, maxlength: 5000, placeholder: t('reviews.new.your_experience_placeholder'), aria: { describedby: 'text-help char-counter' }, data: { behavior: 'char-counter' }, style: 'width:100%' %>
-    <div style="display:flex; justify-content:space-between; margin-top:4px;">
-      <small id="text-help" class="muted"><%= t('reviews.new.text_help') %></small>
-      <small id="char-counter" class="muted">0 / 5000</small>
+    <%= f.label :text, t('reviews.new.your_experience') %><br>
+    <%= f.text_area :text, rows: 6, required: true %>
+  </div>
+
+  <%# Section A — Dimensional scores (optional) %>
+  <details>
+    <summary><%= t('reviews.new.dimensions_section') %></summary>
+    <p class="text-muted text-sm" style="margin:0 0 12px;"><%= t('reviews.new.dimensions_hint') %></p>
+    <% ReviewMetric::DIMENSIONS.keys.each do |dim| %>
+      <div style="margin-bottom:10px; display:flex; align-items:center; gap:12px;">
+        <%= f.label :"dimension_#{dim}", t("reviews.new.dimension_#{dim}"),
+              class: "field-label", style: "min-width:200px; margin-bottom:0;" %>
+        <%= f.number_field :"dimension_#{dim}", in: 1..5, step: 1,
+              placeholder: "1–5",
+              style: "width:70px;" %>
+      </div>
+    <% end %>
+  </details>
+
+  <%# Section B — Job info (optional) %>
+  <details>
+    <summary><%= t('reviews.new.job_section') %></summary>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div>
+        <%= f.label :role_title, t('reviews.new.job_title'), class: "field-label" %>
+        <%= f.text_field :role_title, placeholder: "e.g. Senior Software Engineer",
+              class: "field-input" %>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <div style="flex:1;">
+          <%= f.label :role_min_compensation, t('reviews.new.job_min_comp'), class: "field-label" %>
+          <%= f.number_field :role_min_compensation, placeholder: "e.g. 120000", min: 0,
+                class: "field-input" %>
+        </div>
+        <div style="flex:1;">
+          <%= f.label :role_max_compensation, t('reviews.new.job_max_comp'), class: "field-label" %>
+          <%= f.number_field :role_max_compensation, placeholder: "e.g. 160000", min: 0,
+                class: "field-input" %>
+        </div>
+      </div>
+      <div>
+        <%= f.label :role_target_company, t('reviews.new.target_company'), class: "field-label" %>
+        <%= f.text_field :role_target_company, placeholder: "e.g. Acme Corp",
+              class: "field-input" %>
+      </div>
+      <div>
+        <%= f.label :occurred_at, t('reviews.new.occurred_at'), class: "field-label" %>
+        <%= f.date_field :occurred_at %>
+      </div>
     </div>
-  </div>
+  </details>
 
-  <div>
-    <%= f.label :email, t('reviews.new.email_optional') %><br>
-    <%= f.email_field :email %>
-  </div>
+  <%# Section C — Outcome (optional) %>
+  <details>
+    <summary><%= t('reviews.new.outcome_section') %></summary>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div>
+        <%= f.label :would_recommend do %>
+          <%= f.check_box :would_recommend %>
+          <%= t('reviews.new.would_recommend') %>
+        <% end %>
+      </div>
+      <div>
+        <%= f.label :outcome, t('reviews.new.outcome'), class: "field-label" %>
+        <%= f.select :outcome, [
+              ["", ""],
+              [t('reviews.new.outcome_hired'), "hired"],
+              [t('reviews.new.outcome_declined_offer'), "declined_offer"],
+              [t('reviews.new.outcome_ghosted'), "ghosted"],
+              [t('reviews.new.outcome_still_interviewing'), "still_interviewing"]
+            ], {}, class: "field-select" %>
+      </div>
+    </div>
+  </details>
 
-  <div style="margin-top:10px;">
-    <%= f.submit t('reviews.new.submit'), class: 'cta' %>
+  <div style="margin-top:16px;">
+    <%= f.submit t('reviews.new.submit') %>
   </div>
 <% end %>
-
-<script>
-  (function() {
-    var field = document.querySelector('[data-behavior="char-counter"]');
-    var counter = document.getElementById('char-counter');
-    if (field && counter) {
-      function update() {
-        var len = field.value.length;
-        var max = field.getAttribute('maxlength');
-        counter.textContent = len + ' / ' + max;
-      }
-      field.addEventListener('input', update);
-      // Initialize immediately
-      update();
-    }
-  })();
-</script>

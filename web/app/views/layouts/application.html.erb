@@ -20,12 +20,59 @@
 
     <%= yield :head %>
 
+    <%# ClerkJS — loads the Clerk frontend SDK for session management and auth UI.
+        Only injected when CLERK_PUBLISHABLE_KEY is present (safe to omit in CI). %>
+    <% if (clerk_js_url = Rails.application.config.clerk_js_url).present? %>
+      <script>
+        var _personIcon = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+        function initClerkNav() {
+          window.Clerk.load({
+            signInFallbackRedirectUrl: window.location.origin + '/',
+            signUpFallbackRedirectUrl: window.location.origin + '/'
+          }).then(function() {
+            var auth = document.getElementById('clerk-nav-auth');
+            if (!auth) return;
+            if (window.Clerk.user) {
+              var name = window.Clerk.user.firstName || (window.Clerk.user.emailAddresses[0] || {}).emailAddress || 'user';
+              var settingsLink = document.createElement('a');
+              settingsLink.href = '/settings';
+              settingsLink.className = 'nav-link';
+              settingsLink.title = 'Settings for ' + name;
+              settingsLink.textContent = 'Settings';
+              var signOutBtn = document.createElement('button');
+              signOutBtn.className = 'nav-auth-btn nav-auth-btn--in';
+              signOutBtn.title = 'Signed in as ' + name + ' \u2014 click to sign out';
+              signOutBtn.setAttribute('aria-label', 'Sign out');
+              signOutBtn.innerHTML = _personIcon;
+              signOutBtn.onclick = function() { window.Clerk.signOut().then(function(){location.reload()}); return false; };
+              auth.appendChild(settingsLink);
+              auth.appendChild(signOutBtn);
+            } else {
+              var signInBtn = document.createElement('button');
+              signInBtn.className = 'nav-auth-btn';
+              signInBtn.title = 'Sign in';
+              signInBtn.setAttribute('aria-label', 'Sign in');
+              signInBtn.innerHTML = _personIcon;
+              signInBtn.onclick = function() { window.Clerk.redirectToSignIn({redirectUrl: window.location.href}); return false; };
+              auth.appendChild(signInBtn);
+            }
+          });
+        }
+      </script>
+      <script async crossorigin="anonymous"
+        data-clerk-publishable-key="<%= h ENV['CLERK_PUBLISHABLE_KEY'] %>"
+        src="<%= h clerk_js_url %>"
+        onload="initClerkNav()"
+        type="text/javascript"></script>
+    <% end %>
+
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
     <link rel="icon" href="/icon.png" type="image/png">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="shortcut icon" href="/favicon.ico">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app %>
@@ -47,21 +94,27 @@
     <a href="#main-content" class="skip-link"><%= t('nav.skip_to_content', default: 'Skip to content') %></a>
     <header class="site-header">
       <nav class="container nav">
-        <a class="brand" href="/">Recruiter Rankings</a>
-        <div class="nav-links">
-          <a href="/"><%= t('nav.home') %></a>
-          <a href="/about"><%= t('nav.about') %></a>
-          <a href="/policies"><%= t('nav.policies') %></a>
-          <a href="/recruiters"><%= t('nav.recruiters') %></a>
-          <a href="/companies"><%= t('nav.companies', default: 'Companies') %></a>
-          <a href="/admin/reviews"><%= t('nav.approve') %></a>
-          <a href="<%= switch_locale_to(I18n.locale == :ja ? 'en' : 'ja') %>"><%= I18n.locale == :ja ? t('nav.locale_en') : t('nav.locale_ja') %></a>
+        <a class="brand" href="/">
+          <img src="/logo.svg" alt="" class="nav-logo" width="32" height="32" aria-hidden="true">
+          Recruiter Rankings
+        </a>
+        <div class="nav-actions">
+          <a href="/search" class="nav-link"><%= t('nav.search', default: 'Search') %></a>
+          <a href="/reviews/new" class="nav-link-cta">Submit Review</a>
+          <div id="clerk-nav-auth"></div>
           <button class="theme-toggle" aria-label="Toggle theme" title="Toggle theme"></button>
+          <button class="hamburger" id="nav-hamburger" aria-label="Menu" aria-expanded="false" aria-controls="nav-drawer">&#9776;</button>
         </div>
       </nav>
-      <div class="container" style="padding-bottom:8px;">
-        <small class="muted"><%= t('nav.top_companies', default: 'Top companies') %>:</small>
-        <ul id="top-companies-nav" style="display:inline-flex; gap:10px; list-style:none; margin:0 0 0 8px; padding:0;"></ul>
+      <div id="nav-drawer" class="nav-drawer" hidden>
+        <a href="/companies?type=recruiting">Recruiting Companies</a>
+        <a href="/companies?type=hiring">Hiring Companies</a>
+        <hr>
+        <a href="/about"><%= t('nav.about') %></a>
+        <a href="/policies"><%= t('nav.policies', default: 'Policies') %></a>
+        <hr>
+        <a href="/admin">Moderator Dashboard</a>
+        <a href="/identity_verifications/new">Register / Verify</a>
       </div>
     </header>
 
@@ -75,21 +128,34 @@
     </main>
 
     <footer class="site-footer container">
-      <p>© <%= Time.current.year %> Recruiter Rankings. All rights reserved.</p>
+      <p class="text-muted text-sm">
+        &copy; <%= Time.current.year %>
+        <a href="https://recruiter-rankings.com" style="color:var(--muted);">Recruiter Rankings</a>,
+        a spin-out from <a href="https://www.5l-labs.com" style="color:var(--muted);">5L-Labs</a>.
+        All rights reserved.
+        Identity services provided by <a href="https://clerk.com" style="color:var(--muted);">Clerk</a>.
+      </p>
     </footer>
     <script src="/assets/theme.js"></script>
     <script>
       (function(){
-        fetch('/companies.json?per=5').then(function(r){return r.json()}).then(function(items){
-          var ul = document.getElementById('top-companies-nav'); if(!ul) return;
-          ul.innerHTML='';
-          items.slice(0,5).forEach(function(c){
-            var li=document.createElement('li');
-            var a=document.createElement('a'); a.href='/companies/'+c.id; a.textContent=c.name; li.appendChild(a);
-            ul.appendChild(li);
-          });
-        }).catch(function(){});
+        var btn = document.getElementById('nav-hamburger');
+        var drawer = document.getElementById('nav-drawer');
+        if (!btn || !drawer) return;
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var hidden = drawer.hasAttribute('hidden');
+          if (hidden) { drawer.removeAttribute('hidden'); btn.setAttribute('aria-expanded','true'); }
+          else { drawer.setAttribute('hidden',''); btn.setAttribute('aria-expanded','false'); }
+        });
+        document.addEventListener('click', function(e) {
+          if (!btn.contains(e.target) && !drawer.contains(e.target)) {
+            drawer.setAttribute('hidden','');
+            btn.setAttribute('aria-expanded','false');
+          }
+        });
       })();
     </script>
+
   </body>
 </html>

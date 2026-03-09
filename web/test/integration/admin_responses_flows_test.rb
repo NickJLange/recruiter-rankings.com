@@ -8,26 +8,24 @@ class AdminResponsesFlowsTest < ActionDispatch::IntegrationTest
     @review = Review.create!(user: @user, recruiter: @recruiter, company: @company, overall_score: 4, text: "Moderate me", status: "pending")
   end
 
-  def auth_headers
-    { "HTTP_AUTHORIZATION" => ActionController::HttpAuthentication::Basic.encode_credentials("mod", "mod") }
-  end
-
   test "create response, hide it, then show it again" do
+    sign_in_as_clerk(role: :admin, providers: [:email, :linkedin, :github], two_factor: true)
+
     # Create response
     assert_difference -> { ReviewResponse.count }, +1 do
-      post "/admin/reviews/#{@review.id}/responses", params: { review_response: { body: "Thanks for the feedback." } }, headers: auth_headers
+      post "/admin/reviews/#{@review.id}/responses", params: { review_response: { body: "Thanks for the feedback." } }
     end
     assert_response :redirect
     resp = ReviewResponse.order(:id).last
     assert_equal true, resp.visible
 
     # Hide response
-    patch "/admin/reviews/#{@review.id}/responses/#{resp.id}/hide", headers: auth_headers
+    patch "/admin/reviews/#{@review.id}/responses/#{resp.id}/hide"
     assert_response :redirect
     assert_equal false, resp.reload.visible
 
     # Show response
-    patch "/admin/reviews/#{@review.id}/responses/#{resp.id}", headers: auth_headers
+    patch "/admin/reviews/#{@review.id}/responses/#{resp.id}/unhide"
     assert_response :redirect
     assert_equal true, resp.reload.visible
 
@@ -38,4 +36,3 @@ class AdminResponsesFlowsTest < ActionDispatch::IntegrationTest
     assert actions.where(action: "response_show").exists?
   end
 end
-

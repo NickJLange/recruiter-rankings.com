@@ -10,7 +10,7 @@ require "active_job/railtie"
 require "active_record/railtie"
 # require "active_storage/engine"
 require "action_controller/railtie"
-# require "action_mailer/railtie"
+require "action_mailer/railtie"
 # require "action_mailbox/engine"
 # require "action_text/engine"
 require "action_view/railtie"
@@ -41,5 +41,10 @@ module Web
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Restrict available locales to only supported languages.
+    # Without this, gem locale files (rails-i18n, pay, etc.) pollute I18n.available_locales.
+    config.i18n.available_locales = [:en, :ja]
+    config.i18n.default_locale = :en
   end
 end

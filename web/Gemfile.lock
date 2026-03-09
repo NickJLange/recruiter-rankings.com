@@ -77,16 +77,55 @@ GEM
       uri (>= 0.13.1)
     addressable (2.8.7)
       public_suffix (>= 2.0.2, < 7.0)
+    aws-eventstream (1.4.0)
+    aws-partitions (1.1211.0)
+    aws-sdk-core (3.241.4)
+      aws-eventstream (~> 1, >= 1.3.0)
+      aws-partitions (~> 1, >= 1.992.0)
+      aws-sigv4 (~> 1.9)
+      base64
+      bigdecimal
+      jmespath (~> 1, >= 1.6.1)
+      logger
+    aws-sdk-kms (1.121.0)
+      aws-sdk-core (~> 3, >= 3.241.4)
+      aws-sigv4 (~> 1.5)
+    aws-sdk-s3 (1.213.0)
+      aws-sdk-core (~> 3, >= 3.241.4)
+      aws-sdk-kms (~> 1)
+      aws-sigv4 (~> 1.5)
+    aws-sigv4 (1.12.1)
+      aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.3.0)
     bigdecimal (3.3.1)
     brakeman (7.1.1)
       racc
     builder (3.3.0)
+    capybara (3.40.0)
+      addressable
+      matrix
+      mini_mime (>= 0.1.3)
+      nokogiri (~> 1.11)
+      rack (>= 1.6.0)
+      rack-test (>= 0.6.3)
+      regexp_parser (>= 1.5, < 3.0)
+      xpath (~> 3.2)
+    cgi (0.5.1)
+    clerk-sdk-ruby (5.1.2)
+      base64 (>= 0.2.0, < 1.0)
+      concurrent-ruby (~> 1.3.5)
+      faraday (>= 2.14.1)
+      faraday-multipart (~> 1.2.0)
+      faraday-retry (~> 2.4.0)
+      jwt (~> 3.0)
     colorator (1.1.0)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.4)
     crass (1.0.6)
     csv (3.3.5)
+    cuprite (0.17)
+      capybara (~> 3.0)
+      ferrum (~> 0.17.0)
     date (3.5.0)
     debug (1.11.0)
       irb (~> 1.10)
@@ -104,6 +143,22 @@ GEM
     eventmachine (1.2.7)
     faker (3.5.2)
       i18n (>= 1.8.11, < 2)
+    faraday (2.14.1)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-multipart (1.2.0)
+      multipart-post (~> 2.0)
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
+    faraday-retry (2.4.0)
+      faraday (~> 2.0)
+    ferrum (0.17.1)
+      addressable (~> 2.5)
+      base64 (~> 0.2)
+      concurrent-ruby (~> 1.1)
+      webrick (~> 1.7)
+      websocket-driver (~> 0.7)
     ffi (1.17.2)
     ffi (1.17.2-aarch64-linux-gnu)
     ffi (1.17.2-aarch64-linux-musl)
@@ -171,7 +226,10 @@ GEM
       sass-embedded (~> 1.75)
     jekyll-watch (2.2.1)
       listen (~> 3.0)
+    jmespath (1.6.2)
     json (2.16.0)
+    jwt (3.1.2)
+      base64
     kramdown (2.5.1)
       rexml (>= 3.3.9)
     kramdown-parser-gfm (1.1.0)
@@ -191,12 +249,16 @@ GEM
       net-pop
       net-smtp
     marcel (1.1.0)
+    matrix (0.4.3)
     mercenary (0.4.0)
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
     minitest (5.26.2)
+    multipart-post (2.4.1)
+    net-http (0.9.1)
+      uri (>= 0.11.1)
     net-imap (0.5.12)
       date
       net-protocol
@@ -226,8 +288,15 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.10-x86_64-linux-musl)
       racc (~> 1.4)
+    ostruct (0.6.3)
+    paddle (2.9)
+      cgi
+      faraday (~> 2.11)
+      ostruct (~> 0.6.0)
     pathutil (0.16.2)
       forwardable-extended (~> 2.6)
+    pay (8.3.0)
+      rails (>= 6.0.0)
     pg (1.6.2)
     pg (1.6.2-aarch64-linux)
     pg (1.6.2-aarch64-linux-musl)
@@ -297,6 +366,7 @@ GEM
       erb
       psych (>= 4.0.0)
       tsort
+    regexp_parser (2.11.3)
     reline (0.6.3)
       io-console (~> 0.5)
     rexml (3.4.4)
@@ -341,6 +411,8 @@ GEM
       base64
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
+    xpath (3.2.0)
+      nokogiri (~> 1.8)
     zeitwerk (2.7.3)
 
 PLATFORMS
@@ -356,12 +428,17 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  aws-sdk-s3 (~> 1.120)
   brakeman
+  clerk-sdk-ruby
+  cuprite
   debug
   dotenv-rails
   faker (~> 3.5)
   image_processing (~> 1.2)
   jekyll (> 1.0)
+  paddle (~> 2.0)
+  pay (~> 8.0)
   pg (~> 1.1)
   propshaft
   puma (>= 5.0)

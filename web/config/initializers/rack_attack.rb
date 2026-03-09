@@ -1,14 +1,31 @@
 class Rack::Attack
   # Use a simple keyed cache. Render will set RACK_ATTACK_REDIS_URL if you add Redis; but we use in-memory by default.
-  # throttle review submissions per IP
-  throttle("reviews/ip", limit: (ENV["RATE_LIMIT_REVIEWS_PER_MIN"] || 10).to_i, period: 1.minute) do |req|
-    req.ip if req.post? && req.path == "/reviews"
+
+  # Throttle review submissions: by Clerk user ID when authenticated, IP otherwise.
+  throttle("reviews/user_or_ip", limit: (ENV["RATE_LIMIT_REVIEWS_PER_MIN"] || 10).to_i, period: 1.minute) do |req|
+    if req.post? && req.path == "/reviews"
+      req.env.dig("clerk")&.user_id || req.ip
+    end
   end
 
-  # throttle claim identity create/verify per IP
+  # Throttle recruiter creation: by Clerk user ID when authenticated, IP otherwise.
+  throttle("recruiters/user_or_ip", limit: (ENV["RATE_LIMIT_RECRUITERS_PER_HOUR"] || 10).to_i, period: 1.hour) do |req|
+    if req.post? && req.path == "/person"
+      req.env.dig("clerk")&.user_id || req.ip
+    end
+  end
+
+  # Throttle claim identity create/verify per IP (unauthenticated flow).
   throttle("claim/ip", limit: (ENV["RATE_LIMIT_CLAIM_PER_MIN"] || 10).to_i, period: 1.minute) do |req|
     if req.post? && (req.path == "/claim_identity" || req.path == "/claim_identity/verify")
       req.ip
+    end
+  end
+
+  # Throttle search: unauthenticated users only (by IP). Authenticated users are exempt.
+  throttle("search/ip", limit: (ENV["RATE_LIMIT_SEARCH_PER_MIN"] || 20).to_i, period: 1.minute) do |req|
+    if req.get? && req.path == "/search"
+      req.env.dig("clerk")&.user_id.blank? ? req.ip : nil
     end
   end
 

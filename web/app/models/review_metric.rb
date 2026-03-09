@@ -1,5 +1,8 @@
+# NOTE: ReviewMetric belongs_to :experience (not Review). Despite the name, this model
+# stores dimensional scores for the Experience model. The "review_" prefix is a naming
+# artifact from before the Interaction/Experience refactor. See Review model for deprecation context.
 class ReviewMetric < ApplicationRecord
-  belongs_to :review
+  belongs_to :experience
 
   DIMENSIONS = {
     responsiveness: "responsiveness",

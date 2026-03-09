@@ -28,7 +28,7 @@ module Admin
     def transition!(review, new_status)
       old = review.status
       review.update!(status: new_status)
-      ModerationAction.create!(actor: current_moderator_actor, action: "set_status:#{new_status}", subject: review, notes: "from: #{old}")
+      log_moderation("set_status:#{new_status}", review, "from: #{old}")
       redirect_to admin_reviews_path, notice: "Review ##{review.id} set to #{new_status}."
     end
 

@@ -1,118 +1,55 @@
 class ClaimIdentityController < ApplicationController
-  require 'digest'
-
-  attr_writer :linkedin_fetcher
-
-  def linkedin_fetcher
-    @linkedin_fetcher ||= LinkedInFetcher.new
-  end
-
   def new
-    @subject_type = params[:subject_type].presence || 'recruiter'
+    @subject_type  = params[:subject_type].presence || "recruiter"
     @recruiter_slug = params[:recruiter_slug].to_s
-    @linkedin_url = params[:linkedin_url].to_s
-    @email = params[:email].to_s
+    @recruiter = Recruiter.find_by(public_slug: @recruiter_slug)
   end
 
-  # Creates an identity challenge and shows instructions
   def create
-    @subject_type = permitted[:subject_type]
-    @linkedin_url = permitted[:linkedin_url]
-    @recruiter_slug = permitted[:recruiter_slug]
-    @email = permitted[:email]
+    @subject_type   = params.dig(:claim, :subject_type).to_s
+    @recruiter_slug = params.dig(:claim, :recruiter_slug).to_s
+    @linkedin_url   = params.dig(:claim, :linkedin_url).to_s
 
-    case @subject_type
-    when 'recruiter'
-      recruiter = Recruiter.find_by!(public_slug: @recruiter_slug)
-      subject = recruiter
-    when 'user'
-      user = find_or_create_user(@email)
-      user.update!(linked_in_url: @linkedin_url) if @linkedin_url.present?
-      subject = user
-    else
-      raise ActionController::BadRequest, 'Invalid subject_type'
+    @recruiter = Recruiter.find_by(public_slug: @recruiter_slug)
+
+    unless @subject_type == "recruiter"
+      flash.now[:alert] = "Unsupported identity type."
+      return render :new, status: :unprocessable_entity
     end
 
-    token_hash = generate_token_hash
-    ttl_hours = (ENV['CLAIM_TTL_HOURS'].presence || '168').to_i
+    if @recruiter.nil?
+      flash.now[:alert] = "Recruiter not found. Check the slug and try again."
+      return render :new, status: :unprocessable_entity
+    end
+
+    subject = @recruiter
+
+    # Persist the linkedin_url on the recruiter so admins can check it manually.
+    if @recruiter.linkedin_url.blank? && @linkedin_url.present?
+      unless @recruiter.update(linkedin_url: @linkedin_url)
+        flash.now[:alert] = @recruiter.errors.full_messages.first || "Could not save LinkedIn URL."
+        return render :new, status: :unprocessable_entity
+      end
+    end
+
+    # Generate a cleartext token to paste into LinkedIn; store only its hash (not plaintext).
+    raw_token   = SecureRandom.hex(16)
+    token_hash  = Digest::SHA256.hexdigest(raw_token)
+    paste_token = "RR-VERIFY-#{raw_token}"
+
     challenge = IdentityChallenge.create!(
-      subject_type: subject.class.name,
-      subject_id: subject.id,
+      subject:    subject,
       token_hash: token_hash,
-      linkedin_url: @linkedin_url,
-      expires_at: ttl_hours.hours.from_now
+      expires_at: 7.days.from_now
     )
 
+    @paste_token  = paste_token
     @challenge_id = challenge.id
-    @paste_token = "RR-VERIFY-#{token_hash}"
-    @instructions = [
-      'Copy the token below',
-      'Paste it into your LinkedIn profile (About, Featured, or Website)',
-      'Return and click Verify'
-    ]
-
     render :instructions
   end
 
-  # Fetches the LinkedIn URL and checks for the token
   def verify
-    challenge = IdentityChallenge.find(params.require(:challenge_id))
-    raise ActionController::BadRequest, 'Expired' if challenge.expires_at.past?
-
-    # Security Fix: Use stored URL instead of user input to prevent account takeover
-    linkedin_url = challenge.linkedin_url
-    if linkedin_url.blank?
-      # Fallback for old challenges or missing data - though we should probably require it.
-      # For security, we should reject if not present, but for now we might error.
-      # Let's check params if missing in DB for backward compat? No, that re-opens the hole.
-      # We must rely on the DB.
-      flash[:alert] = 'Invalid challenge data.'
-      redirect_to root_path and return
-    end
-
-    token = "RR-VERIFY-#{challenge.token_hash}"
-
-    VerifyIdentityJob.perform_later(challenge.id, linkedin_url)
-
-    flash[:notice] = 'Verification is running in the background. Please check back in a moment.'
-
-    case challenge.subject_type
-    when 'Recruiter'
-      recruiter = Recruiter.find(challenge.subject_id)
-      redirect_to recruiter_path(recruiter.public_slug)
-    else
-      redirect_to root_path
-    end
-  end
-
-  private
-
-  def map_subject_param(challenge)
-    challenge.subject_type.downcase
-  end
-
-  def recruiter_slug_for(challenge)
-    return nil unless challenge.subject_type == 'Recruiter'
-    Recruiter.find(challenge.subject_id).public_slug
-  end
-
-  def permitted
-    params.require(:claim).permit(:subject_type, :recruiter_slug, :linkedin_url, :email)
-  end
-
-  def generate_token_hash
-    raw = SecureRandom.hex(16) # 128-bit
-    Digest::SHA256.hexdigest(raw)
-  end
-
-  def find_or_create_user(email)
-    email = email.to_s.strip
-    email_to_hash = email.presence || "anon-#{SecureRandom.uuid}@example.com"
-    hmac = User.generate_email_hmac(email_to_hash)
-    User.where(email_hmac: hmac).first_or_create! do |u|
-      u.role = 'recruiter'
-      u.email_kek_id = 'demo'
-    end
+    flash[:notice] = "Your claim is in the queue. An admin will verify your LinkedIn profile within 7 days."
+    redirect_to root_path
   end
 end
-

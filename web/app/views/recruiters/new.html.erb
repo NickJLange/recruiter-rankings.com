@@ -1,0 +1,83 @@
+<% content_for :title, "Add a Recruiter — Recruiter Rankings" %>
+
+<div class="page-sm">
+  <h1 style="margin:0 0 8px;">Add a Recruiter</h1>
+  <p class="text-muted" style="margin:0 0 36px;">
+    They'll be added to the directory and you'll go straight to the review form.
+  </p>
+
+  <% if @recruiter.errors.any? %>
+    <div class="card alert-error" style="padding:16px 24px; margin-bottom:24px;">
+      <p style="margin:0 0 8px; font-weight:600; color:var(--error, #c0392b);">
+        Please fix the following:
+      </p>
+      <ul style="margin:0; padding-left:1.2em; color:var(--error, #c0392b); font-size:0.9rem; line-height:1.8;">
+        <% @recruiter.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= form_with model: @recruiter, url: recruiters_path, method: :post,
+        style: "display:flex; flex-direction:column; gap:20px;" do |f| %>
+
+    <div>
+      <%= f.label :linkedin_url, "LinkedIn URL *", class: "field-label" %>
+      <%= f.url_field :linkedin_url,
+            id: "recruiter_linkedin_url",
+            placeholder: "https://linkedin.com/in/jane-smith",
+            autocomplete: "off",
+            required: true,
+            oninput: "fillNameFromLinkedIn(this.value)",
+            class: "field-input" %>
+    </div>
+
+    <div>
+      <%= f.label :name, "Name *", class: "field-label" %>
+      <%= f.text_field :name,
+            id: "recruiter_name",
+            placeholder: "e.g. Jane Smith",
+            autocomplete: "off",
+            required: true,
+            class: "field-input" %>
+    </div>
+
+    <div>
+      <%= f.label :company_name, "Company name (optional)", class: "field-label" %>
+      <%= f.text_field :company_name,
+            placeholder: "e.g. Acme Staffing",
+            autocomplete: "off",
+            class: "field-input" %>
+    </div>
+
+    <div>
+      <%= f.label :region, "Region (optional)", class: "field-label" %>
+      <%= f.text_field :region,
+            placeholder: "e.g. US – New York",
+            autocomplete: "off",
+            class: "field-input" %>
+    </div>
+
+    <div style="display:flex; gap:12px; align-items:center; margin-top:8px;">
+      <%= f.submit "Add recruiter & write review",
+            class: "cta",
+            style: "margin-top:0;" %>
+      <%= link_to "Cancel", new_global_review_path,
+            style: "color:var(--muted); font-size:0.9rem;" %>
+    </div>
+
+  <% end %>
+</div>
+
+<script>
+function fillNameFromLinkedIn(url) {
+  try {
+    var slug = new URL(url).pathname.replace(/^\/in\//, '').replace(/\/.*$/, '');
+    if (!slug) return;
+    var name = slug.replace(/[-_.]+/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }).trim();
+    var nameField = document.getElementById('recruiter_name');
+    if (name && !nameField.value) nameField.value = name;
+  } catch(e) {}
+}
+</script>

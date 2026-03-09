@@ -1,21 +1,26 @@
 FROM alpine:3.18
 
-# Install dependencies
+# rclone: R2 upload/download (arm64-compatible via apk)
+# postgresql15-client: pg_dump + psql
+# curl: healthchecks.io ping
 RUN apk add --no-cache \
     bash \
     postgresql15-client \
     curl \
-    grep \
-    coreutils
+    coreutils \
+    rclone \
+    jq
 
-# Create backup directory
 WORKDIR /app
 
-# Copy the backup script
-COPY backup.sh .
+COPY entrypoint.sh backup.sh restore.sh render-db-restore.sh ./
 COPY crontab /etc/crontabs/root
 
-RUN chmod +x backup.sh
+RUN chmod +x entrypoint.sh backup.sh restore.sh render-db-restore.sh
 
-# Run cron in foreground
-CMD ["crond", "-f", "-l", "2"]
+# daemon          → runs crond (default)
+# backup          → one-shot backup
+# restore         → restore [filename|latest]
+# render-restore  → full Render free-DB lifecycle restore (create → restore → deploy)
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["daemon"]

@@ -1,7 +1,7 @@
 class CompaniesController < ApplicationController
   def index
     threshold = public_min_reviews
-    aggregates = Review.where(status: "approved").group(:company_id).select(:company_id, "COUNT(*) AS reviews_count", "AVG(overall_score) AS avg_overall")
+    aggregates = Experience.approved_aggregates_by_company
 
     scope = Company
       .joins("INNER JOIN (#{aggregates.to_sql}) agg ON agg.company_id = companies.id")
@@ -11,28 +11,29 @@ class CompaniesController < ApplicationController
     # Filters
     @q = params[:q].to_s.strip
     @region = params[:region].to_s.strip
+    @type = params[:type].to_s.strip
+
     if @q.present?
       scope = scope.where("companies.name ILIKE ?", "%#{@q}%")
     end
     if @region.present?
       scope = scope.where("companies.region ILIKE ?", "%#{@region}%")
     end
+    if @type == "recruiting"
+      # Companies that have recruiters (any company with a recruiter IS a recruiting company)
+      scope = scope.where(id: Recruiter.where.not(company_id: nil).select(:company_id))
+    elsif @type == "hiring"
+      # Companies that have been hired for (target_roles)
+      scope = scope.where(id: Role.select(:target_company_id))
+    end
 
-    scope = scope.order(Arel.sql("agg.avg_overall DESC NULLS LAST, companies.name ASC"))
+    scope = scope.order("agg.avg_overall DESC NULLS LAST, companies.name ASC")
 
-    # Pagination
-    @page = params[:page].to_i; @page = 1 if @page < 1
-    requested_per = params[:per_page].presence&.to_i
-    @per_page = [[requested_per || public_per_page, 1].max, public_max_per_page].min
-    offset = (@page - 1) * @per_page
-    records = scope.offset(offset).limit(@per_page + 1).to_a
-    @has_next = records.length > @per_page
-    @companies = records.first(@per_page)
+    @companies = paginate(scope)
 
     respond_to do |format|
       format.html
       format.json do
-        expires_in 30.minutes, public: true
         per = (params[:per].presence || 5).to_i
         render json: scope.limit(per).map { |c|
           { id: c.id, name: c.name, reviews_count: c.attributes['reviews_count'].to_i, avg_overall: c.attributes['avg_overall']&.to_f }
@@ -45,17 +46,64 @@ class CompaniesController < ApplicationController
     @company = Company.find(params[:id])
 
     # Company aggregates
-    overall = Review.where(company: @company, status: "approved").pluck(Arel.sql("COUNT(*), AVG(overall_score)")).first || [0, nil]
+    overall = Experience.approved
+      .joins(interaction: :recruiter)
+      .where(recruiters: { company_id: @company.id })
+      .pluck(Arel.sql("COUNT(*), AVG(rating)"))
+      .first || [0, nil]
     @reviews_count = overall[0]
     @avg_overall = overall[1]&.to_f
 
     # Recruiters under this company with aggregates
-    aggregates = Review.where(status: "approved", recruiter_id: Recruiter.where(company: @company).select(:id))
-      .group(:recruiter_id)
-      .select(:recruiter_id, "COUNT(*) AS reviews_count", "AVG(overall_score) AS avg_overall")
-    @recruiters = Recruiter.where(company: @company)
-      .joins("LEFT JOIN (#{aggregates.to_sql}) agg ON agg.recruiter_id = recruiters.id")
-      .select("recruiters.*, COALESCE(agg.reviews_count, 0) AS reviews_count, agg.avg_overall")
-      .order("agg.avg_overall DESC NULLS LAST, recruiters.name ASC")
+    # Recruiters under this company with aggregates
+    if can_view_details?
+      aggregates = Experience.approved_aggregates_by_recruiter
+
+      @recruiters = Recruiter.where(company: @company)
+        .joins("LEFT JOIN (#{aggregates.to_sql}) agg ON agg.recruiter_id = recruiters.id")
+        .select("recruiters.*, COALESCE(agg.reviews_count, 0) AS reviews_count, agg.avg_overall")
+        .order("agg.avg_overall DESC NULLS LAST, recruiters.name ASC")
+    else
+      # Anonymous: Aggregate Trendline by Role
+      # Group by Quarter and Role Title
+      raw_data = Experience.approved
+        .joins(interaction: [:role, :recruiter])
+        .where(recruiters: { company_id: @company.id })
+        .group("DATE_TRUNC('quarter', interactions.occurred_at)", "roles.title")
+        .average(:rating)
+
+      # Transform for Chart.js
+      # Labels: Quarters (sorted)
+      # Datasets: One per Role Title
+      
+      # { [date, title] => rating }
+      dates = raw_data.keys.map(&:first).uniq.sort
+      titles = raw_data.keys.map(&:last).uniq.sort
+
+      @chart_labels = dates.map { |d| "Q#{((d.month - 1) / 3) + 1} #{d.year}" }
+      
+      @chart_datasets = titles.map do |title|
+        data_points = dates.map do |date|
+          # Find rating for this date/title, round to 2 decimals
+          rating = raw_data[[date, title]]
+          rating ? rating.to_f.round(2) : nil
+        end
+        
+        # Consistent color generation based on title string
+        color_hash = Digest::MD5.hexdigest(title)[0..5]
+        color = "##{color_hash}"
+
+        {
+          label: title,
+          data: data_points,
+          borderColor: color,
+          backgroundColor: color,
+          fill: false,
+          tension: 0.1
+        }
+      end
+    end
   end
+
+  private
 end

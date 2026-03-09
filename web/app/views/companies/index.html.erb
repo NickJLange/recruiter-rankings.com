@@ -2,7 +2,7 @@
 <p><%= t('recruiters.index.subtitle', count: public_min_reviews) %></p>
 
 <%= form_with url: companies_path, method: :get, local: true do %>
-  <div style="display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; margin: 8px 0 16px;">
+  <div class="search-form" style="align-items:flex-end; flex-wrap:wrap; margin: 8px 0 16px;">
     <div>
       <label for="q"><%= t('recruiters.index.search') %></label><br>
       <input type="text" name="q" id="q" value="<%= h @q %>" placeholder="<%= t('recruiters.index.company') %>">
@@ -17,46 +17,28 @@
     </div>
     <div>
       <button type="submit"><%= t('recruiters.index.filter') %></button>
-      <%= link_to t('recruiters.index.clear'), companies_path, style: "margin-left:6px;", aria: { label: t('companies.index.clear_filters') } %>
+      <%= link_to t('recruiters.index.clear'), companies_path, style: "margin-left:6px;" %>
     </div>
   </div>
 <% end %>
 
-<% if @companies.any? %>
-  <table>
-    <thead>
+<table>
+  <thead>
+    <tr>
+      <th><%= t('recruiters.index.th.company') %></th>
+      <th><%= t('recruiters.index.th.avg_overall') %></th>
+      <th><%= t('recruiters.index.th.reviews') %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @companies.each do |c| %>
       <tr>
-        <th><%= t('recruiters.index.th.company') %></th>
-        <th><%= t('recruiters.index.th.avg_overall') %></th>
-        <th><%= t('recruiters.index.th.reviews') %></th>
+        <td><%= link_to c.name, company_path(c) %></td>
+        <td><%= c.attributes['avg_overall']&.to_f&.round(2) || '—' %></td>
+        <td><%= c.attributes['reviews_count'] || 0 %></td>
       </tr>
-    </thead>
-    <tbody>
-      <% @companies.each do |c| %>
-        <tr class="company-row">
-          <td><%= link_to c.name, company_path(c) %></td>
-          <td><%= c.attributes['avg_overall']&.to_f&.round(2) || '—' %></td>
-          <td><%= c.attributes['reviews_count'] || 0 %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
+    <% end %>
+  </tbody>
+</table>
 
-  <div style="margin-top: 16px; display:flex; justify-content: space-between;">
-    <div>
-      <% if @page > 1 %>
-        <%= link_to "← Previous", companies_path(request.query_parameters.merge(page: @page - 1)), class: "cta", style: "margin-top: 0;", aria: { label: t('pagination.previous') } %>
-      <% end %>
-    </div>
-    <div>
-      <% if @has_next %>
-        <%= link_to "Next →", companies_path(request.query_parameters.merge(page: @page + 1)), class: "cta", style: "margin-top: 0;", aria: { label: t('pagination.next') } %>
-      <% end %>
-    </div>
-  </div>
-<% else %>
-  <div class="card" style="padding: 32px; text-align: center; margin-top: 16px;">
-    <p class="muted" style="margin-bottom: 16px;"><%= t('companies.index.no_results') %></p>
-    <%= link_to t('companies.index.clear_filters'), companies_path, class: "cta", style: "margin-top: 0;" %>
-  </div>
-<% end %>
+<%= render 'shared/pagination' %>

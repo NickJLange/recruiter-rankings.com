@@ -1,0 +1,8 @@
+one:
+  title: "Software Engineer"
+  description: "Writing code"
+  recruiting_company: one
+  target_company: one
+  min_compensation: 120000
+  max_compensation: 150000
+  posted_date: <%= Date.today %>

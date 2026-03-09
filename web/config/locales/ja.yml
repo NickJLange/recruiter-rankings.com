@@ -1,6 +1,7 @@
 ja:
   nav:
     home: "ホーム"
+    search: "検索"
     about: "概要"
     policies: "ポリシー"
     recruiters: "リクルーター"
@@ -48,6 +49,29 @@ ja:
       your_experience: "体験の内容"
       email_optional: "メール（任意・重複防止、非公開）"
       submit: "送信"
+      dimensions_section: "各項目を評価する（任意）"
+      dimensions_hint: "評価できない項目はスキップしてください"
+      dimension_responsiveness: "レスポンスの速さ"
+      dimension_role_clarity: "求人の明確さ"
+      dimension_candidate_understanding: "候補者理解"
+      dimension_fairness_inclusivity: "公平性・多様性"
+      dimension_timeline_management: "スケジュール管理"
+      dimension_feedback_quality: "フィードバックの質"
+      dimension_professionalism_respect: "プロ意識・敬意"
+      dimension_job_match_quality: "マッチングの質"
+      job_section: "求人情報（任意）"
+      job_title: "職種"
+      job_min_comp: "最低報酬（$）"
+      job_max_comp: "最高報酬（$）"
+      target_company: "対象企業"
+      occurred_at: "いつのことですか？"
+      outcome_section: "結果（任意）"
+      would_recommend: "このリクルーターを推薦します"
+      outcome: "結果はどうでしたか？"
+      outcome_hired: "採用された"
+      outcome_declined_offer: "オファーを辞退した"
+      outcome_ghosted: "音信不通になった"
+      outcome_still_interviewing: "まだ選考中"
   admin:
     reviews:
       index:
@@ -58,6 +82,25 @@ ja:
         post_response: "回答を投稿"
         response_visible: "表示"
         response_hidden: "非表示"
+  pages:
+    home:
+      overline: "リクルーター ランキング"
+      headline_1: "あなたが商品だ。"
+      headline_2: "せめて楽しく乗りこなそう。"
+      search_placeholder: "リクルーター、会社、エージェンシーを検索…"
+      trust_badge: "完全匿名。トラッキングなし。ログイン不要。"
+      how_it_works: "使い方"
+      anonymous_title: "匿名設計"
+      anonymous_body: "レビューは公開前に匿名化されます — 氏名・メールなし、標準化された品質スコアのみ。"
+      reply_title: "回答権"
+      reply_body: "認証済みリクルーターは公開前にレビューへ返答でき、公平な記録を保てます。"
+      kanon_title: "k匿名性しきい値"
+      kanon_body: "十分なレビュー数が集まるまでリクルータープロフィールは表示されません。"
+      top_companies: "レビュー数上位の会社"
+      no_companies: "会社データがまだありません。"
+      reviews_count:
+        one: "1 件"
+        other: "%{count} 件"
   claim_identity:
     new:
       title: "本人確認の申請"

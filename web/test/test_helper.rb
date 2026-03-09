@@ -1,6 +1,7 @@
 ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
+require_relative "helpers/clerk_test_helper"
 
 module ActiveSupport
   class TestCase
@@ -11,5 +12,11 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+  end
+end
+
+module ActionDispatch
+  class IntegrationTest
+    include ClerkTestHelper
   end
 end

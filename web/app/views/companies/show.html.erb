@@ -1,22 +1,66 @@
 <h1><%= @company.name %></h1>
 <p><strong><%= t('recruiters.index.th.reviews') %>:</strong> <%= @reviews_count %> &nbsp; <strong><%= t('recruiters.index.th.avg_overall') %>:</strong> <%= @avg_overall&.round(2) || '—' %></p>
 
-<h2><%= t('recruiters.index.th.recruiter') %></h2>
-<table>
-  <thead>
-    <tr>
-      <th><%= t('recruiters.index.th.recruiter') %></th>
-      <th><%= t('recruiters.index.th.avg_overall') %></th>
-      <th><%= t('recruiters.index.th.reviews') %></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @recruiters.each do |r| %>
+<% if can_view_details? %>
+  <h2><%= t('recruiters.index.th.recruiter') %></h2>
+  <table>
+    <thead>
       <tr>
-        <td><%= link_to r.name, recruiter_path(r.public_slug) %></td>
-        <td><%= r.attributes['avg_overall']&.to_f&.round(2) || '—' %></td>
-        <td><%= r.attributes['reviews_count'] || 0 %></td>
+        <th><%= t('recruiters.index.th.recruiter') %></th>
+        <th><%= t('recruiters.index.th.avg_overall') %></th>
+        <th><%= t('recruiters.index.th.reviews') %></th>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody>
+      <% @recruiters.each do |r| %>
+        <tr>
+          <td><%= link_to r.display_name(current_user), recruiter_path(r.public_slug) %></td>
+          <td><%= r.attributes['avg_overall']&.to_f&.round(2) || '—' %></td>
+          <td><%= r.attributes['reviews_count'] || 0 %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% else %>
+  <h2>Role Trends</h2>
+  <div style="position: relative; height:400px; width:100%">
+    <canvas id="trendsChart"></canvas>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const ctx = document.getElementById('trendsChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: <%= @chart_labels.to_json.html_safe %>,
+          datasets: <%= @chart_datasets.to_json.html_safe %>
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Average Rating by Role over Time'
+            },
+            legend: {
+              position: 'bottom'
+            }
+          },
+          scales: {
+            y: {
+              min: 1,
+              max: 5,
+              title: {
+                display: true,
+                text: 'Rating (1-5)'
+              }
+            }
+          }
+        }
+      });
+    });
+  </script>
+<% end %>

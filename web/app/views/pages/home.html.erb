@@ -1,0 +1,73 @@
+<% content_for :title, "Recruiter Rankings — Honest signals for tech job seekers" %>
+<% content_for :meta_description, "Privacy-Friendly recruiter quality scores. Browse ratings, share your experience." %>
+
+<%# Hero — fills most of viewport, content vertically centered %>
+<section style="text-align:center; min-height: calc(80vh - 64px); display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 48px 0;">
+  <p style="font-size:0.75rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin:0 0 16px;">
+    <%= t('pages.home.overline') %>
+  </p>
+  <h1 style="font-size: 2.8rem; line-height: 1.15; margin: 0 0 24px; font-weight: 800;">
+    <span style="color:var(--accent-text);"><%= t('pages.home.headline_1') %></span><br>
+    <%= t('pages.home.headline_2') %>
+  </h1>
+
+  <%# Search bar %>
+  <%= form_with url: "/search", method: :get, local: true,
+        class: "search-form",
+        style: "max-width:560px; margin:0 auto 20px;" do |f| %>
+    <%= f.search_field :q,
+          placeholder: t('pages.home.search_placeholder'),
+          autocomplete: "off",
+          class: "field-input" %>
+    <%= f.submit t('nav.search', default: 'Search'),
+          class: "btn btn-primary" %>
+  <% end %>
+
+  <p style="font-size:0.85rem; color:var(--muted); margin:0;">
+    🛡 <%= t('pages.home.trust_badge') %>
+  </p>
+</section>
+
+<%# Two-column body %>
+<div style="display:flex; gap:32px; align-items:flex-start; margin-bottom: 48px;">
+
+  <%# Left — How it works %>
+  <div style="flex:2;">
+    <h2 class="section-label"><%= t('pages.home.how_it_works') %></h2>
+    <div class="grid" style="gap:16px;">
+      <div class="card">
+        <h3><%= t('pages.home.anonymous_title') %></h3>
+        <p class="text-muted"><%= t('pages.home.anonymous_body') %></p>
+      </div>
+      <div class="card">
+        <h3><%= t('pages.home.reply_title') %></h3>
+        <p class="text-muted"><%= t('pages.home.reply_body') %></p>
+      </div>
+      <div class="card">
+        <h3><%= t('pages.home.kanon_title') %></h3>
+        <p class="text-muted"><%= t('pages.home.kanon_body') %></p>
+      </div>
+    </div>
+  </div>
+
+  <%# Right — Top companies %>
+  <div style="flex:1; min-width:200px;">
+    <h2 class="section-label"><%= t('pages.home.top_companies') %></h2>
+    <% if @home_company_stats.any? %>
+      <ul class="result-list">
+        <% @home_company_stats.each do |company, count| %>
+          <li class="result-item" style="display:flex; justify-content:space-between; align-items:center;">
+            <%= link_to company.name, company_path(company),
+                  style: "color:var(--ink); text-decoration:none; font-weight:500; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" %>
+            <span class="text-muted" style="font-size:0.8rem; margin-left:8px; white-space:nowrap;">
+              <%= t('pages.home.reviews_count', count: count) %>
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-muted" style="font-size:0.9rem;"><%= t('pages.home.no_companies') %></p>
+    <% end %>
+  </div>
+
+</div>
