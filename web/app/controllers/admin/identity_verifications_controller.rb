@@ -14,22 +14,12 @@ module Admin
     def approve
       @challenge.update!(verified_at: Time.current)
       @challenge.subject.update!(verified_at: Time.current) if @challenge.subject.respond_to?(:verified_at=)
-      ModerationAction.create!(
-        actor: current_moderator_actor,
-        action: "identity_approve",
-        subject: @challenge,
-        notes: "subject=#{@challenge.subject_type}##{@challenge.subject_id}"
-      )
+      log_moderation("identity_approve", @challenge, "subject=#{@challenge.subject_type}##{@challenge.subject_id}")
       redirect_to admin_identity_verifications_path, notice: "Challenge ##{@challenge.id} approved."
     end
 
     def reject
-      ModerationAction.create!(
-        actor: current_moderator_actor,
-        action: "identity_reject",
-        subject: @challenge,
-        notes: "subject=#{@challenge.subject_type}##{@challenge.subject_id}"
-      )
+      log_moderation("identity_reject", @challenge, "subject=#{@challenge.subject_type}##{@challenge.subject_id}")
       @challenge.destroy!
       redirect_to admin_identity_verifications_path, notice: "Challenge rejected and removed."
     end

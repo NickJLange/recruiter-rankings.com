@@ -8,6 +8,8 @@ class Experience < ApplicationRecord
   validates :status, presence: true
   validates :outcome, inclusion: { in: OUTCOMES }, allow_nil: true
 
+  scope :approved, -> { where(status: "approved") }
+
   scope :approved_aggregates_by_recruiter, -> {
     where(status: "approved")
       .joins(:interaction)

@@ -82,7 +82,7 @@ class RecruitersController < ApplicationController
     @can_view_details = can_view_details?(@recruiter)
 
     # Base scope for approved experiences
-    base_scope = Experience.where(status: "approved")
+    base_scope = Experience.approved
       .joins(:interaction)
       .where(interactions: { recruiter_id: @recruiter.id })
 

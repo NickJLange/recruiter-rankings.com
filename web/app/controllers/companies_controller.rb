@@ -46,7 +46,7 @@ class CompaniesController < ApplicationController
     @company = Company.find(params[:id])
 
     # Company aggregates
-    overall = Experience.where(status: "approved")
+    overall = Experience.approved
       .joins(interaction: :recruiter)
       .where(recruiters: { company_id: @company.id })
       .pluck(Arel.sql("COUNT(*), AVG(rating)"))
@@ -66,7 +66,7 @@ class CompaniesController < ApplicationController
     else
       # Anonymous: Aggregate Trendline by Role
       # Group by Quarter and Role Title
-      raw_data = Experience.where(status: "approved")
+      raw_data = Experience.approved
         .joins(interaction: [:role, :recruiter])
         .where(recruiters: { company_id: @company.id })
         .group("DATE_TRUNC('quarter', interactions.occurred_at)", "roles.title")
