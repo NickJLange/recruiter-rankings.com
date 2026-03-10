@@ -21,7 +21,7 @@ class ReviewsPaginationLimitTest < ActionDispatch::IntegrationTest
 
   test "reviews list honors public_max_per_page limit" do
     # Request 100 items, more than exists (55) and more than limit (50)
-    get "/recruiters/pagination-tester/reviews.json", params: { per: 100 }
+    get "/person/pagination-tester/reviews.json", params: { per: 100 }
     assert_response :success
 
     reviews = JSON.parse(@response.body)

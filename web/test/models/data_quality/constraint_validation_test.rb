@@ -17,8 +17,8 @@ class ConstraintValidationTest < ActiveSupport::TestCase
     end
   end
 
-  test "database check constraint prevents invalid user role enum" do
-    assert_raises(ArgumentError) do
+  test "model validation prevents invalid user role enum" do
+    assert_raises(ActiveRecord::RecordInvalid) do
       User.create!(email_hmac: SecureRandom.hex(16), role: "invalid_role")
     end
   end

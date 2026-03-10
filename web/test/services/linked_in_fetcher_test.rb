@@ -16,19 +16,27 @@ class LinkedInFetcherTest < ActiveSupport::TestCase
     fetcher = LinkedInFetcher.new
     url = "https://www.linkedin.com/in/someuser"
 
-    http_mock = Minitest::Mock.new
-    response_mock = Minitest::Mock.new
-    response_mock.expect :is_a?, true, [Net::HTTPSuccess]
-    response_mock.expect :body, "linkedin profile"
+    # The implementation uses block form of http.request, so we stub at a higher level
+    # by stubbing Net::HTTP.new to return a mock that handles the block form
+    response_body = "linkedin profile"
 
-    http_mock.expect :use_ssl=, nil, [true]
-    http_mock.expect :read_timeout=, nil, [5]
-    http_mock.expect :open_timeout=, nil, [5]
-    http_mock.expect :request, response_mock, [Net::HTTP::Get]
+    stub_http = Object.new
+    def stub_http.use_ssl=(_v); end
+    def stub_http.read_timeout=(_v); end
+    def stub_http.open_timeout=(_v); end
+    def stub_http.started?; false; end
 
-    Net::HTTP.stub :new, http_mock do
+    # The block form: http.request(req) { |response| ... }
+    # We need to yield a response object to the block
+    stub_response = Object.new
+    stub_response.define_singleton_method(:is_a?) { |klass| klass == Net::HTTPSuccess || klass == Net::HTTPPartialContent }
+    stub_response.define_singleton_method(:read_body) { |&blk| blk.call("linkedin profile") }
+
+    stub_http.define_singleton_method(:request) { |req, &blk| blk.call(stub_response) if blk }
+
+    Net::HTTP.stub :new, stub_http do
       result = fetcher.fetch(url)
-      assert_equal "linkedin profile", result
+      assert_equal response_body, result
     end
   end
 end

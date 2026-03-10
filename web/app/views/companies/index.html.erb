@@ -32,10 +32,18 @@
   </thead>
   <tbody>
     <% @companies.each do |c| %>
-      <tr>
+      <tr class="company-row">
         <td><%= link_to c.name, company_path(c) %></td>
         <td><%= c.attributes['avg_overall']&.to_f&.round(2) || '—' %></td>
         <td><%= c.attributes['reviews_count'] || 0 %></td>
+      </tr>
+    <% end %>
+    <% if @companies.empty? %>
+      <tr>
+        <td colspan="3">
+          <p>No companies found</p>
+          <%= link_to "Clear filters", companies_path %>
+        </td>
       </tr>
     <% end %>
   </tbody>

@@ -49,6 +49,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_013150) do
     t.string "token_hash", null: false
     t.datetime "updated_at", null: false
     t.datetime "verified_at"
+    t.text "last_verification_error"
     t.index ["expires_at"], name: "index_identity_challenges_on_expires_at"
     t.index ["subject_type", "subject_id"], name: "index_identity_challenges_on_subject_type_and_subject_id"
     t.index ["token_hash"], name: "index_identity_challenges_on_token_hash", unique: true
@@ -244,6 +245,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_013150) do
     t.bigint "user_id", null: false
     t.index ["company_id"], name: "index_reviews_on_company_id"
     t.index ["recruiter_id"], name: "index_reviews_on_recruiter_id"
+    t.index ["status", "company_id", "overall_score"], name: "index_reviews_on_status_company_overall"
+    t.index ["status", "recruiter_id", "overall_score"], name: "index_reviews_on_status_recruiter_overall"
     t.index ["status"], name: "index_reviews_on_status"
     t.index ["user_id"], name: "index_reviews_on_user_id"
     t.check_constraint "overall_score >= 1 AND overall_score <= 5", name: "check_reviews_overall_score_range"

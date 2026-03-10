@@ -49,6 +49,12 @@ class ClaimIdentityController < ApplicationController
   end
 
   def verify
+    challenge = IdentityChallenge.find(params[:challenge_id])
+
+    raise ActionController::BadRequest, "Expired" if challenge.expires_at.past?
+
+    VerifyIdentityJob.perform_later(challenge.id, params[:linkedin_url].to_s)
+
     flash[:notice] = "Your claim is in the queue. An admin will verify your LinkedIn profile within 7 days."
     redirect_to root_path
   end

@@ -8,6 +8,7 @@ class ReviewSubmissionTest < ActionDispatch::IntegrationTest
   end
 
   test "review form has accessibility attributes" do
+    sign_in_as_clerk(role: :candidate, providers: [:email])
     get new_recruiter_review_path(@slug, recruiter_slug: @slug)
     assert_response :success
 

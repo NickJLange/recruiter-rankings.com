@@ -2,7 +2,7 @@ require "test_helper"
 
 class AdminReviewsPerformanceTest < ActionDispatch::IntegrationTest
   def setup
-    @auth = ActionController::HttpAuthentication::Basic.encode_credentials("mod", "mod")
+    sign_in_as_clerk(role: :moderator, providers: [:email, :linkedin, :github], two_factor: true)
     @company = Company.create!(name: "Test Co")
     @recruiter = Recruiter.create!(name: "Test Recruiter", company: @company, public_slug: "test-recruiter-perf")
     @user = User.create!(role: "candidate", email_hmac: "test-hmac-perf")
@@ -23,7 +23,7 @@ class AdminReviewsPerformanceTest < ActionDispatch::IntegrationTest
 
   test "admin reviews index avoids N+1 query on review_responses" do
     # Warm up to load schemas, etc.
-    get "/admin/reviews?limit=10&statuses=pending", headers: { "HTTP_AUTHORIZATION" => @auth }
+    get "/admin/reviews?limit=10&statuses=pending"
 
     # Expected queries:
     # 1. User (moderator actor check in controller - current_moderator_actor) -> 1 query
@@ -38,7 +38,7 @@ class AdminReviewsPerformanceTest < ActionDispatch::IntegrationTest
     # We set max to 5 to be safe.
 
     assert_queries(5) do
-      get "/admin/reviews?limit=10&statuses=pending", headers: { "HTTP_AUTHORIZATION" => @auth }
+      get "/admin/reviews?limit=10&statuses=pending"
       assert_response :success
     end
   end

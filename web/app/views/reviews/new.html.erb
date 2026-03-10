@@ -5,12 +5,17 @@
 
   <div>
     <%= f.label :overall_score, t('reviews.new.overall_score') %><br>
-    <%= f.number_field :overall_score, in: 1..5, step: 1, required: true %>
+    <%= f.number_field :overall_score, in: 1..5, step: 1, required: true, autofocus: true %>
   </div>
 
   <div>
     <%= f.label :text, t('reviews.new.your_experience') %><br>
-    <%= f.text_area :text, rows: 6, required: true %>
+    <%= f.text_area :text, rows: 6, required: true,
+          maxlength: 5000,
+          "aria-describedby": "text-help char-counter",
+          "data-behavior": "char-counter" %>
+    <p id="text-help" class="text-muted text-sm">Max 5000 characters</p>
+    <p id="char-counter" class="text-muted text-sm">0 / 5000</p>
   </div>
 
   <%# Section A — Dimensional scores (optional) %>

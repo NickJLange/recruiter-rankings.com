@@ -46,7 +46,10 @@ ja:
     new:
       title_for: "%{name} へのレビューを書く"
       overall_score: "総合スコア (1–5)"
+      overall_score_help: "1 = 不満、5 = 優秀"
       your_experience: "体験の内容"
+      your_experience_placeholder: "インタラクション、面接プロセス、フィードバックの詳細を共有してください..."
+      text_help: "最大5000文字。個人情報（氏名・メール・電話番号）は含めないでください。"
       email_optional: "メール（任意・重複防止、非公開）"
       submit: "送信"
       dimensions_section: "各項目を評価する（任意）"
