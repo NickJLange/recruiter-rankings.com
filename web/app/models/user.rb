@@ -10,8 +10,15 @@ class User < ApplicationRecord
   has_many :identity_challenges, as: :subject, dependent: :destroy
 
   validates :email_hmac, presence: true, uniqueness: true
-  validates :role, presence: true
   validates :public_slug, uniqueness: true, allow_nil: true
+
+  enum :role, {
+    candidate: "candidate",
+    recruiter: "recruiter",
+    moderator: "moderator",
+    admin: "admin"
+  }, validate: true
+
 
   enum :verification_status, {
     unverified: "unverified",

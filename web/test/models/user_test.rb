@@ -7,8 +7,8 @@ class UserTest < ActiveSupport::TestCase
     # Since we haven't created it yet, this test will fail if run now (undefined method).
     # But that's TDD.
 
-    # We verify that it matches the expected HMAC using the default pepper
-    pepper = "demo-only-pepper-not-secret"
+    # We verify that it matches the expected HMAC using whatever pepper is configured
+    pepper = ENV.fetch("SUBMISSION_EMAIL_HMAC_PEPPER", "demo-only-pepper-not-secret")
     expected = OpenSSL::HMAC.hexdigest("SHA256", pepper, email)
 
     assert_equal expected, User.generate_email_hmac(email)

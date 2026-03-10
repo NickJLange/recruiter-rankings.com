@@ -3,15 +3,13 @@ require "test_helper"
 class CompaniesJsonTest < ActionDispatch::IntegrationTest
   setup do
     @company = Company.create!(name: "Test Company", region: "Remote")
-    # Create enough reviews to pass threshold (assume 5 to be safe)
-    6.times do |i|
-      Review.create!(
-        company: @company,
-        user: User.create!(role: "candidate", email_hmac: "user#{i}-#{SecureRandom.hex}"),
-        overall_score: 5,
-        text: "Review #{i}",
-        status: "approved"
-      )
+    @recruiter = Recruiter.create!(name: "Test Recruiter", company: @company, public_slug: "test-recruiter-json")
+    @user = User.create!(role: "candidate", email_hmac: "companies-json-test-#{SecureRandom.hex}")
+
+    # Create enough approved experiences to pass the threshold (PUBLIC_MIN_REVIEWS=1 in test)
+    6.times do
+      interaction = Interaction.create!(recruiter: @recruiter, target: @user, status: "approved")
+      Experience.create!(interaction: interaction, rating: 5, status: "approved")
     end
   end
 

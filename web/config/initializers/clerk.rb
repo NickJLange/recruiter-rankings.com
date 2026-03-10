@@ -1,6 +1,17 @@
+clerk_secret_key = ENV["CLERK_SECRET_KEY"] ||
+                   Rails.application.credentials.dig(:clerk, :secret_key)
+
+clerk_publishable_key = ENV["CLERK_PUBLISHABLE_KEY"] ||
+                        Rails.application.credentials.dig(:clerk, :publishable_key)
+
+if clerk_secret_key.blank? && Rails.env.production?
+  raise "CLERK_SECRET_KEY is not set. Add it to the Render dashboard under " \
+        "Environment → Secret Variables, or to Rails credentials via `rails credentials:edit`."
+end
+
 Clerk.configure do |config|
-  config.secret_key = ENV["CLERK_SECRET_KEY"]
-  config.publishable_key = ENV["CLERK_PUBLISHABLE_KEY"]
+  config.secret_key = clerk_secret_key
+  config.publishable_key = clerk_publishable_key
 
   # Exclude routes where Clerk middleware overhead is unnecessary and no auth check
   # is ever performed. Content pages (recruiter show, company pages) are NOT excluded

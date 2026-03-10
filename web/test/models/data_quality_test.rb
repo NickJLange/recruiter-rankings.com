@@ -94,13 +94,13 @@ class DataQualityTest < ActiveSupport::TestCase
     end
   end
 
-  test "user role enum raises on invalid values" do
+  test "user role enum rejects invalid values" do
     invalid_roles = ["superadmin", "guest", "candidate_recruiter"]
     invalid_roles.each do |role|
-      assert_raises(ArgumentError, "Role #{role} should raise ArgumentError") do
-        user = User.new(email_hmac: SecureRandom.hex(16))
-        user.role = role
-      end
+      user = User.new(email_hmac: SecureRandom.hex(16))
+      user.role = role
+      assert_not user.valid?, "Role #{role} should be invalid"
+      assert_includes user.errors[:role], "is not included in the list", "Role #{role} should have an inclusion error"
     end
   end
 

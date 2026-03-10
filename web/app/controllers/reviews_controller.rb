@@ -4,7 +4,7 @@ class ReviewsController < ApplicationController
 
   def index
     recruiter = Recruiter.find_by!(public_slug: params[:recruiter_slug] || params[:recruiter_id])
-    per = (params[:per].presence || 10).to_i
+    per = [(params[:per].presence || 10).to_i, public_max_per_page].min
     reviews = recruiter.reviews.where(status: "approved").order(created_at: :desc).limit(per)
     render json: reviews.map { |r|
       { id: r.id, overall_score: r.overall_score, text: r.text, created_at: r.created_at.iso8601 }

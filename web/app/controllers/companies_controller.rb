@@ -35,6 +35,7 @@ class CompaniesController < ApplicationController
       format.html
       format.json do
         per = (params[:per].presence || 5).to_i
+        expires_in 30.minutes, public: true
         render json: scope.limit(per).map { |c|
           { id: c.id, name: c.name, reviews_count: c.attributes['reviews_count'].to_i, avg_overall: c.attributes['avg_overall']&.to_f }
         }

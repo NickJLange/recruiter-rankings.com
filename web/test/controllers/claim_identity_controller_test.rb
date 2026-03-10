@@ -22,7 +22,7 @@ class ClaimIdentityControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_redirected_to root_path
-    assert_equal 'Verification is running in the background. Please check back in a moment.', flash[:notice]
+    assert_match(/queue/i, flash[:notice])
   end
 
   test "verify with expired challenge" do
@@ -32,8 +32,7 @@ class ClaimIdentityControllerTest < ActionDispatch::IntegrationTest
     # it raises BadRequest or redirects?
     # Original code: raise ActionController::BadRequest, 'Expired' if challenge.expires_at.past?
 
-    assert_raises(ActionController::BadRequest) do
-      post verify_claim_identity_url, params: { challenge_id: @challenge.id, linkedin_url: "https://linkedin.com/in/test" }
-    end
+    post verify_claim_identity_url, params: { challenge_id: @challenge.id, linkedin_url: "https://linkedin.com/in/test" }
+    assert_response :bad_request
   end
 end

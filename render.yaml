@@ -76,10 +76,10 @@ services:
       - key: PUBLIC_MAX_PER_PAGE
         value: "50"
 
-      # Admin Authentication (Production values should be set in Render dashboard)
-      - key: ADMIN_USERNAME
+      # Clerk Authentication (required — set in Render dashboard, get values from https://dashboard.clerk.com)
+      - key: CLERK_SECRET_KEY
         sync: false
-      - key: ADMIN_PASSWORD
+      - key: CLERK_PUBLISHABLE_KEY
         sync: false
 
 databases:

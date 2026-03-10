@@ -79,6 +79,35 @@ This project uses the OpenSpec change management system for structured feature d
 - `site/` — Jekyll static site (marketing pages, builds to `web/public/`)
 - `openspec/` — Project specs and change management
 
+### Git & Remote Operations
+
+This repo has two remotes — confusing them causes visible failures:
+
+| Remote | Repo | Role |
+|--------|------|------|
+| `origin` | `NickJLange/recruiter-rankings.com` | Personal fork — **PR heads live here** |
+| `upstream` | `5L-Labs/recruiter-rankings.com` | Canonical repo — PRs target its `main` |
+
+**Before any `git push --force`**, confirm which remote the PR head tracks:
+```bash
+gh pr view <number> --repo 5L-Labs/recruiter-rankings.com \
+  --json headRepositoryOwner,headRefName
+```
+Force-push to whichever remote matches `headRepositoryOwner.login`. Feature branches are submitted from `origin` (NickJLange), so squash/rebase force-pushes go to **both** `origin` and `upstream`.
+
+**After a PR merges to `5L-Labs/main`**, sync the fork's main branch:
+```bash
+git fetch upstream
+git push origin upstream/main:main --force
+```
+This keeps `NickJLange/main` in sync so future branches off `main` start from the correct base.
+
+**Before squashing**, make sure all working-directory changes are staged and included. `git reset --soft <base>` only captures previously *committed* changes — unstaged edits will be left behind. Stage everything explicitly with `git add` before the squash commit.
+
+**Do not launch background polling agents** for tasks that require shell access (e.g., monitoring a PR). They have no Bash access and will fail immediately. Check PR status manually with `gh pr view` instead.
+
+---
+
 ### Handoff Signal
 
 At the end of any response, use one of two explicit signals — no signal means work is not done:

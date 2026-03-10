@@ -5,7 +5,7 @@ class ReviewResponse < ApplicationRecord
   belongs_to :review
   belongs_to :user, optional: true
 
-  validates :body, presence: true, length: { minimum: 2 }
+  validates :body, presence: true, length: { minimum: 2, maximum: 5000 }
 
   scope :visible, -> { where(visible: true) }
 end
