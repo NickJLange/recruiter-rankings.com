@@ -4,6 +4,10 @@ set -o errexit
 
 bundle install
 
+# Jekyll builds into public/ before this script runs. Remove its index.html
+# so the Rails root route is served instead of the static marketing page.
+rm -f public/index.html
+
 # Check database connectivity
 echo "Checking database connectivity..."
 bundle exec rails runner "ActiveRecord::Base.connection" || (echo "Database connection failed! Please ensure your database is active and reachable." && exit 1)

@@ -62,8 +62,11 @@
       <script async crossorigin="anonymous"
         data-clerk-publishable-key="<%= h ENV['CLERK_PUBLISHABLE_KEY'] %>"
         src="<%= h clerk_js_url %>"
-        onload="initClerkNav()"
+        id="clerk-js-script"
         type="text/javascript"></script>
+      <script nonce="<%= content_security_policy_nonce %>">
+        document.getElementById('clerk-js-script').addEventListener('load', initClerkNav);
+      </script>
     <% end %>
 
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
