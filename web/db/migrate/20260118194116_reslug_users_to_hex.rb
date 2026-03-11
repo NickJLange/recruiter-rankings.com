@@ -1,5 +1,13 @@
 class ReslugUsersToHex < ActiveRecord::Migration[8.1]
   def up
+    # Add public_slug to users if the column doesn't exist yet.
+    # (create_core_models did not include it; this migration is responsible for
+    # both adding and populating the column.)
+    unless column_exists?(:users, :public_slug)
+      add_column :users, :public_slug, :string
+      add_index  :users, :public_slug
+    end
+
     # Use raw SQL to avoid loading the User model class, which would trigger
     # enum definitions that may reference columns not yet added by later migrations.
     rows = execute("SELECT id, public_slug FROM users").to_a
