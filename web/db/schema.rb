@@ -43,13 +43,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_013150) do
   create_table "identity_challenges", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "expires_at", null: false
+    t.text "last_verification_error"
     t.bigint "subject_id", null: false
     t.string "subject_type", null: false
     t.string "token"
     t.string "token_hash", null: false
     t.datetime "updated_at", null: false
     t.datetime "verified_at"
-    t.text "last_verification_error"
     t.index ["expires_at"], name: "index_identity_challenges_on_expires_at"
     t.index ["subject_type", "subject_id"], name: "index_identity_challenges_on_subject_type_and_subject_id"
     t.index ["token_hash"], name: "index_identity_challenges_on_token_hash", unique: true
