@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    name: Tests & Build Verification
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: rr_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/rr_test
+      PARALLEL_WORKERS: 1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+          working-directory: web
+
+      - name: Install Jekyll dependencies
+        working-directory: site
+        run: bundle install
+
+      # ── Fresh migration check ──────────────────────────────────
+      # Catches missing CREATE TABLE migrations, column ordering issues,
+      # and model-loading side-effects in migrations.
+      - name: Verify db:migrate from scratch
+        working-directory: web
+        run: |
+          bundle exec rake db:create db:migrate
+          echo "db:migrate from scratch succeeded"
+
+      - name: Verify db:schema:load from scratch
+        working-directory: web
+        run: |
+          bundle exec rake db:drop db:create
+          DISABLE_DATABASE_ENVIRONMENT_CHECK=1 bundle exec rake db:schema:load
+          echo "db:schema:load from scratch succeeded"
+
+      # ── Test suite ─────────────────────────────────────────────
+      - name: Run tests
+        working-directory: web
+        run: |
+          bundle exec rake db:drop db:create db:schema:load
+          bundle exec rails test
+
+      # ── Render build simulation ────────────────────────────────
+      # Replicates the Render build flow to catch deploy failures
+      # before they reach production.
+      - name: Simulate Render build (Jekyll + static asset check)
+        run: |
+          # Jekyll build (same as Render build command)
+          cd site
+          bundle exec jekyll build --destination ../web/public
+          cd ../web
+
+          # render-build.sh removes Jekyll's index.html
+          rm -f public/index.html
+
+          # Verify critical static assets survived Jekyll build
+          MISSING=0
+          for f in logo.svg icon.png icon.svg robots.txt; do
+            if [ ! -f "public/$f" ]; then
+              echo "::error::Missing public/$f after Jekyll build — add to site/_config.yml keep_files"
+              MISSING=1
+            fi
+          done
+          if [ "$MISSING" -eq 1 ]; then exit 1; fi
+
+          # Verify Jekyll didn't recreate index.html (would override Rails root)
+          if [ -f "public/index.html" ]; then
+            echo "::error::public/index.html exists after cleanup — Jekyll is recreating it"
+            exit 1
+          fi
+
+          echo "Render build simulation passed"
