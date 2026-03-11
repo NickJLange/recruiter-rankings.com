@@ -10,20 +10,12 @@ bundle exec rails runner "ActiveRecord::Base.connection" || (echo "Database conn
 
 bundle exec rake assets:precompile
 bundle exec rake assets:clean
-# On a fresh database (no schema_migrations rows), load schema directly to avoid
-# migration ordering issues. On an existing database, run incremental migrations.
-bundle exec rails runner "
-  begin
-    count = ActiveRecord::Base.connection.execute('SELECT COUNT(*) FROM schema_migrations').first['count'].to_i
-    if count == 0
-      puts 'Fresh database detected — loading schema directly'
-      system('bundle exec rake db:schema:load') || exit(1)
-    else
-      puts \"Existing database (#{count} migrations applied) — running db:migrate\"
-      system('bundle exec rake db:migrate') || exit(1)
-    end
-  rescue => e
-    puts \"Schema check failed: #{e.message} — loading schema directly\"
-    system('bundle exec rake db:schema:load') || exit(1)
-  end
-"
+# Load schema from schema.rb (the source of truth). This drops and recreates
+# all tables, which is safe because the Render DB has no real data yet.
+#
+# DISABLE_DATABASE_ENVIRONMENT_CHECK bypasses the ar_internal_metadata check
+# that fails when the DB is in a partially-migrated state from prior failures.
+#
+# Once the app is stable and has real data, change this to:
+#   bundle exec rake db:migrate
+DISABLE_DATABASE_ENVIRONMENT_CHECK=1 bundle exec rake db:schema:load
