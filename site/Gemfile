@@ -3,4 +3,6 @@ source "https://rubygems.org"
 gem "jekyll", "~> 4.3"
 # Required for running Jekyll on Ruby 3.x
 gem "webrick", "~> 1.8"
+# Explicit dependency — will no longer be a default gem in Ruby 3.5
+gem "logger"
 
