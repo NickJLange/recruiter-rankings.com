@@ -15,4 +15,6 @@ keep_files:
   - 500.html
   - icon.png
   - icon.svg
+  - logo.svg
+  - robots.txt
 
