@@ -13,6 +13,8 @@ Rails.application.configure do
     policy.script_src  :self, :https
     policy.style_src   :self, :https, :unsafe_inline
     policy.connect_src :self, :https
+    policy.worker_src  :self, :blob
+    policy.frame_src   :self, :https
   end
 
   # Generate a random nonce per request for inline scripts
