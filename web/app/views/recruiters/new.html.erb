@@ -29,7 +29,6 @@
             placeholder: "https://linkedin.com/in/jane-smith",
             autocomplete: "off",
             required: true,
-            oninput: "fillNameFromLinkedIn(this.value)",
             class: "field-input" %>
     </div>
 
@@ -70,14 +69,19 @@
   <% end %>
 </div>
 
-<script>
-function fillNameFromLinkedIn(url) {
-  try {
-    var slug = new URL(url).pathname.replace(/^\/in\//, '').replace(/\/.*$/, '');
-    if (!slug) return;
-    var name = slug.replace(/[-_.]+/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }).trim();
-    var nameField = document.getElementById('recruiter_name');
-    if (name && !nameField.value) nameField.value = name;
-  } catch(e) {}
-}
+<script nonce="<%= content_security_policy_nonce %>">
+  (function() {
+    var linkedinField = document.getElementById('recruiter_linkedin_url');
+    if (linkedinField) {
+      linkedinField.addEventListener('input', function() {
+        try {
+          var slug = new URL(this.value).pathname.replace(/^\/in\//, '').replace(/\/.*$/, '');
+          if (!slug) return;
+          var name = slug.replace(/[-_.]+/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); }).trim();
+          var nameField = document.getElementById('recruiter_name');
+          if (name && !nameField.value) nameField.value = name;
+        } catch(e) {}
+      });
+    }
+  })();
 </script>

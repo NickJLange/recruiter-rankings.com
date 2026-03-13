@@ -12,8 +12,7 @@
         We need a verified email or LinkedIn account to prevent duplicate reviews.<br>
         Your identity is never shown publicly.
       </p>
-      <a href="#"
-         onclick="window.Clerk && window.Clerk.redirectToSignIn({redirectUrl: window.location.href}); return false;"
+      <a href="#" id="clerk-sign-in-btn"
          class="cta" style="margin-top:0;">Sign in with Clerk</a>
     </div>
 
@@ -31,8 +30,7 @@
         <li>Connect a verified email <em>or</em> LinkedIn</li>
         <li>Return here to submit your review</li>
       </ul>
-      <a href="#"
-         onclick="window.Clerk && window.Clerk.openUserProfile(); return false;"
+      <a href="#" id="clerk-profile-btn"
          class="cta" style="margin-top:0;">Open account settings</a>
     </div>
 
@@ -66,3 +64,22 @@
   <% end %>
 
 </div>
+
+<script nonce="<%= content_security_policy_nonce %>">
+  (function() {
+    var signInBtn = document.getElementById('clerk-sign-in-btn');
+    if (signInBtn) {
+      signInBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.Clerk && window.Clerk.redirectToSignIn({redirectUrl: window.location.href});
+      });
+    }
+    var profileBtn = document.getElementById('clerk-profile-btn');
+    if (profileBtn) {
+      profileBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.Clerk && window.Clerk.openUserProfile();
+      });
+    }
+  })();
+</script>

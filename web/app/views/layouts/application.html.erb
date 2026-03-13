@@ -60,6 +60,7 @@
         }
       </script>
       <script async crossorigin="anonymous"
+        nonce="<%= content_security_policy_nonce %>"
         data-clerk-publishable-key="<%= h ENV['CLERK_PUBLISHABLE_KEY'] %>"
         src="<%= h clerk_js_url %>"
         id="clerk-js-script"
@@ -139,7 +140,7 @@
         Identity services provided by <a href="https://clerk.com" style="color:var(--muted);">Clerk</a>.
       </p>
     </footer>
-    <script src="/assets/theme.js"></script>
+    <script src="/assets/theme.js" nonce="<%= content_security_policy_nonce %>"></script>
     <script nonce="<%= content_security_policy_nonce %>">
       (function(){
         var btn = document.getElementById('nav-hamburger');
