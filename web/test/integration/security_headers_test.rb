@@ -10,7 +10,7 @@ class SecurityHeadersTest < ActionDispatch::IntegrationTest
     assert_not_nil csp, "Content-Security-Policy header should be present"
 
     # Check for nonce usage in script-src
-    assert_match /script-src 'self' https: 'nonce-[a-zA-Z0-9+\/=]+'/, csp, "CSP should include script-src with nonce"
+    assert_match /script-src 'self' https: 'strict-dynamic' 'nonce-[a-zA-Z0-9+\/=]+'/, csp, "CSP should include script-src with strict-dynamic and nonce"
 
     # Check that inline scripts have the nonce attribute
     # We need to extract the nonce from the header to check the body

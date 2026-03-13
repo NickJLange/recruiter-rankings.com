@@ -9,19 +9,21 @@ if clerk_secret_key.blank? && Rails.env.production?
         "Environment → Secret Variables, or to Rails credentials via `rails credentials:edit`."
 end
 
-Clerk.configure do |config|
-  config.secret_key = clerk_secret_key
-  config.publishable_key = clerk_publishable_key
+if clerk_secret_key.present?
+  Clerk.configure do |config|
+    config.secret_key = clerk_secret_key
+    config.publishable_key = clerk_publishable_key
 
-  # Exclude routes where Clerk middleware overhead is unnecessary and no auth check
-  # is ever performed. Content pages (recruiter show, company pages) are NOT excluded
-  # because can_view_details? needs to read the Clerk session.
-  config.excluded_routes = [
-    "/up",
-    "/sitemap.xml",
-    "/favicon.ico",
-    "/assets/"
-  ]
+    # Exclude routes where Clerk middleware overhead is unnecessary and no auth check
+    # is ever performed. Content pages (recruiter show, company pages) are NOT excluded
+    # because can_view_details? needs to read the Clerk session.
+    config.excluded_routes = [
+      "/up",
+      "/sitemap.xml",
+      "/favicon.ico",
+      "/assets/"
+    ]
+  end
 end
 
 # Derive the Clerk frontend API URL from the publishable key so ClerkJS can be

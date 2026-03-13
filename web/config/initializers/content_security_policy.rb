@@ -10,7 +10,7 @@ Rails.application.configure do
     policy.font_src    :self, :https, :data
     policy.img_src     :self, :https, :data
     policy.object_src  :none
-    policy.script_src  :self, :https
+    policy.script_src  :self, :https, :strict_dynamic
     policy.style_src   :self, :https, :unsafe_inline
     policy.connect_src :self, :https
     policy.worker_src  :self, :blob
