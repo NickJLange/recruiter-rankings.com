@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export:*)",
+      "Bash(bundle*)",
+      "Bash(for f in web/app/controllers/claim_identity_controller.rb web/app/models/user.rb web/app/views/companies/index.html.erb web/app/views/layouts/application.html.erb web/app/views/reviews/new.html.erb web/config/initializers/clerk.rb web/db/schema.rb web/test/models/data_quality/constraint_validation_test.rb web/test/models/data_quality_test.rb)",
+      "Bash(do echo \"=== $f ===\")",
+      "Read(//Users/njl/dev/src/recruiter-rankings.com/**)",
+      "Bash(done)",
+      "Bash(grep:*)",
+      "Bash(PARALLEL_WORKERS=1 bundle exec:*)",
+      "Bash(rbenv exec:*)",
+      "Bash(PARALLEL_WORKERS=1 rbenv exec:*)",
+      "Bash(gh pr:*)",
+      "Bash(git:*)",
+      "Bash(for f in /Users/njl/dev/src/recruiter-rankings.com/web/db/migrate/20260119081700_add_experience_to_review_metrics.rb /Users/njl/dev/src/recruiter-rankings.com/web/db/migrate/20260221015622_add_clerk_user_id_to_users_and_interactions.rb /Users/njl/dev/src/recruiter-rankings.com/web/db/migrate/20260301000001_add_outcome_to_experiences.rb)",
+      "Bash(do)",
+      "Bash(echo \"=== $f ===\")",
+      "Bash(RAILS_ENV=test rbenv exec:*)",
+      "Bash(render logs:*)",
+      "Bash(ls:*)",
+      "WebFetch(domain:www.recruiter-rankings.com)",
+      "Bash(curl:*)",
+      "Bash(ruby:*)",
+      "Bash(rbenv versions:*)",
+      "WebSearch"
+    ]
+  }
+}
