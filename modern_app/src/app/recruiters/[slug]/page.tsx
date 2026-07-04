@@ -1,4 +1,4 @@
-import { getRecruiterBySlug, getRecruiterReviews } from '@/lib/profiles';
+import { getRecruiterBySlug, getRecruiterReviews, Review, ReviewMetric } from '@/lib/profiles';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
@@ -51,7 +51,7 @@ export default async function RecruiterProfile({
             <p className="text-gray-500">No verified reviews available for this recruiter yet.</p>
           </div>
         ) : (
-          reviews.map((review: any) => (
+          reviews.map((review: Review) => (
             <div key={review.id} className="p-6 border rounded-xl bg-white shadow-sm hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-4">
                 <div className="text-sm text-gray-400 font-medium">
@@ -61,11 +61,11 @@ export default async function RecruiterProfile({
                     day: 'numeric' 
                   })}
                 </div>
-                {review.metric_name && (
-                  <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">
-                    {review.metric_name}: {review.value}
+                {review.metrics && review.metrics.map((m: ReviewMetric) => (
+                  <span key={m.metric_name} className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">
+                    {m.metric_name}: {m.value}
                   </span>
-                )}
+                ))}
               </div>
               <p className="text-gray-800 leading-relaxed">{review.content}</p>
             </div>

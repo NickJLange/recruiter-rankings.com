@@ -1,13 +1,20 @@
 import { getRecruiters } from '@/lib/recruiters';
 import Link from 'next/link';
 
+interface Recruiter {
+  id: number;
+  slug: string;
+  pseudonym: string;
+  company_name: string;
+}
+
 export default async function SearchPage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q: query } = await searchParams;
-  const recruiters = query ? await getRecruiters(query) : [];
+  const recruiters = query ? await getRecruiters(query) as Recruiter[] : [];
 
   return (
     <div className="p-8 max-w-4xl mx-auto min-h-screen">
@@ -43,13 +50,13 @@ export default async function SearchPage({
         
         {query && recruiters.length === 0 && (
           <div className="text-center py-20 bg-zinc-50 rounded-3xl border-2 border-dashed border-zinc-200">
-            <p className="text-zinc-500 mb-2">No results found for "{query}".</p>
+            <p className="text-zinc-500 mb-2">No results found for &ldquo;{query}&rdquo;.</p>
             <p className="text-sm text-zinc-400">Try different keywords or check the spelling.</p>
           </div>
         )}
 
         <div className="grid gap-4">
-          {recruiters.map((r: any) => (
+          {recruiters.map((r: Recruiter) => (
             <Link 
               key={r.id} 
               href={`/recruiters/${r.slug}`} 

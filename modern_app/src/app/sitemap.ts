@@ -3,10 +3,10 @@ import { pool } from '@/lib/db';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
-    const result = await pool.query('SELECT id FROM recruiters LIMIT 1000');
+    const result = await pool.query('SELECT id, updated_at FROM recruiters LIMIT 1000');
     const recruiterUrls = result.rows.map((row) => ({
       url: `https://recruiter-rankings.com/person/${row.id}`,
-      lastModified: new Date(),
+      lastModified: row.updated_at ? new Date(row.updated_at) : new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     }));
