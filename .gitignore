@@ -140,3 +140,7 @@ web/vendor/bundle
 # Private inbox export + seed drafts (never commit)
 messages.csv
 recruiters_draft.csv
+
+# Claude agent configuration
+.claude/
+
